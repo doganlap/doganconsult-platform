@@ -1,0 +1,93 @@
+========================================
+DoganConsult Platform - Server Setup
+Manual Installation Guide
+========================================
+
+PuTTY is now connecting to your server.
+When connected, copy and paste these commands:
+
+========================================
+STEP 1: Install Docker
+========================================
+
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo systemctl start docker
+sudo systemctl enable docker
+docker --version
+
+========================================
+STEP 2: Create Directory
+========================================
+
+mkdir -p /opt/doganconsult
+cd /opt/doganconsult
+
+========================================
+STEP 3: Install Docker Compose
+========================================
+
+Already installed with Docker! Verify:
+docker compose version
+
+========================================
+STEP 4: Configure Firewall
+========================================
+
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 5000:5010/tcp
+ufw --force enable
+
+========================================
+STEP 5: Create docker-compose.yml
+========================================
+
+On your Windows machine, you need to copy files.
+Open a NEW PowerShell window and run:
+
+cd D:\test\aspnet-core
+
+# Copy docker-compose
+scp docker-compose.prod.yml root@46.224.64.95:/opt/doganconsult/docker-compose.yml
+
+# Copy source code
+scp -r src root@46.224.64.95:/opt/doganconsult/
+
+# Copy config
+scp common.props root@46.224.64.95:/opt/doganconsult/
+
+Password when prompted: aKTbCKAeWapnp9xkLcjF
+
+========================================
+STEP 6: Build and Start (on server)
+========================================
+
+cd /opt/doganconsult
+docker compose build
+docker compose up -d
+
+========================================
+STEP 7: Check Status
+========================================
+
+docker compose ps
+docker compose logs -f
+
+========================================
+ACCESS YOUR APPLICATION
+========================================
+
+Blazor UI:        http://46.224.64.95:5001
+API Gateway:      http://46.224.64.95:5000
+Identity Service: http://46.224.64.95:5002
+
+========================================
+TROUBLESHOOTING
+========================================
+
+View logs:        docker compose logs -f identity-service
+Restart services: docker compose restart
+Stop all:         docker compose down
+Rebuild:          docker compose build --no-cache

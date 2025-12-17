@@ -20,6 +20,11 @@ public class UserProfileDto : FullAuditedEntityDto<Guid>
     public string? Department { get; set; }
     public string? Bio { get; set; }
     public string? Skills { get; set; }
+    public string? Title { get; set; }
+    public string? AvatarUrl { get; set; }
+    public Guid? ManagerId { get; set; }
+    public DateTime? StartDate { get; set; }
+    public string? Availability { get; set; }
     public bool ProfileCompleted { get; set; }
     public Guid? TenantId { get; set; }
 }

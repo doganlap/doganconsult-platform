@@ -55,8 +55,6 @@ public class IdentityHttpApiHostModule : AbpModule
             {
                 options.SetTokenEndpointUris("/connect/token");
                 options.SetAuthorizationEndpointUris("/connect/authorize");
-                options.SetUserinfoEndpointUris("/connect/userinfo");
-                options.SetLogoutEndpointUris("/connect/logout");
                 options.SetIntrospectionEndpointUris("/connect/introspect");
                 options.SetRevocationEndpointUris("/connect/revocation");
 
@@ -71,9 +69,7 @@ public class IdentityHttpApiHostModule : AbpModule
 
                 options.UseAspNetCore()
                     .EnableTokenEndpointPassthrough()
-                    .EnableAuthorizationEndpointPassthrough()
-                    .EnableUserinfoEndpointPassthrough()
-                    .EnableLogoutEndpointPassthrough();
+                    .EnableAuthorizationEndpointPassthrough();
             });
 
             builder.AddValidation(options =>

@@ -42,6 +42,11 @@ public class UserProfileAppService : ApplicationService, IUserProfileAppService
             Department = input.Department,
             Bio = input.Bio,
             Skills = input.Skills,
+            Title = input.Title,
+            AvatarUrl = input.AvatarUrl,
+            ManagerId = input.ManagerId,
+            StartDate = input.StartDate,
+            Availability = input.Availability ?? "Available",
             ProfileCompleted = input.ProfileCompleted
         };
 
@@ -89,6 +94,11 @@ public class UserProfileAppService : ApplicationService, IUserProfileAppService
         userProfile.Department = input.Department;
         userProfile.Bio = input.Bio;
         userProfile.Skills = input.Skills;
+        userProfile.Title = input.Title ?? userProfile.Title;
+        userProfile.AvatarUrl = input.AvatarUrl ?? userProfile.AvatarUrl;
+        userProfile.ManagerId = input.ManagerId ?? userProfile.ManagerId;
+        userProfile.StartDate = input.StartDate ?? userProfile.StartDate;
+        userProfile.Availability = input.Availability ?? userProfile.Availability;
         userProfile.ProfileCompleted = input.ProfileCompleted;
 
         await _userProfileRepository.UpdateAsync(userProfile);

@@ -1,12 +1,816 @@
-/* Getting-Started */
-.card-bg-image {
-    position: absolute;
-    width: 630px;
-    height: auto;
-    bottom: 0;
-    right: 0;
-    z-index: 1;
-}
-/* Getting-Started End */
+/* ============================================
+   DC OS - Dogan Consult Operating System
+   Professional Enterprise Theme
+   ============================================ */
 
-/* Write here your styles for the Index page */
+/* CSS Variables - Enterprise Color Palette */
+:root {
+    --dc-primary: #1e3a5f;          /* Deep Navy Blue */
+    --dc-primary-light: #2c5282;     /* Lighter Navy */
+    --dc-secondary: #0d9488;         /* Teal Accent */
+    --dc-accent: #f59e0b;            /* Gold/Amber */
+    --dc-success: #059669;           /* Emerald Green */
+    --dc-warning: #d97706;           /* Orange */
+    --dc-danger: #dc2626;            /* Red */
+    --dc-info: #0284c7;              /* Sky Blue */
+    --dc-dark: #1f2937;              /* Charcoal */
+    --dc-light: #f8fafc;             /* Off White */
+    --dc-gray-50: #f9fafb;
+    --dc-gray-100: #f3f4f6;
+    --dc-gray-200: #e5e7eb;
+    --dc-gray-300: #d1d5db;
+    --dc-gray-400: #9ca3af;
+    --dc-gray-500: #6b7280;
+    --dc-gray-600: #4b5563;
+    --dc-gray-700: #374151;
+    --dc-gray-800: #1f2937;
+    --dc-gradient-primary: linear-gradient(135deg, #1e3a5f 0%, #0d9488 100%);
+    --dc-gradient-accent: linear-gradient(135deg, #1e3a5f 0%, #f59e0b 100%);
+    --dc-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --dc-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --dc-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --dc-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --dc-radius: 12px;
+    --dc-radius-lg: 16px;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    background: var(--dc-gray-50);
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+/* ============================================
+   DC OS Banner & Logo
+   ============================================ */
+.dc-os-banner {
+    background: var(--dc-gradient-primary) !important;
+    border: none;
+    border-radius: var(--dc-radius-lg);
+    box-shadow: var(--dc-shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.dc-os-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.dc-os-logo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dc-os-logo .logo-text {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dc-os-logo .logo-badge {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dc-accent);
+    background: rgba(255,255,255,0.15);
+    padding: 4px 8px;
+    border-radius: 6px;
+    vertical-align: top;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dc-ai-btn {
+    background: white;
+    color: var(--dc-primary);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: var(--dc-shadow);
+}
+
+.dc-ai-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--dc-shadow-lg);
+    background: var(--dc-accent);
+    color: white;
+}
+
+/* ============================================
+   Stat Cards - Enterprise Style
+   ============================================ */
+.stat-card {
+    background: white;
+    border-radius: var(--dc-radius);
+    border: 1px solid var(--dc-gray-200);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--dc-shadow-sm);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--dc-shadow-lg);
+    border-color: var(--dc-secondary);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--dc-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-card h6 {
+    color: var(--dc-gray-500);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.stat-card h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dc-dark);
+}
+
+/* Override Bootstrap colors for enterprise */
+.bg-primary { background-color: var(--dc-primary) !important; }
+.bg-info { background-color: var(--dc-info) !important; }
+.bg-success { background-color: var(--dc-success) !important; }
+.bg-warning { background-color: var(--dc-warning) !important; }
+.bg-danger { background-color: var(--dc-danger) !important; }
+.bg-secondary { background-color: var(--dc-gray-500) !important; }
+
+/* ============================================
+   Tab Navigation - Professional
+   ============================================ */
+.nav-tabs {
+    border-bottom: 2px solid var(--dc-gray-200);
+    gap: 4px;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--dc-gray-500);
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 1rem 1.25rem;
+    transition: all 0.2s ease;
+    border-radius: var(--dc-radius) var(--dc-radius) 0 0;
+    position: relative;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--dc-primary);
+    background-color: var(--dc-gray-50);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--dc-secondary);
+    background-color: white;
+}
+
+.nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--dc-secondary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* ============================================
+   Cards - Enterprise Design
+   ============================================ */
+.card {
+    background: white;
+    border: 1px solid var(--dc-gray-200);
+    border-radius: var(--dc-radius);
+    box-shadow: var(--dc-shadow-sm);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--dc-shadow);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid var(--dc-gray-100);
+    font-weight: 600;
+    color: var(--dc-dark);
+}
+
+/* Quick Action Cards */
+.quick-action-card {
+    border-radius: var(--dc-radius);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--dc-shadow-lg);
+    border-color: var(--dc-secondary);
+}
+
+/* Recommendation Cards */
+.recommendation-card {
+    border-left-width: 4px !important;
+    border-radius: var(--dc-radius);
+}
+
+.recommendation-card.border-danger { border-left-color: var(--dc-danger) !important; }
+.recommendation-card.border-warning { border-left-color: var(--dc-warning) !important; }
+.recommendation-card.border-info { border-left-color: var(--dc-info) !important; }
+
+/* Knowledge Cards */
+.knowledge-card {
+    border-radius: var(--dc-radius);
+    transition: all 0.3s ease;
+}
+
+.knowledge-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--dc-shadow-lg);
+}
+
+/* ============================================
+   DC OS AI Chat Panel - Side Panel Design
+   ============================================ */
+.dc-ai-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 420px;
+    max-height: calc(100vh - 48px);
+    background: white;
+    border-radius: var(--dc-radius-lg);
+    box-shadow: var(--dc-shadow-xl), 0 0 0 1px var(--dc-gray-200);
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.dc-ai-panel.minimized {
+    height: auto;
+    max-height: none;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dc-ai-header {
+    background: var(--dc-gradient-primary);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.dc-ai-avatar {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dc-accent);
+    font-size: 1.25rem;
+}
+
+.dc-ai-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.dc-ai-controls .btn {
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    padding: 0.25rem 0.5rem;
+}
+
+.dc-ai-controls .btn:hover {
+    opacity: 1;
+}
+
+.dc-ai-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    max-height: 400px;
+}
+
+.dc-ai-context {
+    background: var(--dc-gray-50);
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--dc-gray-200);
+}
+
+.dc-ai-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.dc-chat-message {
+    display: flex;
+    gap: 0.75rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.dc-chat-message.user {
+    flex-direction: row-reverse;
+}
+
+.dc-message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.dc-chat-message.ai .dc-message-avatar {
+    background: var(--dc-gradient-primary);
+    color: var(--dc-accent);
+}
+
+.dc-chat-message.user .dc-message-avatar {
+    background: var(--dc-secondary);
+    color: white;
+}
+
+.dc-message-content {
+    max-width: 80%;
+}
+
+.dc-message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 0.75rem;
+}
+
+.dc-message-header strong {
+    color: var(--dc-dark);
+}
+
+.dc-message-text {
+    background: var(--dc-gray-50);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    color: var(--dc-gray-700);
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.dc-chat-message.user .dc-message-text {
+    background: var(--dc-primary);
+    color: white;
+}
+
+/* Typing Indicator */
+.dc-typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 1rem;
+}
+
+.dc-typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--dc-gray-400);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out;
+}
+
+.dc-typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.dc-typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+.dc-ai-footer {
+    border-top: 1px solid var(--dc-gray-200);
+    padding: 1rem;
+    background: var(--dc-gray-50);
+}
+
+.dc-quick-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dc-quick-actions .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+.dc-ai-input {
+    display: flex;
+    gap: 8px;
+}
+
+.dc-ai-input .form-control {
+    border-radius: 24px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--dc-gray-300);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dc-ai-input .form-control:focus {
+    border-color: var(--dc-secondary);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.dc-send-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--dc-secondary);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.dc-send-btn:hover {
+    background: var(--dc-primary);
+    transform: scale(1.05);
+}
+
+.dc-send-btn:disabled {
+    background: var(--dc-gray-300);
+    cursor: not-allowed;
+}
+
+/* ============================================
+   Activity Timeline
+   ============================================ */
+.activity-item {
+    border-radius: var(--dc-radius);
+    transition: all 0.2s ease;
+    background: white !important;
+    border: 1px solid var(--dc-gray-100);
+}
+
+.activity-item:hover {
+    border-color: var(--dc-gray-200);
+    box-shadow: var(--dc-shadow-sm);
+}
+
+.icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--dc-radius);
+}
+
+/* ============================================
+   Pivot Table - Professional
+   ============================================ */
+.pivot-table {
+    border-radius: var(--dc-radius);
+    overflow: hidden;
+}
+
+.pivot-table th {
+    background: var(--dc-gray-100);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--dc-gray-600);
+}
+
+.pivot-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.pivot-table th.sortable:hover {
+    background: var(--dc-gray-200);
+}
+
+.pivot-table td {
+    font-size: 0.875rem;
+    color: var(--dc-gray-700);
+}
+
+/* ============================================
+   Charts
+   ============================================ */
+.chart-container {
+    position: relative;
+    background: white;
+    border-radius: var(--dc-radius);
+    padding: 1rem;
+}
+
+.chart-container svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ============================================
+   Badges & Buttons
+   ============================================ */
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.75em;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+.btn-primary {
+    background: var(--dc-primary);
+    border-color: var(--dc-primary);
+}
+
+.btn-primary:hover {
+    background: var(--dc-primary-light);
+    border-color: var(--dc-primary-light);
+}
+
+.btn-outline-primary {
+    color: var(--dc-primary);
+    border-color: var(--dc-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--dc-primary);
+    border-color: var(--dc-primary);
+}
+
+/* ============================================
+   Progress Bars
+   ============================================ */
+.progress {
+    background: var(--dc-gray-200);
+    border-radius: 10px;
+    height: 8px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 1s ease;
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 768px) {
+    .dc-os-banner .row {
+        text-align: center;
+    }
+    
+    .dc-os-logo {
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card .stat-icon {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .dc-ai-panel {
+        width: calc(100% - 32px);
+        right: 16px;
+        bottom: 16px;
+    }
+}
+
+/* ============================================
+   Loading State
+   ============================================ */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: var(--dc-radius);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-primary {
+    background: var(--dc-gradient-primary) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, var(--dc-success) 0%, #34d399 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, var(--dc-warning) 0%, #fbbf24 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, var(--dc-info) 0%, #38bdf8 100%) !important;
+}
+
+/* ============================================
+   RTL (Arabic) Support for Dashboard
+   ============================================ */
+
+/* RTL DC OS Banner */
+:global(html[dir="rtl"]) .dc-os-banner .row {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .dc-os-logo {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .dc-os-banner h4,
+:global(html[dir="rtl"]) .dc-os-banner p,
+:global(html[dir="rtl"]) .dc-os-banner small {
+    text-align: right;
+}
+
+/* RTL Stat Cards */
+:global(html[dir="rtl"]) .stat-card .d-flex {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .stat-card h6,
+:global(html[dir="rtl"]) .stat-card h2,
+:global(html[dir="rtl"]) .stat-card small {
+    text-align: right;
+}
+
+/* RTL AI Chat Panel */
+:global(html[dir="rtl"]) .dc-ai-panel {
+    right: auto;
+    left: 24px;
+}
+
+:global(html[dir="rtl"]) .dc-ai-header {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .dc-chat-message {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .dc-chat-message.user {
+    flex-direction: row;
+}
+
+:global(html[dir="rtl"]) .dc-message-content {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .dc-message-text {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .dc-ai-input {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .dc-ai-input .form-control {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .dc-quick-actions {
+    flex-direction: row-reverse;
+}
+
+/* RTL Activity Items */
+:global(html[dir="rtl"]) .activity-item .d-flex {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .activity-item {
+    text-align: right;
+}
+
+/* RTL Tab Navigation */
+:global(html[dir="rtl"]) .nav-tabs {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .nav-tabs .nav-link.active::after {
+    left: 0;
+    right: 0;
+}
+
+/* RTL Tables */
+:global(html[dir="rtl"]) .pivot-table th,
+:global(html[dir="rtl"]) .pivot-table td {
+    text-align: right;
+}
+
+/* RTL Card Headers */
+:global(html[dir="rtl"]) .card-header {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .card-header .d-flex {
+    flex-direction: row-reverse;
+}
+
+/* RTL Quick Action Cards */
+:global(html[dir="rtl"]) .quick-action-card {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .quick-action-card .d-flex {
+    flex-direction: row-reverse;
+}
+
+/* RTL Recommendation Cards */
+:global(html[dir="rtl"]) .recommendation-card {
+    border-left-width: 1px !important;
+    border-right-width: 4px !important;
+}
+
+:global(html[dir="rtl"]) .recommendation-card.border-danger { 
+    border-left-color: var(--dc-gray-200) !important;
+    border-right-color: var(--dc-danger) !important; 
+}
+:global(html[dir="rtl"]) .recommendation-card.border-warning { 
+    border-left-color: var(--dc-gray-200) !important;
+    border-right-color: var(--dc-warning) !important; 
+}
+:global(html[dir="rtl"]) .recommendation-card.border-info { 
+    border-left-color: var(--dc-gray-200) !important;
+    border-right-color: var(--dc-info) !important; 
+}
+
+/* RTL Mobile Adjustments */
+@media (max-width: 768px) {
+    :global(html[dir="rtl"]) .dc-ai-panel {
+        left: 16px;
+        right: auto;
+    }
+}

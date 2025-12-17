@@ -31,7 +31,12 @@ public class WorkspaceAppService : ApplicationService, IWorkspaceAppService
         )
         {
             Description = input.Description,
-            Status = input.Status
+            Status = input.Status ?? "active",
+            Settings = input.Settings,
+            Members = input.Members,
+            CreatedDate = DateTime.UtcNow,
+            WorkspaceOwner = CurrentUser.Id?.ToString(),
+            Permissions = input.Permissions
         };
 
         await _workspaceRepository.InsertAsync(workspace);
@@ -48,9 +53,6 @@ public class WorkspaceAppService : ApplicationService, IWorkspaceAppService
     {
         var queryable = await _workspaceRepository.GetQueryableAsync();
         var workspaces = queryable
-            .WhereIf(!string.IsNullOrWhiteSpace(input.Filter), x => 
-                x.Name.Contains(input.Filter!) || 
-                x.Code.Contains(input.Filter!))
             .OrderBy(x => x.Name)
             .Skip(input.SkipCount)
             .Take(input.MaxResultCount)
@@ -70,7 +72,10 @@ public class WorkspaceAppService : ApplicationService, IWorkspaceAppService
         workspace.Name = input.Name;
         workspace.OrganizationId = input.OrganizationId;
         workspace.Description = input.Description;
-        workspace.Status = input.Status;
+        workspace.Status = input.Status ?? workspace.Status;
+        workspace.Settings = input.Settings ?? workspace.Settings;
+        workspace.Members = input.Members ?? workspace.Members;
+        workspace.Permissions = input.Permissions ?? workspace.Permissions;
         await _workspaceRepository.UpdateAsync(workspace);
         return ObjectMapper.Map<Workspace, WorkspaceDto>(workspace);
     }

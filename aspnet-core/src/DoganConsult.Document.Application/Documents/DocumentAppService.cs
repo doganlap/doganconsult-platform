@@ -34,11 +34,18 @@ public class DocumentAppService : ApplicationService, IDocumentAppService
             FileSize = input.FileSize,
             FilePath = input.FilePath,
             Category = input.Category,
-            Status = input.Status,
+            Status = input.Status ?? "active",
             Version = input.Version,
             ParentDocumentId = input.ParentDocumentId,
             OrganizationId = input.OrganizationId,
-            WorkspaceId = input.WorkspaceId
+            WorkspaceId = input.WorkspaceId,
+            DocumentCategory = input.DocumentCategory,
+            StoragePath = input.StoragePath,
+            UploadedBy = input.UploadedBy ?? CurrentUser.Id,
+            UploadDate = input.UploadDate ?? DateTime.UtcNow,
+            Tags = input.Tags,
+            AccessControl = input.AccessControl,
+            Metadata = input.Metadata
         };
 
         await _documentRepository.InsertAsync(document);
@@ -77,11 +84,16 @@ public class DocumentAppService : ApplicationService, IDocumentAppService
         document.FileSize = input.FileSize;
         document.FilePath = input.FilePath;
         document.Category = input.Category;
-        document.Status = input.Status;
+        document.Status = input.Status ?? document.Status;
         document.Version = input.Version;
         document.ParentDocumentId = input.ParentDocumentId;
         document.OrganizationId = input.OrganizationId;
         document.WorkspaceId = input.WorkspaceId;
+        document.DocumentCategory = input.DocumentCategory ?? document.DocumentCategory;
+        document.StoragePath = input.StoragePath ?? document.StoragePath;
+        document.Tags = input.Tags ?? document.Tags;
+        document.AccessControl = input.AccessControl ?? document.AccessControl;
+        document.Metadata = input.Metadata ?? document.Metadata;
 
         await _documentRepository.UpdateAsync(document);
         return ObjectMapper.Map<Document, DocumentDto>(document);

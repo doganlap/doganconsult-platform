@@ -23,6 +23,20 @@ public class Workspace : FullAuditedAggregateRoot<Guid>, IMultiTenant
     [StringLength(20)]
     public string Status { get; set; } = "active"; // active|inactive|archived
 
+    [StringLength(500)]
+    public string? Settings { get; set; } // JSON-serialized settings
+
+    [StringLength(1000)]
+    public string? Members { get; set; } // JSON-serialized member list
+
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    [StringLength(500)]
+    public string? WorkspaceOwner { get; set; } // Owner user ID
+
+    [StringLength(500)]
+    public string? Permissions { get; set; } // JSON-serialized permissions model
+
     public Guid? TenantId { get; set; }
 
     protected Workspace()

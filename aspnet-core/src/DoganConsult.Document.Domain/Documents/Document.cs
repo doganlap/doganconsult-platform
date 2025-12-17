@@ -39,6 +39,25 @@ public class Document : FullAuditedAggregateRoot<Guid>, IMultiTenant
 
     public Guid? WorkspaceId { get; set; }
 
+    [StringLength(500)]
+    public string? Tags { get; set; } // Comma-separated tags
+
+    [StringLength(200)]
+    public string? DocumentCategory { get; set; } // Proposal|Contract|Report|Invoice|etc.
+
+    [StringLength(500)]
+    public string? StoragePath { get; set; } // Actual file storage location
+
+    public Guid? UploadedBy { get; set; } // User who uploaded
+
+    public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+
+    [StringLength(500)]
+    public string? AccessControl { get; set; } // JSON-serialized access permissions
+
+    [StringLength(2000)]
+    public string? Metadata { get; set; } // JSON-serialized additional metadata
+
     public Guid? TenantId { get; set; }
 
     protected Document()

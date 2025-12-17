@@ -39,10 +39,82 @@ public class WebMenuContributor : IMenuContributor
             1,
             new ApplicationMenuItem(
                 WebMenus.Organizations,
-                "Organizations",
+                l["Menu:Organizations"],
                 "/organizations",
                 icon: "fas fa-building",
                 order: 1
+            )
+        );
+
+        // Add Workspaces Menu
+        context.Menu.Items.Insert(
+            2,
+            new ApplicationMenuItem(
+                "DoganConsult.Workspaces",
+                l["Menu:Workspaces"],
+                "/workspaces",
+                icon: "fas fa-folder-open",
+                order: 2
+            )
+        );
+
+        // Add Documents Menu
+        context.Menu.Items.Insert(
+            3,
+            new ApplicationMenuItem(
+                "DoganConsult.Documents",
+                l["Menu:Documents"],
+                "/documents",
+                icon: "fas fa-file-alt",
+                order: 3
+            )
+        );
+
+        // Add Users Menu
+        context.Menu.Items.Insert(
+            4,
+            new ApplicationMenuItem(
+                "DoganConsult.Users",
+                l["Menu:UserProfiles"],
+                "/user-profiles",
+                icon: "fas fa-users",
+                order: 4
+            )
+        );
+
+        // Add AI Assistant Menu
+        context.Menu.Items.Insert(
+            5,
+            new ApplicationMenuItem(
+                "DoganConsult.AI",
+                l["Menu:AIChat"],
+                "/ai-chat",
+                icon: "fas fa-robot",
+                order: 5
+            )
+        );
+
+        // Add Audit Logs Menu
+        context.Menu.Items.Insert(
+            6,
+            new ApplicationMenuItem(
+                "DoganConsult.AuditLogs",
+                l["Menu:AuditLogs"],
+                "/audit-logs",
+                icon: "fas fa-history",
+                order: 6
+            )
+        );
+
+        // Add Approvals Menu
+        context.Menu.Items.Insert(
+            7,
+            new ApplicationMenuItem(
+                "DoganConsult.Approvals",
+                l["Menu:Approvals"],
+                "/approvals",
+                icon: "fas fa-tasks",
+                order: 7
             )
         );
 

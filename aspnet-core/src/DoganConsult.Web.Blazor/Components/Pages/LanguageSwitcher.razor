@@ -1,0 +1,99 @@
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+@using System.Globalization
+@using Volo.Abp.Localization
+@inject IOptions<AbpLocalizationOptions> LocalizationOptions
+@inject NavigationManager NavigationManager
+
+<div class="dropdown language-switcher">
+    <button class="btn btn-outline-light dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-globe me-1"></i>
+        @GetLanguageFlag(CultureInfo.CurrentCulture.Name) @CurrentLanguageName
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+        @foreach (var language in Languages)
+        {
+            <li>
+                <a class="dropdown-item @(IsCurrentLanguage(language.CultureName) ? "active" : "")" 
+                   href="javascript:void(0)" 
+                   @onclick="() => ChangeLanguage(language.CultureName)">
+                    @GetLanguageFlag(language.CultureName)
+                    @language.DisplayName
+                    @if (IsRtlLanguage(language.CultureName))
+                    {
+                        <span class="badge bg-info ms-2" style="font-size: 0.65rem;">RTL</span>
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    private List<LanguageInfo> Languages { get; set; } = new();
+    private string CurrentLanguageName { get; set; } = "English";
+    
+    // RTL languages list
+    private static readonly HashSet<string> RtlLanguages = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ar", "ar-SA", "ar-EG", "ar-AE", "ar-KW", "ar-QA", "ar-BH", "ar-OM", "ar-YE", "ar-SY", "ar-JO", "ar-LB", "ar-IQ",
+        "he", "he-IL",
+        "fa", "fa-IR",
+        "ur", "ur-PK"
+    };
+    
+    protected override void OnInitialized()
+    {
+        Languages = LocalizationOptions.Value.Languages.ToList();
+        
+        var currentCulture = CultureInfo.CurrentCulture.Name;
+        var currentLanguage = Languages.FirstOrDefault(l => l.CultureName == currentCulture);
+        CurrentLanguageName = currentLanguage?.DisplayName ?? "English";
+    }
+    
+    private bool IsCurrentLanguage(string cultureName)
+    {
+        return CultureInfo.CurrentCulture.Name.Equals(cultureName, StringComparison.OrdinalIgnoreCase);
+    }
+    
+    private bool IsRtlLanguage(string cultureName)
+    {
+        return RtlLanguages.Contains(cultureName) || cultureName.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    }
+    
+    private string GetLanguageFlag(string cultureName)
+    {
+        // Return emoji flags for languages
+        return cultureName.ToLowerInvariant() switch
+        {
+            "ar" or "ar-sa" or "ar-eg" or "ar-ae" => "🇸🇦",
+            "en" or "en-us" or "en-gb" => "🇺🇸",
+            "de" or "de-de" => "🇩🇪",
+            "fr" or "fr-fr" => "🇫🇷",
+            "es" or "es-es" => "🇪🇸",
+            "tr" or "tr-tr" => "🇹🇷",
+            "he" or "he-il" => "🇮🇱",
+            "fa" or "fa-ir" => "🇮🇷",
+            "ur" or "ur-pk" => "🇵🇰",
+            "zh" or "zh-cn" or "zh-hans" => "🇨🇳",
+            "ja" or "ja-jp" => "🇯🇵",
+            "ko" or "ko-kr" => "🇰🇷",
+            "it" or "it-it" => "🇮🇹",
+            "pt" or "pt-br" => "🇧🇷",
+            "ru" or "ru-ru" => "🇷🇺",
+            "nl" or "nl-nl" => "🇳🇱",
+            _ => "🌐"
+        };
+    }
+    
+    private void ChangeLanguage(string cultureName)
+    {
+        var uri = new Uri(NavigationManager.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+        var cultureEscaped = Uri.EscapeDataString(cultureName);
+        var uriEscaped = Uri.EscapeDataString(uri);
+
+        NavigationManager.NavigateTo(
+            $"/Abp/Languages/Switch?culture={cultureEscaped}&uiCulture={cultureEscaped}&returnUrl={uriEscaped}",
+            forceLoad: true);
+    }
+}

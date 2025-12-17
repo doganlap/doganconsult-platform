@@ -30,6 +30,12 @@
     <ProjectReference Include="..\DoganConsult.Web.Application\DoganConsult.Web.Application.csproj" />
     <ProjectReference Include="..\DoganConsult.Web.HttpApi\DoganConsult.Web.HttpApi.csproj" />
     <ProjectReference Include="..\DoganConsult.Web.EntityFrameworkCore\DoganConsult.Web.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\DoganConsult.Organization.Application.Contracts\DoganConsult.Organization.Application.Contracts.csproj" />
+    <ProjectReference Include="..\DoganConsult.Workspace.Application.Contracts\DoganConsult.Workspace.Application.Contracts.csproj" />
+    <ProjectReference Include="..\DoganConsult.UserProfile.Application.Contracts\DoganConsult.UserProfile.Application.Contracts.csproj" />
+    <ProjectReference Include="..\DoganConsult.Document.Application.Contracts\DoganConsult.Document.Application.Contracts.csproj" />
+    <ProjectReference Include="..\DoganConsult.AI.Application.Contracts\DoganConsult.AI.Application.Contracts.csproj" />
+    <ProjectReference Include="..\DoganConsult.Audit.Application.Contracts\DoganConsult.Audit.Application.Contracts.csproj" />
     <PackageReference Include="Volo.Abp.Autofac" Version="10.0.1" />
     <PackageReference Include="Volo.Abp.Swashbuckle" Version="10.0.1" />
     <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="10.0.1" />

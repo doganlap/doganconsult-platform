@@ -36,4 +36,21 @@ public class CreateUpdateDocumentDto
     public Guid? OrganizationId { get; set; }
 
     public Guid? WorkspaceId { get; set; }
+
+    [StringLength(255)]
+    public string? DocumentCategory { get; set; }
+
+    [StringLength(500)]
+    public string? StoragePath { get; set; }
+
+    public Guid? UploadedBy { get; set; }
+
+    public DateTime? UploadDate { get; set; }
+
+    [StringLength(1000)]
+    public string? Tags { get; set; }
+
+    public string? AccessControl { get; set; }
+
+    public string? Metadata { get; set; }
 }

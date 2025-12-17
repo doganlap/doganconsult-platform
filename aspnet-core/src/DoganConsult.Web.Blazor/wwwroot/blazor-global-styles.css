@@ -16,7 +16,39 @@
     right: 0.75rem;
     top: 0.5rem;
 }
+
+/* DC OS Blazor-specific styles */
 :root .lpx-brand-logo {
-    --lpx-logo: url('/images/logo/leptonx/logo-light.png');
-    --lpx-logo-icon: url('/images/logo/leptonx/logo-light-thumbnail.png');
+    --lpx-logo: url('/images/logo/dc-os-logo.svg');
+    --lpx-logo-icon: url('/images/logo/dc-icon.svg');
+}
+
+/* Ensure light sidebar theme in Blazor */
+:root {
+    --lpx-sidebar-bg: #ffffff;
+    --lpx-sidebar-text: #475569;
+    --lpx-sidebar-active-bg: rgba(59, 130, 246, 0.1);
+    --lpx-sidebar-active-text: #3b82f6;
+}
+
+/* Blazor loading indicator enhancement */
+.blazor-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.blazor-loading::after {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

@@ -1,0 +1,283 @@
+@page "/documents"
+@using DoganConsult.Document.Documents
+@using DoganConsult.Web.Blazor.Services
+@using Volo.Abp.Application.Dtos
+
+<PageTitle>Document Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Document Management
+                        </h4>
+                        <button class="btn btn-primary" @onclick="OpenCreateModal">
+                            <i class="fas fa-plus me-1"></i>Add Document
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (Loading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading documents...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col">File Type</th>
+                                        <th scope="col">Size</th>
+                                        <th scope="col">Version</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Uploaded</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (DocumentItems?.Any() == true)
+                                    {
+                                        @foreach (var doc in DocumentItems)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <i class="@GetFileIcon(doc.FileType) me-2"></i>
+                                                    <strong>@doc.Name</strong>
+                                                </td>
+                                                <td>@(doc.Category ?? doc.DocumentCategory ?? "-")</td>
+                                                <td>@(doc.FileType ?? "-")</td>
+                                                <td>@FormatFileSize(doc.FileSize)</td>
+                                                <td>v@doc.Version</td>
+                                                <td>
+                                                    <span class="badge bg-@GetStatusColor(doc.Status)">
+                                                        @doc.Status
+                                                    </span>
+                                                </td>
+                                                <td>@(doc.UploadDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewDetails(doc)">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-warning" @onclick="() => EditDocument(doc)">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteDocument(doc)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted">
+                                                <i class="fas fa-file-alt fa-3x mb-3"></i>
+                                                <p class="mb-0">No documents found</p>
+                                                <button class="btn btn-primary mt-2" @onclick="OpenCreateModal">
+                                                    Upload your first document
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (TotalCount > PageSize)
+                        {
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item @(CurrentPage <= 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="PreviousPage">Previous</button>
+                                    </li>
+                                    @for (int i = 1; i <= TotalPages; i++)
+                                    {
+                                        var pageNum = i;
+                                        <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                        </li>
+                                    }
+                                    <li class="page-item @(CurrentPage >= TotalPages ? "disabled" : "")">
+                                        <button class="page-link" @onclick="NextPage">Next</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas @(IsEditing ? "fa-edit" : "fa-plus") me-2"></i>
+                        @(IsEditing ? "Edit Document" : "Create New Document")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <EditForm Model="CurrentDocument" OnValidSubmit="SaveDocument">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        @if (!string.IsNullOrEmpty(FormErrorMessage))
+                        {
+                            <div class="alert alert-danger">@FormErrorMessage</div>
+                        }
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Document Name *</label>
+                                <InputText class="form-control" @bind-Value="CurrentDocument.Name" placeholder="Document Name" />
+                                <ValidationMessage For="@(() => CurrentDocument.Name)" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Version</label>
+                                <InputNumber class="form-control" @bind-Value="CurrentDocument.Version" />
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <InputTextArea class="form-control" @bind-Value="CurrentDocument.Description" rows="3" placeholder="Document description..." />
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category</label>
+                                <InputSelect class="form-select" @bind-Value="CurrentDocument.Category">
+                                    <option value="">Select Category</option>
+                                    <option value="Policy">Policy</option>
+                                    <option value="Procedure">Procedure</option>
+                                    <option value="Report">Report</option>
+                                    <option value="Contract">Contract</option>
+                                    <option value="Template">Template</option>
+                                    <option value="Training">Training</option>
+                                    <option value="Compliance">Compliance</option>
+                                    <option value="Technical">Technical</option>
+                                    <option value="Other">Other</option>
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <InputSelect class="form-select" @bind-Value="CurrentDocument.Status">
+                                    <option value="active">Active</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="archived">Archived</option>
+                                    <option value="pending">Pending Review</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">File Name</label>
+                                <InputText class="form-control" @bind-Value="CurrentDocument.FileName" placeholder="document.pdf" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">File Type</label>
+                                <InputSelect class="form-select" @bind-Value="CurrentDocument.FileType">
+                                    <option value="">Select Type</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="docx">Word Document</option>
+                                    <option value="xlsx">Excel Spreadsheet</option>
+                                    <option value="pptx">PowerPoint</option>
+                                    <option value="txt">Text File</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="json">JSON</option>
+                                    <option value="xml">XML</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Storage Path</label>
+                            <InputText class="form-control" @bind-Value="CurrentDocument.StoragePath" placeholder="/documents/2024/..." />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tags (comma-separated)</label>
+                            <InputText class="form-control" @bind-Value="CurrentDocument.Tags" placeholder="compliance, audit, policy" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled="@Saving">
+                            @if (Saving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            @(IsEditing ? "Update" : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Details Modal -->
+@if (ShowDetailsModal && SelectedDocument != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-alt me-2"></i>Document Details
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDetailsModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> @SelectedDocument.Name</p>
+                            <p><strong>Category:</strong> @(SelectedDocument.Category ?? SelectedDocument.DocumentCategory ?? "N/A")</p>
+                            <p><strong>Status:</strong> <span class="badge bg-@GetStatusColor(SelectedDocument.Status)">@SelectedDocument.Status</span></p>
+                            <p><strong>Version:</strong> @SelectedDocument.Version</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>File Name:</strong> @(SelectedDocument.FileName ?? "N/A")</p>
+                            <p><strong>File Type:</strong> @(SelectedDocument.FileType ?? "N/A")</p>
+                            <p><strong>File Size:</strong> @FormatFileSize(SelectedDocument.FileSize)</p>
+                            <p><strong>Uploaded:</strong> @(SelectedDocument.UploadDate?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")</p>
+                        </div>
+                    </div>
+                    <hr />
+                    <p><strong>Description:</strong></p>
+                    <p>@(SelectedDocument.Description ?? "No description")</p>
+                    <hr />
+                    <p><strong>Storage Path:</strong> @(SelectedDocument.StoragePath ?? "N/A")</p>
+                    <p><strong>Tags:</strong> @(SelectedDocument.Tags ?? "None")</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDetailsModal">Close</button>
+                    <button type="button" class="btn btn-warning" @onclick="() => EditDocument(SelectedDocument)">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

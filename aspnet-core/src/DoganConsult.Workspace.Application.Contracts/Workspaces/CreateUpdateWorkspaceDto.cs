@@ -21,4 +21,16 @@ public class CreateUpdateWorkspaceDto
 
     [StringLength(20)]
     public string Status { get; set; } = "active";
+
+    [StringLength(500)]
+    public string? Settings { get; set; }
+
+    [StringLength(1000)]
+    public string? Members { get; set; }
+
+    [StringLength(500)]
+    public string? WorkspaceOwner { get; set; }
+
+    [StringLength(500)]
+    public string? Permissions { get; set; }
 }

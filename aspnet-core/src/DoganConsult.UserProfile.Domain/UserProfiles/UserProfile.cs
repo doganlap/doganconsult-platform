@@ -59,6 +59,19 @@ public class UserProfile : FullAuditedAggregateRoot<Guid>, IMultiTenant
     [StringLength(1000)]
     public string? Skills { get; set; }
 
+    [StringLength(200)]
+    public string? Title { get; set; } // Job title/role
+
+    [StringLength(500)]
+    public string? AvatarUrl { get; set; } // Profile picture URL
+
+    public Guid? ManagerId { get; set; } // Manager's user profile ID
+
+    public DateTime? StartDate { get; set; } // Employment start date
+
+    [StringLength(50)]
+    public string? Availability { get; set; } // Available|Busy|Away|Offline
+
     public bool ProfileCompleted { get; set; } = false;
 
     public Guid? TenantId { get; set; }

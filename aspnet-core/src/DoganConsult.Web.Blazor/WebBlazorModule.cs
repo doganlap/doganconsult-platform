@@ -130,11 +130,16 @@ public class WebBlazorModule : AbpModule
 
         context.Services.AddMapperlyObjectMapper<WebBlazorModule>();
         
-        // Configure HTTP client for organization service
+        // Configure HTTP client for services
         context.Services.AddHttpClient();
         
-        // Register organization service
+        // Register application services
         context.Services.AddTransient<DoganConsult.Web.Blazor.Services.OrganizationService>();
+        context.Services.AddTransient<DoganConsult.Web.Blazor.Services.WorkspaceService>();
+        context.Services.AddTransient<DoganConsult.Web.Blazor.Services.UserProfileService>();
+        context.Services.AddTransient<DoganConsult.Web.Blazor.Services.DocumentService>();
+        context.Services.AddTransient<DoganConsult.Web.Blazor.Services.AIService>();
+        context.Services.AddTransient<DoganConsult.Web.Blazor.Services.AuditService>();
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -167,6 +172,14 @@ public class WebBlazorModule : AbpModule
                     bundle.AddFiles("/global-styles.css");
                 }
             );
+            
+            options.ScriptBundles.Configure(
+                LeptonXLiteThemeBundles.Scripts.Global,
+                bundle =>
+                {
+                    bundle.AddFiles("/dc-sidebar.js");
+                }
+            );
 
             //BLAZOR UI
             options.StyleBundles.Configure(
@@ -176,6 +189,14 @@ public class WebBlazorModule : AbpModule
                     bundle.AddFiles("/blazor-global-styles.css");
                     //You can remove the following line if you don't use Blazor CSS isolation for components
                     bundle.AddFiles(new BundleFile("/DoganConsult.Web.Blazor.styles.css", true));
+                }
+            );
+            
+            options.ScriptBundles.Configure(
+                BlazorLeptonXLiteThemeBundles.Scripts.Global,
+                bundle =>
+                {
+                    bundle.AddFiles("/dc-sidebar.js");
                 }
             );
         });

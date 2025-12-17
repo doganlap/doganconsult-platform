@@ -17,5 +17,12 @@ public class DocumentDto : FullAuditedEntityDto<Guid>
     public Guid? ParentDocumentId { get; set; }
     public Guid? OrganizationId { get; set; }
     public Guid? WorkspaceId { get; set; }
+    public string? DocumentCategory { get; set; }
+    public string? StoragePath { get; set; }
+    public Guid? UploadedBy { get; set; }
+    public DateTime? UploadDate { get; set; }
+    public string? Tags { get; set; }
+    public string? AccessControl { get; set; }
+    public string? Metadata { get; set; }
     public Guid? TenantId { get; set; }
 }

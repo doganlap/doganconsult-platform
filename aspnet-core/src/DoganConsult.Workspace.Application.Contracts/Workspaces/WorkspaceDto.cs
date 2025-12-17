@@ -10,5 +10,10 @@ public class WorkspaceDto : FullAuditedEntityDto<Guid>
     public Guid OrganizationId { get; set; }
     public string? Description { get; set; }
     public string Status { get; set; } = "active";
+    public string? Settings { get; set; }
+    public string? Members { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public string? WorkspaceOwner { get; set; }
+    public string? Permissions { get; set; }
     public Guid? TenantId { get; set; }
 }

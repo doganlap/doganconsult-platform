@@ -1,0 +1,135 @@
+/* ============================================
+   Audit Logs Page Styles with RTL Support
+   ============================================ */
+
+/* Table Styles */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table thead.table-dark th {
+    background: #1e3a5f;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(13, 148, 136, 0.05);
+}
+
+/* Card Styles */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Timeline Styles */
+.audit-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.audit-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e5e7eb;
+}
+
+.audit-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.audit-item::before {
+    content: '';
+    position: absolute;
+    left: -1.625rem;
+    top: 0.25rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #1e3a5f;
+    border: 2px solid white;
+}
+
+/* Badge Styles */
+.badge {
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+}
+
+/* Filter Form */
+.filter-form {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+
+:global(html[dir="rtl"]) .card-header .d-flex {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .card-title {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .card-title i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+:global(html[dir="rtl"]) .table th,
+:global(html[dir="rtl"]) .table td {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .audit-timeline {
+    padding-left: 0;
+    padding-right: 2rem;
+}
+
+:global(html[dir="rtl"]) .audit-timeline::before {
+    left: auto;
+    right: 0.75rem;
+}
+
+:global(html[dir="rtl"]) .audit-item::before {
+    left: auto;
+    right: -1.625rem;
+}
+
+:global(html[dir="rtl"]) .audit-item {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .form-label {
+    text-align: right;
+    display: block;
+}
+
+:global(html[dir="rtl"]) .form-control,
+:global(html[dir="rtl"]) .form-select {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .filter-form .row {
+    flex-direction: row-reverse;
+}

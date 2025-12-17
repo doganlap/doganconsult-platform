@@ -1,0 +1,243 @@
+@page "/workspaces"
+@using DoganConsult.Workspace.Workspaces
+@using DoganConsult.Web.Blazor.Services
+@using Volo.Abp.Application.Dtos
+
+<PageTitle>Workspace Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-folder-open me-2"></i>Workspace Management
+                        </h4>
+                        <button class="btn btn-primary" @onclick="OpenCreateModal">
+                            <i class="fas fa-plus me-1"></i>Add Workspace
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (Loading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading workspaces...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Code</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Owner</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Created</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (WorkspaceItems?.Any() == true)
+                                    {
+                                        @foreach (var ws in WorkspaceItems)
+                                        {
+                                            <tr>
+                                                <td><strong>@ws.Code</strong></td>
+                                                <td>@ws.Name</td>
+                                                <td>@(ws.Description?.Length > 50 ? ws.Description.Substring(0, 50) + "..." : ws.Description)</td>
+                                                <td>@ws.WorkspaceOwner</td>
+                                                <td>
+                                                    <span class="badge bg-@GetStatusColor(ws.Status)">
+                                                        @ws.Status
+                                                    </span>
+                                                </td>
+                                                <td>@ws.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewDetails(ws)">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-warning" @onclick="() => EditWorkspace(ws)">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteWorkspace(ws)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted">
+                                                <i class="fas fa-folder-open fa-3x mb-3"></i>
+                                                <p class="mb-0">No workspaces found</p>
+                                                <button class="btn btn-primary mt-2" @onclick="OpenCreateModal">
+                                                    Create your first workspace
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (TotalCount > PageSize)
+                        {
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item @(CurrentPage <= 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="PreviousPage">Previous</button>
+                                    </li>
+                                    @for (int i = 1; i <= TotalPages; i++)
+                                    {
+                                        var pageNum = i;
+                                        <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                        </li>
+                                    }
+                                    <li class="page-item @(CurrentPage >= TotalPages ? "disabled" : "")">
+                                        <button class="page-link" @onclick="NextPage">Next</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas @(IsEditing ? "fa-edit" : "fa-plus") me-2"></i>
+                        @(IsEditing ? "Edit Workspace" : "Create New Workspace")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <EditForm Model="CurrentWorkspace" OnValidSubmit="SaveWorkspace">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        @if (!string.IsNullOrEmpty(FormErrorMessage))
+                        {
+                            <div class="alert alert-danger">@FormErrorMessage</div>
+                        }
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Code *</label>
+                                <InputText class="form-control" @bind-Value="CurrentWorkspace.Code" placeholder="WS001" />
+                                <ValidationMessage For="@(() => CurrentWorkspace.Code)" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Name *</label>
+                                <InputText class="form-control" @bind-Value="CurrentWorkspace.Name" placeholder="Workspace Name" />
+                                <ValidationMessage For="@(() => CurrentWorkspace.Name)" />
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <InputTextArea class="form-control" @bind-Value="CurrentWorkspace.Description" rows="3" placeholder="Workspace description..." />
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Owner</label>
+                                <InputText class="form-control" @bind-Value="CurrentWorkspace.WorkspaceOwner" placeholder="Owner name or email" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <InputSelect class="form-select" @bind-Value="CurrentWorkspace.Status">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="archived">Archived</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Members (comma-separated)</label>
+                            <InputText class="form-control" @bind-Value="CurrentWorkspace.Members" placeholder="user1@email.com, user2@email.com" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Permissions</label>
+                            <InputTextArea class="form-control" @bind-Value="CurrentWorkspace.Permissions" rows="2" placeholder="Permission settings..." />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled="@Saving">
+                            @if (Saving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            @(IsEditing ? "Update" : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Details Modal -->
+@if (ShowDetailsModal && SelectedWorkspace != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-folder-open me-2"></i>Workspace Details
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDetailsModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Code:</strong> @SelectedWorkspace.Code</p>
+                            <p><strong>Name:</strong> @SelectedWorkspace.Name</p>
+                            <p><strong>Status:</strong> <span class="badge bg-@GetStatusColor(SelectedWorkspace.Status)">@SelectedWorkspace.Status</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Owner:</strong> @SelectedWorkspace.WorkspaceOwner</p>
+                            <p><strong>Created:</strong> @SelectedWorkspace.CreatedDate.ToString("yyyy-MM-dd HH:mm")</p>
+                        </div>
+                    </div>
+                    <hr />
+                    <p><strong>Description:</strong></p>
+                    <p>@(SelectedWorkspace.Description ?? "No description")</p>
+                    <hr />
+                    <p><strong>Members:</strong> @(SelectedWorkspace.Members ?? "None")</p>
+                    <p><strong>Permissions:</strong> @(SelectedWorkspace.Permissions ?? "Default")</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDetailsModal">Close</button>
+                    <button type="button" class="btn btn-warning" @onclick="() => EditWorkspace(SelectedWorkspace)">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

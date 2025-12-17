@@ -1,0 +1,147 @@
+/* ============================================
+   Approvals Page Styles with RTL Support
+   ============================================ */
+
+/* Card Styles */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Approval Card */
+.approval-card {
+    border-left: 4px solid;
+    transition: all 0.2s ease;
+}
+
+.approval-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.approval-card.pending {
+    border-left-color: #f59e0b;
+}
+
+.approval-card.approved {
+    border-left-color: #059669;
+}
+
+.approval-card.rejected {
+    border-left-color: #dc2626;
+}
+
+/* Status Badges */
+.badge {
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+}
+
+/* Action Buttons */
+.approval-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.approval-actions .btn {
+    padding: 0.5rem 1rem;
+}
+
+/* Timeline */
+.approval-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.approval-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e5e7eb;
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+
+:global(html[dir="rtl"]) .card-header .d-flex {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .card-title {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .card-title i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+:global(html[dir="rtl"]) .approval-card {
+    border-left: 1px solid #e5e7eb;
+    border-right: 4px solid;
+}
+
+:global(html[dir="rtl"]) .approval-card.pending {
+    border-right-color: #f59e0b;
+}
+
+:global(html[dir="rtl"]) .approval-card.approved {
+    border-right-color: #059669;
+}
+
+:global(html[dir="rtl"]) .approval-card.rejected {
+    border-right-color: #dc2626;
+}
+
+:global(html[dir="rtl"]) .approval-card .d-flex {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .approval-card h5,
+:global(html[dir="rtl"]) .approval-card p {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .approval-actions {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .approval-timeline {
+    padding-left: 0;
+    padding-right: 1.5rem;
+}
+
+:global(html[dir="rtl"]) .approval-timeline::before {
+    left: auto;
+    right: 0;
+}
+
+:global(html[dir="rtl"]) .table th,
+:global(html[dir="rtl"]) .table td {
+    text-align: right;
+}
+
+:global(html[dir="rtl"]) .btn-group {
+    flex-direction: row-reverse;
+}
+
+:global(html[dir="rtl"]) .form-label {
+    text-align: right;
+    display: block;
+}
+
+:global(html[dir="rtl"]) .form-control,
+:global(html[dir="rtl"]) .form-select,
+:global(html[dir="rtl"]) textarea {
+    text-align: right;
+}

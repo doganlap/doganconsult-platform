@@ -153,6 +153,21 @@ services:
       - document-service
       - ai-service
 
+  web-ui:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.Web.Blazor/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - AuthServer__Authority=http://identity-service:80
+      - RemoteServices__Default__BaseUrl=http://api-gateway:80
+    networks:
+      - doganconsult-network
+    depends_on:
+      - api-gateway
+
 networks:
   doganconsult-network:
     driver: bridge

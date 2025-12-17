@@ -48,6 +48,14 @@ public class WebDomainSharedModule : AbpModule
                 .AddVirtualJson("/Localization/Web");
 
             options.DefaultResourceType = typeof(WebResource);
+
+            // Add supported languages including Arabic (RTL)
+            options.Languages.Add(new LanguageInfo("ar", "ar", "العربية"));
+            options.Languages.Add(new LanguageInfo("en", "en", "English"));
+            options.Languages.Add(new LanguageInfo("de", "de", "Deutsch"));
+            options.Languages.Add(new LanguageInfo("fr", "fr", "Français"));
+            options.Languages.Add(new LanguageInfo("es", "es", "Español"));
+            options.Languages.Add(new LanguageInfo("tr", "tr", "Türkçe"));
         });
 
         Configure<AbpExceptionLocalizationOptions>(options =>

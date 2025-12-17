@@ -15,6 +15,29 @@ public class OrganizationDto
     public string RegulatoryRequirements { get; set; } = string.Empty;
     public string ContactInformation { get; set; } = string.Empty;
     public OrganizationStatus OrganizationStatus { get; set; }
+    
+    // Legal & Financial Details
+    public string LegalName { get; set; } = string.Empty;
+    public string RegistrationNumber { get; set; } = string.Empty;
+    public string VatNumber { get; set; } = string.Empty;
+    public string BillingAddress { get; set; } = string.Empty;
+    public DateTime? IncorporationDate { get; set; }
+    
+    // Address Details
+    public string StreetAddress { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public string PostalCode { get; set; } = string.Empty;
+    
+    // Authorized Person
+    public string AuthorizedPersonName { get; set; } = string.Empty;
+    public string AuthorizedPersonEmail { get; set; } = string.Empty;
+    
+    // Scope
+    public string BusinessDescription { get; set; } = string.Empty;
+    public string TechnologyScope { get; set; } = string.Empty;
+    public string ServiceScope { get; set; } = string.Empty;
+    
+    // Audit
     public DateTime CreatedAt { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime? LastModifiedAt { get; set; }
@@ -52,6 +75,50 @@ public class CreateUpdateOrganizationDto
 
     [Required(ErrorMessage = "Organization Status is required")]
     public OrganizationStatus OrganizationStatus { get; set; }
+    
+    // Legal & Financial Details
+    [Required(ErrorMessage = "Legal Name is required")]
+    [StringLength(255, MinimumLength = 2, ErrorMessage = "Legal Name must be between 2 and 255 characters")]
+    public string LegalName { get; set; } = string.Empty;
+
+    [StringLength(100, ErrorMessage = "Registration Number must not exceed 100 characters")]
+    public string RegistrationNumber { get; set; } = string.Empty;
+
+    [StringLength(100, ErrorMessage = "VAT Number must not exceed 100 characters")]
+    public string VatNumber { get; set; } = string.Empty;
+
+    [StringLength(500, ErrorMessage = "Billing Address must not exceed 500 characters")]
+    public string BillingAddress { get; set; } = string.Empty;
+
+    public DateTime? IncorporationDate { get; set; }
+    
+    // Address Details
+    [StringLength(255, ErrorMessage = "Street Address must not exceed 255 characters")]
+    public string StreetAddress { get; set; } = string.Empty;
+
+    [StringLength(100, ErrorMessage = "State must not exceed 100 characters")]
+    public string State { get; set; } = string.Empty;
+
+    [StringLength(20, ErrorMessage = "Postal Code must not exceed 20 characters")]
+    public string PostalCode { get; set; } = string.Empty;
+    
+    // Authorized Person
+    [StringLength(255, ErrorMessage = "Authorized Person Name must not exceed 255 characters")]
+    public string AuthorizedPersonName { get; set; } = string.Empty;
+
+    [StringLength(255, ErrorMessage = "Email must not exceed 255 characters")]
+    [EmailAddress(ErrorMessage = "Email must be valid")]
+    public string AuthorizedPersonEmail { get; set; } = string.Empty;
+    
+    // Scope
+    [StringLength(1000, ErrorMessage = "Business Description must not exceed 1000 characters")]
+    public string BusinessDescription { get; set; } = string.Empty;
+
+    [StringLength(500, ErrorMessage = "Technology Scope must not exceed 500 characters")]
+    public string TechnologyScope { get; set; } = string.Empty;
+
+    [StringLength(500, ErrorMessage = "Service Scope must not exceed 500 characters")]
+    public string ServiceScope { get; set; } = string.Empty;
 }
 
 public enum OrganizationType
