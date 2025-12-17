@@ -1,0 +1,224 @@
+@page "/admin/branding"
+@using DoganConsult.Web.Blazor
+@using DoganConsult.Web.Blazor.Services
+@using DoganConsult.Workspace.Branding
+@inherits WebComponentBase
+
+<PageTitle>Branding Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-palette me-2"></i>Tenant Branding
+                    </h4>
+                    <p class="text-muted mb-0">Customize your tenant's branding, colors, and appearance.</p>
+                </div>
+                <div class="card-body">
+                    @if (_isLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@_branding" OnValidSubmit="HandleSave">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">App Display Name</label>
+                                        <InputText @bind-Value="_branding.AppDisplayName" class="form-control" />
+                                        <small class="form-text text-muted">The name shown in the application header and browser title.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Product Name (Optional)</label>
+                                        <InputText @bind-Value="_branding.ProductName" class="form-control" />
+                                        <small class="form-text text-muted">Additional product branding name.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Logo URL</label>
+                                        <InputText @bind-Value="_branding.LogoUrl" class="form-control" placeholder="https://example.com/logo.png" />
+                                        <small class="form-text text-muted">URL to your logo image. Recommended size: 200x50px.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Favicon URL</label>
+                                        <InputText @bind-Value="_branding.FaviconUrl" class="form-control" placeholder="https://example.com/favicon.ico" />
+                                        <small class="form-text text-muted">URL to your favicon. Recommended size: 32x32px.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Home Route</label>
+                                        <InputText @bind-Value="_branding.HomeRoute" class="form-control" />
+                                        <small class="form-text text-muted">Default route when users visit the home page.</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Primary Color</label>
+                                        <div class="input-group">
+                                            <InputText @bind-Value="_branding.PrimaryColor" class="form-control" type="color" />
+                                            <InputText @bind-Value="_branding.PrimaryColor" class="form-control" placeholder="#0ea5a4" />
+                                        </div>
+                                        <small class="form-text text-muted">Main brand color used throughout the UI.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Accent Color</label>
+                                        <div class="input-group">
+                                            <InputText @bind-Value="_branding.AccentColor" class="form-control" type="color" />
+                                            <InputText @bind-Value="_branding.AccentColor" class="form-control" placeholder="#22c55e" />
+                                        </div>
+                                        <small class="form-text text-muted">Secondary color for highlights and accents.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Default Language</label>
+                                        <InputSelect @bind-Value="_branding.DefaultLanguage" class="form-select">
+                                            <option value="en">English</option>
+                                            <option value="ar">Arabic</option>
+                                            <option value="tr">Turkish</option>
+                                        </InputSelect>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <InputCheckbox @bind-Value="_branding.IsRtl" class="form-check-input" id="rtlSwitch" />
+                                            <label class="form-check-label" for="rtlSwitch">
+                                                Right-to-Left (RTL) Layout
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">Enable for Arabic and Hebrew languages.</small>
+                                    </div>
+
+                                    <div class="card bg-light p-3 mb-3">
+                                        <h6 class="mb-2">Preview</h6>
+                                        <div class="d-flex align-items-center gap-3">
+                                            @if (!string.IsNullOrEmpty(_branding.LogoUrl))
+                                            {
+                                                <img src="@_branding.LogoUrl" alt="Logo" height="32" />
+                                            }
+                                            <div>
+                                                <div class="fw-bold" style="color: @_branding.PrimaryColor">@_branding.AppDisplayName</div>
+                                                <small class="text-muted">Preview</small>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="badge" style="background-color: @_branding.PrimaryColor; color: white;">Primary</span>
+                                            <span class="badge ms-2" style="background-color: @_branding.AccentColor; color: white;">Accent</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (_message != null)
+                            {
+                                <div class="alert alert-@(_isError ? "danger" : "success") alert-dismissible fade show mt-3" role="alert">
+                                    @_message
+                                    <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <button type="button" class="btn btn-secondary" @onclick="HandleReset">Reset to Defaults</button>
+                                <button type="submit" class="btn btn-primary" disabled="@_isSaving">
+                                    @if (_isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    }
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private IBrandingAppService BrandingAppService { get; set; } = null!;
+    [Inject] private DgThemeService ThemeService { get; set; } = null!;
+
+    private BrandingProfileDto _branding = new();
+    private BrandingProfileDto _originalBranding = new();
+    private bool _isLoading = true;
+    private bool _isSaving = false;
+    private string? _message;
+    private bool _isError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBrandingAsync();
+    }
+
+    private async Task LoadBrandingAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            _branding = await BrandingAppService.GetCurrentAsync();
+            _originalBranding = new BrandingProfileDto
+            {
+                AppDisplayName = _branding.AppDisplayName,
+                ProductName = _branding.ProductName,
+                LogoUrl = _branding.LogoUrl,
+                FaviconUrl = _branding.FaviconUrl,
+                PrimaryColor = _branding.PrimaryColor,
+                AccentColor = _branding.AccentColor,
+                DefaultLanguage = _branding.DefaultLanguage,
+                IsRtl = _branding.IsRtl,
+                HomeRoute = _branding.HomeRoute
+            };
+        }
+        catch (Exception ex)
+        {
+            // Error handling - could use toast notification service here
+            Console.WriteLine($"Failed to load branding: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        try
+        {
+            _isSaving = true;
+            _branding = await BrandingAppService.UpdateAsync(_branding);
+            await ThemeService.UpdateBrandingAsync(_branding);
+            _message = "Branding updated successfully!";
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = $"Failed to save branding: {ex.Message}";
+            _isError = true;
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task HandleReset()
+    {
+        _branding = new BrandingProfileDto();
+        await HandleSave();
+    }
+}
+

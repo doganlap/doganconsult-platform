@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using DoganConsult.Web.Localization;
 using DoganConsult.Web.MultiTenancy;
+using DoganConsult.Web.Blazor.Services;
+using DoganConsult.Workspace.UI;
+using Volo.Abp.Features;
 using Volo.Abp.Identity.Blazor;
 using Volo.Abp.SettingManagement.Blazor.Menus;
 using Volo.Abp.TenantManagement.Blazor.Navigation;
@@ -10,6 +14,15 @@ namespace DoganConsult.Web.Blazor.Menus;
 
 public class WebMenuContributor : IMenuContributor
 {
+    private readonly DgModuleUiService _moduleUiService;
+    private readonly IFeatureChecker _featureChecker;
+
+    public WebMenuContributor(DgModuleUiService moduleUiService, IFeatureChecker featureChecker)
+    {
+        _moduleUiService = moduleUiService;
+        _featureChecker = featureChecker;
+    }
+
     public async Task ConfigureMenuAsync(MenuConfigurationContext context)
     {
         if (context.Menu.Name == StandardMenus.Main)
@@ -18,7 +31,7 @@ public class WebMenuContributor : IMenuContributor
         }
     }
 
-    private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
+    private async Task ConfigureMainMenuAsync(MenuConfigurationContext context)
     {
         var administration = context.Menu.GetAdministration();
         var l = context.GetLocalizer<WebResource>();
@@ -130,6 +143,69 @@ public class WebMenuContributor : IMenuContributor
         administration.SetSubItemOrder(IdentityMenuNames.GroupName, 3);
         administration.SetSubItemOrder(SettingManagementMenus.GroupName, 4);
 
-        return Task.CompletedTask;
+        // Add Tenant Settings submenu under Administration
+        administration.AddItem(new ApplicationMenuItem(
+            "DoganConsult.TenantSettings",
+            "Tenant Settings",
+            icon: "fas fa-cog",
+            order: 5
+        ));
+
+        var tenantSettings = administration.Items.FirstOrDefault(x => x.Name == "DoganConsult.TenantSettings");
+        if (tenantSettings != null)
+        {
+            tenantSettings.AddItem(new ApplicationMenuItem(
+                "DoganConsult.Branding",
+                "Branding",
+                "/admin/branding",
+                icon: "fas fa-palette",
+                order: 1
+            ));
+            tenantSettings.AddItem(new ApplicationMenuItem(
+                "DoganConsult.Features",
+                "Features",
+                "/admin/features",
+                icon: "fas fa-toggle-on",
+                order: 2
+            ));
+        }
+
+        // Load and add menu contributions from modules
+        var moduleContributions = await _moduleUiService.GetMenuContributionsAsync();
+        foreach (var contribution in moduleContributions)
+        {
+            var menuItem = new ApplicationMenuItem(
+                contribution.Name,
+                contribution.DisplayName,
+                contribution.Url,
+                icon: contribution.Icon,
+                order: contribution.Order
+            );
+
+            if (!string.IsNullOrEmpty(contribution.RequiredPermission))
+            {
+                menuItem.RequiredPermissionName = contribution.RequiredPermission;
+            }
+
+            if (!string.IsNullOrEmpty(contribution.RequiredFeature))
+            {
+                // Feature check is already done by DgModuleUiService, but we can add it as metadata
+                menuItem.Metadata.Add("RequiredFeature", contribution.RequiredFeature);
+            }
+
+            // Add sub-items recursively
+            foreach (var subItem in contribution.Items)
+            {
+                menuItem.AddItem(new ApplicationMenuItem(
+                    subItem.Name,
+                    subItem.DisplayName,
+                    subItem.Url,
+                    icon: subItem.Icon,
+                    order: subItem.Order
+                ));
+            }
+
+            context.Menu.AddItem(menuItem);
+        }
     }
 }

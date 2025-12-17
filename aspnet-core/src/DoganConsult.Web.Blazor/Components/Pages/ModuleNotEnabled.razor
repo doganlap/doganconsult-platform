@@ -1,0 +1,43 @@
+@page "/module-not-enabled"
+@using DoganConsult.Web.Blazor
+@inherits WebComponentBase
+
+<PageTitle>Module Not Enabled</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-ban fa-5x text-warning"></i>
+                    </div>
+                    <h2 class="card-title mb-3">Module Not Enabled</h2>
+                    <p class="card-text text-muted mb-4">
+                        @if (!string.IsNullOrEmpty(FeatureName))
+                        {
+                            <span>The module <strong>@FeatureName</strong> is not enabled for your tenant.</span>
+                        }
+                        else
+                        {
+                            <span>The requested module is not enabled for your tenant.</span>
+                        }
+                    </p>
+                    <p class="text-muted mb-4">
+                        Please contact your administrator to enable this module.
+                    </p>
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Return to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] [SupplyParameterFromQuery] public string? Feature { get; set; }
+    
+    private string? FeatureName => Feature;
+}
+
