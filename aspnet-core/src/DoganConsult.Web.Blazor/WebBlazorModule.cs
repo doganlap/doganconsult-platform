@@ -140,6 +140,9 @@ public class WebBlazorModule : AbpModule
         context.Services.AddTransient<DoganConsult.Web.Blazor.Services.DocumentService>();
         context.Services.AddTransient<DoganConsult.Web.Blazor.Services.AIService>();
         context.Services.AddTransient<DoganConsult.Web.Blazor.Services.AuditService>();
+        
+        // Register DG.OS Foundation services
+        context.Services.AddScoped<DoganConsult.Web.Blazor.Services.DgThemeService>();
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)

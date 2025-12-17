@@ -1,0 +1,248 @@
+/* DG.OS Icon System - Unified Icon Management */
+
+/* FontAwesome Icon Library - Ensure proper loading */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css');
+
+/* Icon Consistency Standards */
+:root {
+  /* Icon Sizes */
+  --icon-xs: 12px;
+  --icon-sm: 14px;
+  --icon-base: 16px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-2xl: 32px;
+  --icon-3xl: 48px;
+  
+  /* Icon Colors */
+  --icon-primary: #0d6efd;
+  --icon-success: #10b981;
+  --icon-warning: #fbbf24;
+  --icon-danger: #ef4444;
+  --icon-info: #3b82f6;
+  --icon-neutral: #6b7280;
+  --icon-muted: #9ca3af;
+}
+
+/* Base Icon Styling */
+i, .fa, .fas, .far, .fal, .fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Icon Size Classes */
+.icon-xs { font-size: var(--icon-xs); }
+.icon-sm { font-size: var(--icon-sm); }
+.icon-base { font-size: var(--icon-base); }
+.icon-lg { font-size: var(--icon-lg); }
+.icon-xl { font-size: var(--icon-xl); }
+.icon-2xl { font-size: var(--icon-2xl); }
+.icon-3xl { font-size: var(--icon-3xl); }
+
+/* Icon Color Classes */
+.icon-primary { color: var(--icon-primary); }
+.icon-success { color: var(--icon-success); }
+.icon-warning { color: var(--icon-warning); }
+.icon-danger { color: var(--icon-danger); }
+.icon-info { color: var(--icon-info); }
+.icon-neutral { color: var(--icon-neutral); }
+.icon-muted { color: var(--icon-muted); }
+
+/* Icon Containers */
+.icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--icon-lg);
+}
+
+.icon-circle.primary {
+  background: rgba(13, 110, 253, 0.1);
+  color: var(--icon-primary);
+}
+
+.icon-circle.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--icon-success);
+}
+
+.icon-circle.warning {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--icon-warning);
+}
+
+.icon-circle.danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--icon-danger);
+}
+
+.icon-rounded {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--icon-lg);
+}
+
+.icon-rounded.primary {
+  background: rgba(13, 110, 253, 0.1);
+  color: var(--icon-primary);
+}
+
+.icon-rounded.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--icon-success);
+}
+
+/* Icon Spacing Utilities */
+.icon-me-1 { margin-right: 0.25rem; }
+.icon-me-2 { margin-right: 0.5rem; }
+.icon-me-3 { margin-right: 1rem; }
+
+.icon-ms-1 { margin-left: 0.25rem; }
+.icon-ms-2 { margin-left: 0.5rem; }
+.icon-ms-3 { margin-left: 1rem; }
+
+/* Icon Animation */
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.icon-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Icon Hover Effects */
+.icon-hover {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.icon-hover:hover {
+  transform: scale(1.1);
+  color: var(--icon-primary);
+}
+
+/* Dashboard Icon Definitions */
+
+/* Header Icons */
+.icon-search { font-size: var(--icon-base); }
+.icon-brain { color: var(--icon-info); }
+.icon-user { font-size: var(--icon-base); }
+
+/* Executive Summary Icons */
+.icon-operational { color: var(--icon-primary); }
+.icon-governance { color: var(--icon-success); }
+.icon-ai { color: var(--icon-info); }
+.icon-organization { color: var(--icon-success); }
+
+/* KPI Icons */
+.icon-workspace { font-size: var(--icon-base); }
+.icon-document { font-size: var(--icon-base); }
+.icon-approval { font-size: var(--icon-base); }
+.icon-user-profile { font-size: var(--icon-base); }
+
+/* Quick Action Icons */
+.icon-create { font-size: var(--icon-lg); }
+.icon-upload { font-size: var(--icon-lg); }
+.icon-review { font-size: var(--icon-lg); }
+.icon-request { font-size: var(--icon-lg); }
+
+/* Tab Icons */
+.icon-overview { font-size: var(--icon-base); }
+.icon-analytics { font-size: var(--icon-base); }
+.icon-pivot { font-size: var(--icon-base); }
+.icon-guidance { font-size: var(--icon-base); }
+.icon-knowledge { font-size: var(--icon-base); }
+.icon-activity { font-size: var(--icon-base); }
+
+/* System Icons */
+.icon-refresh { font-size: var(--icon-base); }
+.icon-lightbulb { color: var(--icon-warning); }
+.icon-arrow-right { font-size: var(--icon-base); }
+.icon-expand { font-size: var(--icon-base); }
+.icon-minimize { font-size: var(--icon-base); }
+.icon-close { font-size: var(--icon-base); }
+
+/* RTL Icon Flipping */
+[dir="rtl"] .icon-arrow-left::before { content: "\f061"; }
+[dir="rtl"] .icon-arrow-right::before { content: "\f060"; }
+[dir="rtl"] .icon-chevron-left::before { content: "\f054"; }
+[dir="rtl"] .icon-chevron-right::before { content: "\f053"; }
+
+/* Icon Accessibility */
+.icon-accessible {
+  display: inline-block;
+}
+
+.icon-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Icon Loading States */
+.icon-loading {
+  animation: spin 1s linear infinite;
+  opacity: 0.6;
+}
+
+/* Icon Disabled State */
+.icon-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Icon Sizes */
+@media (max-width: 768px) {
+  .icon-lg { font-size: var(--icon-base); }
+  .icon-xl { font-size: var(--icon-lg); }
+  .icon-2xl { font-size: var(--icon-xl); }
+  
+  .icon-circle,
+  .icon-rounded {
+    width: 36px;
+    height: 36px;
+    font-size: var(--icon-base);
+  }
+}
+
+/* Icon Outline vs Filled Consistency */
+.fas { font-weight: 900; } /* Filled icons */
+.far { font-weight: 400; } /* Regular/outline icons */
+.fal { font-weight: 300; } /* Light icons */
+.fab { font-weight: 400; } /* Brand icons */
+
+/* Ensure consistent rendering */
+.fa::before,
+.fas::before,
+.far::before,
+.fal::before,
+.fab::before {
+  display: inline-block;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

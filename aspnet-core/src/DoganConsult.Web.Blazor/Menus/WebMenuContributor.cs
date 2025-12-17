@@ -27,7 +27,7 @@ public class WebMenuContributor : IMenuContributor
             0,
             new ApplicationMenuItem(
                 WebMenus.Home,
-                l["Menu:Home"],
+                "Home",
                 "/",
                 icon: "fas fa-home",
                 order: 0
@@ -39,7 +39,7 @@ public class WebMenuContributor : IMenuContributor
             1,
             new ApplicationMenuItem(
                 WebMenus.Organizations,
-                l["Menu:Organizations"],
+                "Organizations",
                 "/organizations",
                 icon: "fas fa-building",
                 order: 1
@@ -51,7 +51,7 @@ public class WebMenuContributor : IMenuContributor
             2,
             new ApplicationMenuItem(
                 "DoganConsult.Workspaces",
-                l["Menu:Workspaces"],
+                "Workspaces",
                 "/workspaces",
                 icon: "fas fa-folder-open",
                 order: 2
@@ -63,7 +63,7 @@ public class WebMenuContributor : IMenuContributor
             3,
             new ApplicationMenuItem(
                 "DoganConsult.Documents",
-                l["Menu:Documents"],
+                "Documents",
                 "/documents",
                 icon: "fas fa-file-alt",
                 order: 3
@@ -75,7 +75,7 @@ public class WebMenuContributor : IMenuContributor
             4,
             new ApplicationMenuItem(
                 "DoganConsult.Users",
-                l["Menu:UserProfiles"],
+                "User Profiles",
                 "/user-profiles",
                 icon: "fas fa-users",
                 order: 4
@@ -87,7 +87,7 @@ public class WebMenuContributor : IMenuContributor
             5,
             new ApplicationMenuItem(
                 "DoganConsult.AI",
-                l["Menu:AIChat"],
+                "AI Chat",
                 "/ai-chat",
                 icon: "fas fa-robot",
                 order: 5
@@ -99,7 +99,7 @@ public class WebMenuContributor : IMenuContributor
             6,
             new ApplicationMenuItem(
                 "DoganConsult.AuditLogs",
-                l["Menu:AuditLogs"],
+                "Audit Logs",
                 "/audit-logs",
                 icon: "fas fa-history",
                 order: 6
@@ -111,7 +111,7 @@ public class WebMenuContributor : IMenuContributor
             7,
             new ApplicationMenuItem(
                 "DoganConsult.Approvals",
-                l["Menu:Approvals"],
+                "Approvals",
                 "/approvals",
                 icon: "fas fa-tasks",
                 order: 7

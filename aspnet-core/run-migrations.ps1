@@ -15,7 +15,7 @@ $services = @(
 
 foreach ($service in $services) {
     Write-Host "Running migrations for $service service..." -ForegroundColor Yellow
-    $migratorPath = "src\DoganConsult.$service.DbMigrator"
+    $migratorPath = Join-Path $PSScriptRoot "src\DoganConsult.$service.DbMigrator"
     
     if (Test-Path $migratorPath) {
         Push-Location $migratorPath

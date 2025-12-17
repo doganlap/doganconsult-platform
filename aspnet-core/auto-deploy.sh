@@ -3,7 +3,7 @@
 # Automated deployment script using sshpass
 SERVER_IP="46.224.64.95"
 SERVER_USER="root"
-SERVER_PASS="aKTbCKAeWapnp9xkLcjF"
+SERVER_PASS="As\$123456"
 
 echo "=== DoganConsult Platform - Auto Deploy ==="
 echo "Target: $SERVER_USER@$SERVER_IP"

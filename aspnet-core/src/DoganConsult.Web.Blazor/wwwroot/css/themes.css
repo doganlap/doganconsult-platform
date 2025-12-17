@@ -1,0 +1,159 @@
+/* DG.OS Theme System - Multiple Color Themes */
+
+/* Theme 1: Dark (Default) */
+:root.theme-dark {
+    --sidebar-bg: #1a1a1a;
+    --sidebar-border: #2d2d2d;
+    --sidebar-text: #e0e0e0;
+    --sidebar-text-hover: #ffffff;
+    --sidebar-text-active: #0d6efd;
+    --sidebar-hover-bg: #2d2d2d;
+    --sidebar-active-bg: rgba(13, 110, 253, 0.15);
+    --sidebar-icon-color: #a0a0a0;
+    --sidebar-icon-active: #0d6efd;
+}
+
+/* Theme 2: Navy Blue */
+:root.theme-navy {
+    --sidebar-bg: #0f172a;
+    --sidebar-border: #1e293b;
+    --sidebar-text: #cbd5e1;
+    --sidebar-text-hover: #f1f5f9;
+    --sidebar-text-active: #3b82f6;
+    --sidebar-hover-bg: #1e293b;
+    --sidebar-active-bg: rgba(59, 130, 246, 0.15);
+    --sidebar-icon-color: #94a3b8;
+    --sidebar-icon-active: #3b82f6;
+}
+
+/* Theme 3: Slate Gray */
+:root.theme-slate {
+    --sidebar-bg: #1e293b;
+    --sidebar-border: #334155;
+    --sidebar-text: #cbd5e1;
+    --sidebar-text-hover: #f1f5f9;
+    --sidebar-text-active: #06b6d4;
+    --sidebar-hover-bg: #334155;
+    --sidebar-active-bg: rgba(6, 182, 212, 0.15);
+    --sidebar-icon-color: #94a3b8;
+    --sidebar-icon-active: #06b6d4;
+}
+
+/* Theme 4: Charcoal */
+:root.theme-charcoal {
+    --sidebar-bg: #2d2d2d;
+    --sidebar-border: #3d3d3d;
+    --sidebar-text: #d4d4d4;
+    --sidebar-text-hover: #ffffff;
+    --sidebar-text-active: #10b981;
+    --sidebar-hover-bg: #3d3d3d;
+    --sidebar-active-bg: rgba(16, 185, 129, 0.15);
+    --sidebar-icon-color: #a8a8a8;
+    --sidebar-icon-active: #10b981;
+}
+
+/* Theme 5: Deep Purple */
+:root.theme-purple {
+    --sidebar-bg: #1a0f2e;
+    --sidebar-border: #2d1b4e;
+    --sidebar-text: #d8bfd8;
+    --sidebar-text-hover: #f0e6ff;
+    --sidebar-text-active: #a78bfa;
+    --sidebar-hover-bg: #2d1b4e;
+    --sidebar-active-bg: rgba(167, 139, 250, 0.15);
+    --sidebar-icon-color: #c4b5fd;
+    --sidebar-icon-active: #a78bfa;
+}
+
+/* Apply theme colors to sidebar */
+.lpx-sidebar {
+    background: var(--sidebar-bg) !important;
+    border-right: 1px solid var(--sidebar-border);
+}
+
+.lpx-sidebar-header {
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.lpx-sidebar .nav-link,
+.lpx-sidebar .lpx-menu-item a {
+    color: var(--sidebar-text) !important;
+}
+
+.lpx-sidebar .nav-link:hover,
+.lpx-sidebar .lpx-menu-item a:hover {
+    color: var(--sidebar-text-hover) !important;
+    background: var(--sidebar-hover-bg) !important;
+}
+
+.lpx-sidebar .nav-link.active,
+.lpx-sidebar .lpx-menu-item.active > a,
+.lpx-sidebar .lpx-menu-item a.active {
+    color: var(--sidebar-text-active) !important;
+    background: var(--sidebar-active-bg) !important;
+}
+
+.lpx-sidebar .nav-link i,
+.lpx-sidebar .lpx-menu-item i {
+    color: var(--sidebar-icon-color);
+}
+
+.lpx-sidebar .nav-link:hover i,
+.lpx-sidebar .lpx-menu-item:hover i {
+    color: var(--sidebar-text-hover);
+}
+
+.lpx-sidebar .nav-link.active i,
+.lpx-sidebar .lpx-menu-item.active i {
+    color: var(--sidebar-icon-active);
+}
+
+.lpx-sidebar .nav-section-header,
+.lpx-sidebar .lpx-menu-section-title {
+    color: var(--sidebar-icon-color);
+}
+
+/* Theme Switcher Button */
+.theme-switcher {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 300px;
+}
+
+.theme-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-btn:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+}
+
+.theme-btn.active {
+    border-color: #0d6efd;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+}
+
+/* Theme colors for buttons */
+.theme-dark-btn { background: #1a1a1a; color: #fff; }
+.theme-navy-btn { background: #0f172a; color: #fff; }
+.theme-slate-btn { background: #1e293b; color: #fff; }
+.theme-charcoal-btn { background: #2d2d2d; color: #fff; }
+.theme-purple-btn { background: #1a0f2e; color: #f0e6ff; }

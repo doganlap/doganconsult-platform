@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using DoganConsult.Workspace.MultiTenancy;
+using DoganConsult.Workspace.Features;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.BackgroundJobs;
 using Volo.Abp.Emailing;
+using Volo.Abp.Features;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
 using Volo.Abp.Localization;
@@ -59,6 +61,11 @@ public class WorkspaceDomainModule : AbpModule
         Configure<AbpMultiTenancyOptions>(options =>
         {
             options.IsEnabled = MultiTenancyConsts.IsEnabled;
+        });
+
+        Configure<AbpFeatureOptions>(options =>
+        {
+            options.DefinitionProviders.Add<DgFeatureDefinitionProvider>();
         });
 
 #if DEBUG

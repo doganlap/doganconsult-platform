@@ -117,22 +117,22 @@ body {
    Light Sidebar Theme with Modern Colors
    ============================================ */
 
-/* LeptonX Sidebar - Light Theme with Auto-Collapse */
+/* LeptonX Sidebar - Dark Theme with Auto-Collapse */
 :root {
     --lpx-sidebar-width: 260px;
     --lpx-sidebar-mini-width: 70px;
-    --sidebar-bg: #ffffff;
-    --sidebar-border: #e2e8f0;
-    --sidebar-text: #475569;
-    --sidebar-text-hover: #1e3a5f;
-    --sidebar-text-active: #0d9488;
-    --sidebar-hover-bg: #f1f5f9;
-    --sidebar-active-bg: rgba(13, 148, 136, 0.1);
-    --sidebar-icon-color: #64748b;
-    --sidebar-icon-active: #0d9488;
+    --sidebar-bg: #1a1a1a;
+    --sidebar-border: #2d2d2d;
+    --sidebar-text: #e0e0e0;
+    --sidebar-text-hover: #ffffff;
+    --sidebar-text-active: #0d6efd;
+    --sidebar-hover-bg: #2d2d2d;
+    --sidebar-active-bg: rgba(13, 110, 253, 0.15);
+    --sidebar-icon-color: #a0a0a0;
+    --sidebar-icon-active: #0d6efd;
 }
 
-/* Sidebar Base - Light Background */
+/* Sidebar Base - Dark Background */
 .lpx-sidebar {
     background: var(--sidebar-bg) !important;
     border-right: 1px solid var(--sidebar-border);
@@ -143,7 +143,7 @@ body {
 /* Sidebar Header */
 .lpx-sidebar-header {
     border-bottom: 1px solid var(--sidebar-border);
-    background: #f8fafc;
+    background: #1a1a1a;
     padding: 1rem;
 }
 
@@ -215,13 +215,25 @@ body {
 /* Menu Section Headers */
 .lpx-sidebar .nav-section-header,
 .lpx-sidebar .lpx-menu-section-title {
-    color: #94a3b8;
-    font-size: 0.7rem;
-    font-weight: 600;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 1rem 1rem 0.5rem;
-    margin-top: 0.5rem;
+    letter-spacing: 0.08em;
+    padding: 1.25rem 1rem 0.75rem;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lpx-sidebar .nav-section-header::before,
+.lpx-sidebar .lpx-menu-section-title::before {
+    content: '';
+    width: 3px;
+    height: 16px;
+    background: #0d6efd;
+    border-radius: 2px;
 }
 
 /* Submenu Styling */

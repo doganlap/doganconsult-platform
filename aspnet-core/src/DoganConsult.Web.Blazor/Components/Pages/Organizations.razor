@@ -21,6 +21,78 @@
                 </div>
                 
                 <div class="card-body">
+                    <!-- Advanced Search & Filter Section -->
+                    <div class="card mb-4 bg-light">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Advanced Search & Filters</h6>
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="ToggleFilters">
+                                    <i class="fas fa-@(ShowFilters ? "chevron-up" : "chevron-down")"></i>
+                                </button>
+                            </div>
+                        </div>
+                        @if (ShowFilters)
+                        {
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold">Search by Name/Code</label>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" placeholder="Organization name or code..." 
+                                                   @bind="SearchQuery" @bind:event="oninput" @onkeyup="OnSearchChanged" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold">Organization Type</label>
+                                        <select class="form-select form-select-sm" @onchange="OnFilterChanged">
+                                            <option value="">-- All Types --</option>
+                                            <option value="Internal">Internal</option>
+                                            <option value="External">External</option>
+                                            <option value="Partner">Partner</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold">Status</label>
+                                        <select class="form-select form-select-sm" @onchange="OnFilterChanged">
+                                            <option value="">-- All Status --</option>
+                                            <option value="Active">Active & Operational</option>
+                                            <option value="Inactive">Inactive</option>
+                                            <option value="Suspended">Suspended</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold">Sector</label>
+                                        <select class="form-select form-select-sm" @onchange="OnFilterChanged">
+                                            <option value="">-- All Sectors --</option>
+                                            <option value="Technology">Technology</option>
+                                            <option value="Finance">Finance</option>
+                                            <option value="Healthcare">Healthcare</option>
+                                            <option value="Retail">Retail</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-2">
+                                    <div class="col-12">
+                                        <button class="btn btn-sm btn-primary" @onclick="ApplyFilters">
+                                            <i class="fas fa-search me-1"></i>Apply Filters
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="ClearFilters">
+                                            <i class="fas fa-times me-1"></i>Clear Filters
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" @onclick="ExportToCSV">
+                                            <i class="fas fa-download me-1"></i>Export CSV
+                                        </button>
+                                        <span class="ms-3 text-muted small">
+                                            Found: <strong>@TotalCount</strong> organizations
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
                     @if (Loading)
                     {
                         <div class="text-center">
@@ -654,3 +726,42 @@
         </div>
     </div>
 </div>
+
+@code {
+    private bool ShowFilters = false;
+    private string SearchQuery = "";
+    private string SelectedType = "";
+    private string SelectedStatus = "";
+    private string SelectedSector = "";
+    
+    private void ToggleFilters()
+    {
+        ShowFilters = !ShowFilters;
+    }
+    
+    private void OnSearchChanged(KeyboardEventArgs e)
+    {
+    }
+    
+    private void OnFilterChanged(ChangeEventArgs e)
+    {
+    }
+    
+    private async Task ApplyFilters()
+    {
+        await Task.CompletedTask;
+    }
+    
+    private void ClearFilters()
+    {
+        SearchQuery = "";
+        SelectedType = "";
+        SelectedStatus = "";
+        SelectedSector = "";
+    }
+    
+    private async Task ExportToCSV()
+    {
+        await Task.CompletedTask;
+    }
+}

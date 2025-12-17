@@ -6,99 +6,179 @@
 <PageTitle>DC OS - @L["Dashboard"]</PageTitle>
 
 <div class="dashboard-container">
-    <!-- DC OS Compact Header -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="card bg-gradient-primary text-white dc-os-header">
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <!-- Left: Logo & Welcome -->
-                        <div class="d-flex align-items-center gap-3">
-                            <img src="/images/logo/dc-os-logo.svg" alt="DC OS" height="40" />
-                            <div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-semibold">@L["WelcomeBack"], @CurrentUserName</span>
-                                    <span class="badge bg-light bg-opacity-25 text-white small">@CurrentUserTitle</span>
-                                </div>
-                                <small class="opacity-75">@AIResponse.DailyFocus</small>
-                            </div>
-                        </div>
-                        <!-- Right: Utilities -->
-                        <div class="d-flex align-items-center gap-2">
-                            <LanguageSwitcher />
-                            <button class="btn btn-light btn-sm dc-ai-btn" @onclick="OpenAIAssistant">
-                                <i class="fas fa-robot me-1"></i>@L["AIAssistant"]
-                            </button>
-                        </div>
-                    </div>
+    <!-- 3-Zone Header: Brand | Search | User/Language/AI -->
+    <div class="dc-header-3zone mb-4">
+        <div class="dc-header-zone-left">
+            <div class="d-flex align-items-center gap-3">
+                <img src="/images/logo/dc-os-logo.svg" alt="DG.OS" height="32" class="dc-logo" />
+                <div class="dc-brand-context">
+                    <h6 class="mb-0 fw-bold">DG.OS</h6>
+                    <small class="text-muted">@CurrentUserTitle</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dc-header-zone-center">
+            <div class="dc-global-search">
+                <input type="text" class="form-control form-control-sm" placeholder="Search documents, workspaces, users..." 
+                       @bind="SearchQuery" @onkeypress="HandleGlobalSearch" />
+                <i class="fas fa-search dc-search-icon"></i>
+            </div>
+        </div>
+        
+        <div class="dc-header-zone-right">
+            <div class="d-flex align-items-center gap-2">
+                <LanguageSwitcher />
+                <button class="btn btn-sm btn-outline-secondary dc-ai-quick-btn" @onclick="OpenAIAssistant" title="AI Assistant">
+                    <i class="fas fa-brain"></i>
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Logout</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card h-100" style="cursor: pointer;" @onclick='() => NavigateTo("/organizations")'>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">@L["Menu:Organizations"]</h6>
-                            <h2 class="mb-0">@Summary.TotalOrganizations</h2>
-                            <small class="text-success"><i class="fas fa-arrow-up"></i> @L["Active"]</small>
-                        </div>
-                        <div class="stat-icon bg-primary text-white" style="width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-building fa-lg"></i>
+    <!-- Welcome Card with Next Action -->
+    <div class="card dc-welcome-card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-1">Welcome back, @CurrentUserName</h5>
+                    <p class="mb-0 text-muted">
+                        @if (Summary.PendingApprovals > 0)
+                        {
+                            <span>You have <strong>@Summary.PendingApprovals approval@(Summary.PendingApprovals != 1 ? "s" : "")</strong> pending</span>
+                        }
+                        else
+                        {
+                            <span>All caught up! Ready to create your next workspace.</span>
+                        }
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-sm btn-primary" @onclick='() => NavigateTo("/workspaces")'>
+                        <i class="fas fa-plus me-1"></i>Create Workspace
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Executive Summary Row -->
+    <div class="dc-executive-summary mb-4">
+        <div class="row g-3">
+            <!-- Operational Section -->
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm dc-summary-section">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase fw-bold text-muted mb-3">
+                            <i class="fas fa-layer-group text-primary me-2"></i>Operational
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="dc-kpi-item" @onclick='() => NavigateTo("/workspaces")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value">@Summary.TotalWorkspaces</div>
+                                    <div class="dc-kpi-label">Workspaces</div>
+                                    <div class="dc-kpi-trend">— No data yet</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="dc-kpi-item" @onclick='() => NavigateTo("/documents")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value">@Summary.TotalDocuments</div>
+                                    <div class="dc-kpi-label">Documents</div>
+                                    <div class="dc-kpi-trend">— No data yet</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card h-100" style="cursor: pointer;" @onclick='() => NavigateTo("/workspaces")'>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">@L["Menu:Workspaces"]</h6>
-                            <h2 class="mb-0">@Summary.TotalWorkspaces</h2>
-                            <small class="text-info"><i class="fas fa-layer-group"></i> @L["Active"]</small>
-                        </div>
-                        <div class="stat-icon bg-info text-white" style="width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-th-large fa-lg"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card h-100" style="cursor: pointer;" @onclick='() => NavigateTo("/documents")'>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">@L["Menu:Documents"]</h6>
-                            <h2 class="mb-0">@Summary.TotalDocuments</h2>
-                            <small class="text-secondary"><i class="fas fa-file-alt"></i> @L["TotalDocuments"]</small>
-                        </div>
-                        <div class="stat-icon bg-success text-white" style="width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-folder-open fa-lg"></i>
+
+            <!-- Governance Section -->
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm dc-summary-section">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase fw-bold text-muted mb-3">
+                            <i class="fas fa-shield-alt text-success me-2"></i>Governance
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="dc-kpi-item @(Summary.PendingApprovals > 0 ? "dc-kpi-alert" : "")" @onclick='() => NavigateTo("/approvals")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value @(Summary.PendingApprovals > 0 ? "text-warning" : "")">@Summary.PendingApprovals</div>
+                                    <div class="dc-kpi-label">Open Approvals</div>
+                                    <div class="dc-kpi-trend">@(Summary.PendingApprovals > 0 ? "⚠ Action needed" : "— All clear")</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="dc-kpi-item" @onclick='() => NavigateTo("/audit-logs")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value">0</div>
+                                    <div class="dc-kpi-label">Audit Events (7d)</div>
+                                    <div class="dc-kpi-trend">— Last 7 days</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card h-100 @(Summary.PendingApprovals > 0 ? "border-warning" : "")" style="cursor: pointer;" @onclick='() => NavigateTo("/approvals")'>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">@L["Menu:Approvals"]</h6>
-                            <h2 class="mb-0 @(Summary.PendingApprovals > 0 ? "text-warning" : "")">@Summary.PendingApprovals</h2>
-                            <small class="@(Summary.PendingApprovals > 0 ? "text-warning" : "text-muted")">
-                                <i class="fas fa-clock"></i> @L["Pending"]
-                            </small>
+
+            <!-- AI Section -->
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm dc-summary-section">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase fw-bold text-muted mb-3">
+                            <i class="fas fa-brain text-info me-2"></i>AI Engine
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="dc-kpi-item" @onclick='() => NavigateTo("/ai-chat")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value">0</div>
+                                    <div class="dc-kpi-label">Automations Run</div>
+                                    <div class="dc-kpi-trend">— This period</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="dc-kpi-item" @onclick='() => NavigateTo("/ai-chat")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value">0</div>
+                                    <div class="dc-kpi-label">Recommendations</div>
+                                    <div class="dc-kpi-trend">— Generated</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-icon text-white @(Summary.PendingApprovals > 0 ? "bg-warning" : "bg-secondary")" style="width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-tasks fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Section -->
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm dc-summary-section">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase fw-bold text-muted mb-3">
+                            <i class="fas fa-building text-success me-2"></i>Organization
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="dc-kpi-item" @onclick='() => NavigateTo("/organizations")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value">@Summary.TotalOrganizations</div>
+                                    <div class="dc-kpi-label">Organizations</div>
+                                    <div class="dc-kpi-trend">— Active</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="dc-kpi-item" @onclick='() => NavigateTo("/user-profiles")' style="cursor: pointer;">
+                                    <div class="dc-kpi-value">@Summary.TotalUsers</div>
+                                    <div class="dc-kpi-label">Users</div>
+                                    <div class="dc-kpi-trend">— Registered</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -298,77 +378,100 @@
 }
 
 @code {
+    private string SearchQuery = "";
+    
+    private void HandleGlobalSearch(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            // Implement global search logic
+            NavigateTo("/search?q=" + Uri.EscapeDataString(SearchQuery));
+        }
+    }
+    
     // Render methods for each tab
     private RenderFragment RenderOverviewTab() => __builder =>
     {
         <div class="row">
-            <!-- Quick Actions -->
-            <div class="col-lg-6 mb-4">
-                <h5 class="mb-3"><i class="fas fa-bolt text-warning me-2"></i>Quick Actions</h5>
-                <div class="row g-3">
-                    @foreach (var action in RoleGuidance.QuickActions)
-                    {
-                        <div class="col-6">
-                            <div class="card quick-action-card h-100" style="cursor: pointer;" @onclick="() => NavigateTo(action.Route)">
-                                <div class="card-body text-center py-4">
-                                    <i class="@action.Icon fa-2x text-primary mb-2"></i>
-                                    <h6 class="mb-1">@action.Title</h6>
-                                    <small class="text-muted">@action.Description</small>
-                                </div>
-                            </div>
-                        </div>
-                    }
+            <!-- Quick Actions (Left Column) -->
+            <div class="col-lg-8 mb-4">
+                <h5 class="mb-3"><i class="fas fa-zap text-warning me-2"></i>Quick Actions</h5>
+                <div class="row g-2">
+                    <div class="col-6 col-md-3">
+                        <button class="btn btn-outline-primary w-100 py-3 dc-quick-action-btn" @onclick='() => NavigateTo("/workspaces")'>
+                            <i class="fas fa-plus-circle fa-lg d-block mb-2"></i>
+                            <small>Create Workspace</small>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <button class="btn btn-outline-primary w-100 py-3 dc-quick-action-btn" @onclick='() => NavigateTo("/documents")'>
+                            <i class="fas fa-file-upload fa-lg d-block mb-2"></i>
+                            <small>Upload Document</small>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <button class="btn btn-outline-primary w-100 py-3 dc-quick-action-btn" @onclick='() => NavigateTo("/ai-chat")'>
+                            <i class="fas fa-brain fa-lg d-block mb-2"></i>
+                            <small>Start AI Review</small>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <button class="btn btn-outline-primary w-100 py-3 dc-quick-action-btn" @onclick='() => NavigateTo("/approvals")'>
+                            <i class="fas fa-check-circle fa-lg d-block mb-2"></i>
+                            <small>Request Approval</small>
+                        </button>
+                    </div>
                 </div>
             </div>
-            
-            <!-- System Health -->
-            <div class="col-lg-6 mb-4">
-                <h5 class="mb-3"><i class="fas fa-heartbeat text-danger me-2"></i>System Health</h5>
-                <div class="card">
+
+            <!-- System Health (Right Column) -->
+            <div class="col-lg-4 mb-4">
+                <h5 class="mb-3"><i class="fas fa-heartbeat text-success me-2"></i>System Health</h5>
+                <div class="card border-0 shadow-sm">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span>Overall Health</span>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold">Overall Health</span>
                             <span class="badge bg-success">@Summary.SystemHealthScore%</span>
                         </div>
-                        <div class="progress mb-4" style="height: 10px;">
+                        <div class="progress mb-3" style="height: 8px;">
                             <div class="progress-bar bg-success" style="width: @Summary.SystemHealthScore%"></div>
                         </div>
-                        
-                        <div class="row text-center">
-                            <div class="col-4">
-                                <div class="p-2">
-                                    <i class="fas fa-server text-success fa-lg mb-2"></i>
-                                    <div class="small">Services</div>
-                                    <strong class="text-success">Online</strong>
-                                </div>
-                            </div>
-                            <div class="col-4 border-start border-end">
-                                <div class="p-2">
-                                    <i class="fas fa-database text-success fa-lg mb-2"></i>
-                                    <div class="small">Database</div>
-                                    <strong class="text-success">Connected</strong>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="p-2">
-                                    <i class="fas fa-brain text-success fa-lg mb-2"></i>
-                                    <div class="small">AI Engine</div>
-                                    <strong class="text-success">Active</strong>
-                                </div>
-                            </div>
-                        </div>
+                        <small class="text-muted d-block mb-3">Last checked: 2 min ago</small>
+                        <button class="btn btn-sm btn-link p-0 text-primary">View details →</button>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Tips Section -->
+
+        <!-- AI Insights Panel (Right Side) -->
         <div class="row">
-            <div class="col-12">
-                <div class="alert alert-info d-flex align-items-center">
-                    <i class="fas fa-info-circle fa-lg me-3"></i>
-                    <div>
-                        <strong>Pro Tip:</strong> @(AIResponse.Tips.Any() ? AIResponse.Tips[new Random().Next(AIResponse.Tips.Count)] : "Explore the dashboard tabs to discover all features!")
+            <div class="col-lg-8 mb-4">
+                <!-- Placeholder for additional content -->
+            </div>
+            <div class="col-lg-4 mb-4">
+                <h5 class="mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>AI Insights</h5>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="small fw-bold mb-2">Suggested Next Steps</h6>
+                            <ul class="list-unstyled small">
+                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Review pending approvals</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Create new workspace</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Upload documents</li>
+                            </ul>
+                        </div>
+                        <hr class="my-2" />
+                        <div class="mb-3">
+                            <h6 class="small fw-bold mb-2">Risks & Anomalies</h6>
+                            <p class="small text-muted mb-0">No anomalies detected. System operating normally.</p>
+                        </div>
+                        <hr class="my-2" />
+                        <div>
+                            <h6 class="small fw-bold mb-2">Pending Items</h6>
+                            <div class="small">
+                                <span class="badge bg-warning text-dark">@Summary.PendingApprovals Approvals</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -13,6 +13,7 @@ using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using DoganConsult.Workspace.Workspaces;
+using DoganConsult.Workspace.Branding;
 
 namespace DoganConsult.Workspace.EntityFrameworkCore;
 
@@ -26,6 +27,7 @@ public class WorkspaceDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Workspaces.Workspace> Workspaces { get; set; }
+    public DbSet<BrandingProfile> BrandingProfiles { get; set; }
 
     #region Entities from the modules
 
@@ -90,6 +92,22 @@ public class WorkspaceDbContext :
 
             b.HasIndex(x => x.Code).IsUnique();
             b.HasIndex(x => x.OrganizationId);
+        });
+
+        builder.Entity<BrandingProfile>(b =>
+        {
+            b.ToTable(WorkspaceConsts.DbTablePrefix + "BrandingProfiles", WorkspaceConsts.DbSchema);
+
+            b.Property(x => x.AppDisplayName).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ProductName).HasMaxLength(128);
+            b.Property(x => x.LogoUrl).HasMaxLength(512);
+            b.Property(x => x.FaviconUrl).HasMaxLength(512);
+            b.Property(x => x.PrimaryColor).IsRequired().HasMaxLength(32);
+            b.Property(x => x.AccentColor).IsRequired().HasMaxLength(32);
+            b.Property(x => x.DefaultLanguage).IsRequired().HasMaxLength(10);
+            b.Property(x => x.HomeRoute).IsRequired().HasMaxLength(256);
+
+            b.HasIndex(x => x.TenantId);
         });
     }
 }

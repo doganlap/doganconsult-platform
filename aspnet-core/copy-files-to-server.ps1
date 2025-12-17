@@ -2,7 +2,7 @@
 # Run this in a separate PowerShell window after connecting via PuTTY
 
 $SERVER = "root@46.224.64.95"
-$PASSWORD = "aKTbCKAeWapnp9xkLcjF"
+$PASSWORD = "As$123456"
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "Copying Files to Server" -ForegroundColor Cyan

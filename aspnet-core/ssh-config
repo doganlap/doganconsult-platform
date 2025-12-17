@@ -1,0 +1,47 @@
+# SSH Configuration for All Servers
+# Place this in: C:\Users\dogan\.ssh\config (Windows) or ~/.ssh/config (Linux)
+
+Host doganconsult
+    HostName 46.224.64.95
+    User root
+    Port 22
+    IdentitiesOnly yes
+    PreferredAuthentications publickey,password
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host hetzner2
+    HostName 46.4.206.15
+    User root
+    Port 22
+    IdentitiesOnly yes
+    PreferredAuthentications publickey,password
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host hetzner1
+    HostName 65.108.37.204
+    User root
+    Port 22
+    IdentitiesOnly yes
+    PreferredAuthentications publickey,password
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host azure
+    HostName 20.174.194.240
+    User DoganConsult
+    Port 22
+    IdentitiesOnly yes
+    PreferredAuthentications publickey,password
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host ai-server
+    HostName 78.46.42.238
+    User root
+    Port 22
+    IdentitiesOnly yes
+    PreferredAuthentications publickey,password
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
