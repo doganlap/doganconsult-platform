@@ -1,0 +1,158 @@
+version: '3.8'
+
+services:
+  identity-service:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.Identity.HttpApi.Host/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=nozomi.proxy.rlwy.net;Port=35537;Database=railway;Username=postgres;Password=mcmfdSTZUcDwqJtwkQXzJQSTurwVaQvz;SSL Mode=Require;
+      - AuthServer__Authority=https://localhost:44346
+    networks:
+      - doganconsult-network
+
+  organization-service:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.Organization.HttpApi.Host/Dockerfile
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=metro.proxy.rlwy.net;Port=47319;Database=railway;Username=postgres;Password=dEUIWJcxwajoHIoLwqTnAITbgXraTTKc;SSL Mode=Require;
+      - AuthServer__Authority=https://localhost:44346
+      - Services__Identity__BaseUrl=https://localhost:44346
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+
+  workspace-service:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.Workspace.HttpApi.Host/Dockerfile
+    ports:
+      - "5004:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=switchyard.proxy.rlwy.net;Port=37561;Database=railway;Username=postgres;Password=EwciEISIVdnEulryLkVgqHOVlaqjiyML;SSL Mode=Require;
+      - AuthServer__Authority=https://localhost:44346
+      - Services__Identity__BaseUrl=https://localhost:44346
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+      - organization-service
+
+  userprofile-service:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.UserProfile.HttpApi.Host/Dockerfile
+    ports:
+      - "5005:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=hopper.proxy.rlwy.net;Port=47669;Database=railway;Username=postgres;Password=lKZKCQxdrBpklnirrzTSzznhzofmdNlv;SSL Mode=Require;
+      - AuthServer__Authority=https://localhost:44346
+      - Services__Identity__BaseUrl=https://localhost:44346
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+
+  audit-service:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.Audit.HttpApi.Host/Dockerfile
+    ports:
+      - "5006:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=crossover.proxy.rlwy.net;Port=17109;Database=railway;Username=postgres;Password=PxccVRRaJCXlJGVdrzDTCGfApuJQEFVo;SSL Mode=Require;
+      - AuthServer__Authority=https://localhost:44346
+      - Services__Identity__BaseUrl=https://localhost:44346
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+
+  document-service:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.Document.HttpApi.Host/Dockerfile
+    ports:
+      - "5007:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=yamanote.proxy.rlwy.net;Port=35357;Database=railway;Username=postgres;Password=sCjZiToIMDSAznQNZZXcmAJlnLcElioE;SSL Mode=Require;
+      - AuthServer__Authority=https://localhost:44346
+      - Services__Identity__BaseUrl=https://localhost:44346
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.AI.HttpApi.Host/Dockerfile
+    ports:
+      - "5008:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=ballast.proxy.rlwy.net;Port=53629;Database=railway;Username=postgres;Password=RRcrRrKgksUqapCckJJqBUIyWBhoNDJg;SSL Mode=Require;
+      - AuthServer__Authority=https://localhost:44346
+      - Services__Identity__BaseUrl=https://localhost:44346
+      - AIService__LlmServerEndpoint=https://hertze.your-domain.com/api/v1
+      - AIService__ApiKey=
+      - AIService__TimeoutSeconds=30
+      - AIService__MaxRetries=3
+      - AIService__ModelName=your-model-name
+      - Redis__Configuration=interchange.proxy.rlwy.net:26424,password=sOJrVPlSFlDQQpMizveGoYpFyzuNiPIv,ssl=false,abortConnect=false
+      - Redis__InstanceName=DoganConsult:
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+
+  blazor-ui:
+    build:
+      context: .
+      dockerfile: src/DoganConsult.Web.Blazor/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - App__SelfUrl=https://localhost:44346
+      - AuthServer__Authority=https://localhost:44346
+      - Services__Gateway__BaseUrl=http://api-gateway:80
+    networks:
+      - doganconsult-network
+    depends_on:
+      - api-gateway
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: src/gateway/DoganConsult.Gateway/Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+      - organization-service
+      - workspace-service
+      - userprofile-service
+      - audit-service
+      - document-service
+      - ai-service
+
+networks:
+  doganconsult-network:
+    driver: bridge

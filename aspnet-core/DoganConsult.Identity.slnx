@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DoganConsult.Identity.Application.Contracts/DoganConsult.Identity.Application.Contracts.csproj" />
+    <Project Path="src/DoganConsult.Identity.Application/DoganConsult.Identity.Application.csproj" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <Project Path="src/DoganConsult.Identity.DbMigrator/DoganConsult.Identity.DbMigrator.csproj" />
+    <Project Path="src/DoganConsult.Identity.Domain.Shared/DoganConsult.Identity.Domain.Shared.csproj" />
+    <Project Path="src/DoganConsult.Identity.Domain/DoganConsult.Identity.Domain.csproj" />
+    <Project Path="src/DoganConsult.Identity.EntityFrameworkCore/DoganConsult.Identity.EntityFrameworkCore.csproj" />
+    <Project Path="src/DoganConsult.Identity.HttpApi.Client/DoganConsult.Identity.HttpApi.Client.csproj" />
+    
+    <Project Path="src/DoganConsult.Identity.HttpApi.Host/DoganConsult.Identity.HttpApi.Host.csproj" />
+    <Project Path="src/DoganConsult.Identity.HttpApi/DoganConsult.Identity.HttpApi.csproj" />
+    
+    
+    
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/DoganConsult.Identity.Application.Tests/DoganConsult.Identity.Application.Tests.csproj" />
+    <Project Path="test/DoganConsult.Identity.Domain.Tests/DoganConsult.Identity.Domain.Tests.csproj" />
+    <Project Path="test/DoganConsult.Identity.EntityFrameworkCore.Tests/DoganConsult.Identity.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="test/DoganConsult.Identity.HttpApi.Client.ConsoleTestApp/DoganConsult.Identity.HttpApi.Client.ConsoleTestApp.csproj" />
+    
+    <Project Path="test/DoganConsult.Identity.TestBase/DoganConsult.Identity.TestBase.csproj" />
+    
+  </Folder>
+</Solution>

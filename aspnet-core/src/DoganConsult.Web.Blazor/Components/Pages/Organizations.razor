@@ -1,0 +1,391 @@
+@page "/organizations"
+@using DoganConsult.Web.Blazor.Organizations
+@using DoganConsult.Web.Blazor.Services
+@using Volo.Abp.Application.Dtos
+
+<PageTitle>Organization Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-building me-2"></i>Organization Management
+                        </h4>
+                        <button class="btn btn-primary" @onclick="OpenCreateModal">
+                            <i class="fas fa-plus me-1"></i>Add Organization
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (Loading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading organizations...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Code</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Location</th>
+                                        <th scope="col">Sector</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (OrganizationItems?.Any() == true)
+                                    {
+                                        @foreach (var org in OrganizationItems)
+                                        {
+                                            <tr>
+                                                <td><strong>@org.OrganizationCode</strong></td>
+                                                <td>@org.OrganizationName</td>
+                                                <td>
+                                                    <span class="badge bg-@GetTypeColor(org.OrganizationType)">
+                                                        @org.OrganizationType
+                                                    </span>
+                                                </td>
+                                                <td>@org.City, @org.Country</td>
+                                                <td>@org.Sector</td>
+                                                <td>
+                                                    <span class="badge bg-@GetStatusColor(org.OrganizationStatus)">
+                                                        @org.OrganizationStatus
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewDetails(org)">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-warning" @onclick="() => EditOrganization(org)">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteOrganization(org)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted">
+                                                <i class="fas fa-building fa-3x mb-3"></i>
+                                                <p class="mb-0">No organizations found</p>
+                                                <button class="btn btn-primary mt-2" @onclick="OpenCreateModal">
+                                                    Create your first organization
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (TotalCount > PageSize)
+                        {
+                            <nav aria-label="Organization pagination">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)">Previous</button>
+                                    </li>
+                                    @for (int i = Math.Max(1, CurrentPage - 2); i <= Math.Min(TotalPages, CurrentPage + 2); i++)
+                                    {
+                                        <li class="page-item @(i == CurrentPage ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+                                        </li>
+                                    }
+                                    <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)">Next</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade @(ShowModal ? "show d-block" : "")" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@(IsEditing ? "Edit Organization" : "Create Organization")</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="CurrentOrganization" OnValidSubmit="SaveOrganization">
+                    <DataAnnotationsValidator />
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Required fields are marked with *</strong>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(FormErrorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            @FormErrorMessage
+                        </div>
+                    }
+
+                    <!-- Basic Information Section -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-building"></i> Basic Information
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Organization Code *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                            <InputText @bind-Value="CurrentOrganization.OrganizationCode" 
+                                                     class="form-control" 
+                                                     placeholder="e.g., DOGAN-001" 
+                                                     maxlength="20" />
+                                        </div>
+                                        <ValidationMessage For="@(() => CurrentOrganization.OrganizationCode)" class="text-danger small" />
+                                        <div class="form-text">Unique identifier for this organization</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Organization Type *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                                            <InputSelect @bind-Value="CurrentOrganization.OrganizationType" class="form-select">
+                                                <option value="">-- Select Type --</option>
+                                                @foreach (OrganizationType type in Enum.GetValues<OrganizationType>())
+                                                {
+                                                    <option value="@type">@GetTypeDisplayName(type)</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+                                        <ValidationMessage For="@(() => CurrentOrganization.OrganizationType)" class="text-danger small" />
+                                        <div class="form-text">Select the organization type that best fits</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Organization Name *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                    <InputText @bind-Value="CurrentOrganization.OrganizationName" 
+                                             class="form-control" 
+                                             placeholder="e.g., Dogan Consulting Ltd." 
+                                             maxlength="200" />
+                                </div>
+                                <ValidationMessage For="@(() => CurrentOrganization.OrganizationName)" class="text-danger small" />
+                                <div class="form-text">Full legal name of the organization</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location & Contact Section -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-map-marker-alt"></i> Location & Contact
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Country</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                            <InputSelect @bind-Value="CurrentOrganization.Country" class="form-select">
+                                                <option value="">-- Select Country --</option>
+                                                @foreach (var country in CountryList)
+                                                {
+                                                    <option value="@country">@country</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+                                        <div class="form-text">Primary business location country</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">City</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                            <InputText @bind-Value="CurrentOrganization.City" 
+                                                     class="form-control" 
+                                                     placeholder="e.g., Riyadh" 
+                                                     maxlength="100" />
+                                        </div>
+                                        <div class="form-text">Primary business location city</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Contact Information</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-address-card"></i></span>
+                                    <InputTextArea @bind-Value="CurrentOrganization.ContactInformation" 
+                                                 class="form-control" 
+                                                 rows="3" 
+                                                 placeholder="Email: info@example.com&#10;Phone: +1234567890&#10;Address: Street, City, Country" 
+                                                 maxlength="500" />
+                                </div>
+                                <div class="form-text">Email, phone, address, and other contact details</div>
+                                <div class="text-muted small mt-1">@(CurrentOrganization.ContactInformation?.Length ?? 0)/500 characters</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Details Section -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-briefcase"></i> Business Details
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Business Sector</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-industry"></i></span>
+                                            <InputSelect @bind-Value="CurrentOrganization.Sector" class="form-select">
+                                                <option value="">-- Select Sector --</option>
+                                                @foreach (var sector in SectorList)
+                                                {
+                                                    <option value="@sector">@sector</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+                                        <div class="form-text">Primary industry or business sector</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Status *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-flag"></i></span>
+                                            <InputSelect @bind-Value="CurrentOrganization.OrganizationStatus" class="form-select">
+                                                <option value="">-- Select Status --</option>
+                                                @foreach (OrganizationStatus status in Enum.GetValues<OrganizationStatus>())
+                                                {
+                                                    <option value="@status">@GetStatusDisplayName(status)</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+                                        <ValidationMessage For="@(() => CurrentOrganization.OrganizationStatus)" class="text-danger small" />
+                                        <div class="form-text">Current operational status</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Regulatory Requirements</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-gavel"></i></span>
+                                    <InputTextArea @bind-Value="CurrentOrganization.RegulatoryRequirements" 
+                                                 class="form-control" 
+                                                 rows="3" 
+                                                 placeholder="Describe compliance requirements, certifications, licenses, etc." 
+                                                 maxlength="1000" />
+                                </div>
+                                <div class="form-text">Compliance standards, licenses, certifications, and regulatory requirements</div>
+                                <div class="text-muted small mt-1">@(CurrentOrganization.RegulatoryRequirements?.Length ?? 0)/1000 characters</div>
+                            </div>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveOrganization" disabled="@Saving">
+                    @if (Saving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    @(IsEditing ? "Update" : "Create")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade @(ShowDetailsModal ? "show d-block" : "")" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Organization Details</h5>
+                <button type="button" class="btn-close" @onclick="CloseDetailsModal"></button>
+            </div>
+            @if (SelectedOrganization != null)
+            {
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Code:</strong> @SelectedOrganization.OrganizationCode</p>
+                            <p><strong>Name:</strong> @SelectedOrganization.OrganizationName</p>
+                            <p><strong>Type:</strong> 
+                                <span class="badge bg-@GetTypeColor(SelectedOrganization.OrganizationType)">
+                                    @SelectedOrganization.OrganizationType
+                                </span>
+                            </p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-@GetStatusColor(SelectedOrganization.OrganizationStatus)">
+                                    @SelectedOrganization.OrganizationStatus
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Location:</strong> @SelectedOrganization.City, @SelectedOrganization.Country</p>
+                            <p><strong>Sector:</strong> @SelectedOrganization.Sector</p>
+                            <p><strong>Created:</strong> @SelectedOrganization.CreatedAt.ToString("MMM dd, yyyy")</p>
+                            @if (SelectedOrganization.LastModifiedAt.HasValue)
+                            {
+                                <p><strong>Last Modified:</strong> @SelectedOrganization.LastModifiedAt.Value.ToString("MMM dd, yyyy")</p>
+                            }
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrWhiteSpace(SelectedOrganization.ContactInformation))
+                    {
+                        <div class="mt-3">
+                            <strong>Contact Information:</strong>
+                            <p class="text-muted">@SelectedOrganization.ContactInformation</p>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrWhiteSpace(SelectedOrganization.RegulatoryRequirements))
+                    {
+                        <div class="mt-3">
+                            <strong>Regulatory Requirements:</strong>
+                            <p class="text-muted">@SelectedOrganization.RegulatoryRequirements</p>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CloseDetailsModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

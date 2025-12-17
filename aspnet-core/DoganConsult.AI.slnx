@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DoganConsult.AI.Application.Contracts/DoganConsult.AI.Application.Contracts.csproj" />
+    <Project Path="src/DoganConsult.AI.Application/DoganConsult.AI.Application.csproj" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <Project Path="src/DoganConsult.AI.DbMigrator/DoganConsult.AI.DbMigrator.csproj" />
+    <Project Path="src/DoganConsult.AI.Domain.Shared/DoganConsult.AI.Domain.Shared.csproj" />
+    <Project Path="src/DoganConsult.AI.Domain/DoganConsult.AI.Domain.csproj" />
+    <Project Path="src/DoganConsult.AI.EntityFrameworkCore/DoganConsult.AI.EntityFrameworkCore.csproj" />
+    <Project Path="src/DoganConsult.AI.HttpApi.Client/DoganConsult.AI.HttpApi.Client.csproj" />
+    
+    <Project Path="src/DoganConsult.AI.HttpApi.Host/DoganConsult.AI.HttpApi.Host.csproj" />
+    <Project Path="src/DoganConsult.AI.HttpApi/DoganConsult.AI.HttpApi.csproj" />
+    
+    
+    
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/DoganConsult.AI.Application.Tests/DoganConsult.AI.Application.Tests.csproj" />
+    <Project Path="test/DoganConsult.AI.Domain.Tests/DoganConsult.AI.Domain.Tests.csproj" />
+    <Project Path="test/DoganConsult.AI.EntityFrameworkCore.Tests/DoganConsult.AI.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="test/DoganConsult.AI.HttpApi.Client.ConsoleTestApp/DoganConsult.AI.HttpApi.Client.ConsoleTestApp.csproj" />
+    
+    <Project Path="test/DoganConsult.AI.TestBase/DoganConsult.AI.TestBase.csproj" />
+    
+  </Folder>
+</Solution>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DoganConsult.AI</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DoganConsult.AI.Domain\DoganConsult.AI.Domain.csproj" />
+    <ProjectReference Include="..\DoganConsult.AI.TestBase\DoganConsult.AI.TestBase.csproj" />
+  </ItemGroup>
+
+</Project>
