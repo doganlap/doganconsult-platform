@@ -1,4 +1,4 @@
-﻿using Volo.Abp.Account;
+using Volo.Abp.Account;
 using Volo.Abp.Mapperly;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
@@ -25,5 +25,8 @@ public class AuditApplicationModule : AbpModule
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         context.Services.AddMapperlyObjectMapper<AuditApplicationModule>();
+        
+        // Manually register the mapper to ensure it's available for DI
+        context.Services.AddSingleton<AuditApplicationMappers>();
     }
 }

@@ -1,0 +1,206 @@
+@using Microsoft.Extensions.Localization
+@using DoganConsult.Web.Localization
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<WebResource> L
+
+<div class="dc-theme-controls">
+    <!-- Language Selector -->
+    <div class="dropdown me-2">
+        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-globe me-1"></i>
+            <span class="d-none d-md-inline">@GetCurrentLanguageDisplay()</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            @foreach (var culture in SupportedCultures)
+            {
+                <li>
+                    <button class="dropdown-item @(IsCurrentCulture(culture.Value) ? "active" : "")" 
+                            @onclick="() => ChangeLanguage(culture.Value)">
+                        <i class="fas fa-@culture.Icon me-2"></i>
+                        @culture.Name
+                    </button>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Theme Selector -->
+    <div class="dropdown me-2">
+        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="@GetThemeIcon() me-1"></i>
+            <span class="d-none d-md-inline">@GetThemeDisplay()</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            @foreach (var theme in AvailableThemes)
+            {
+                <li>
+                    <button class="dropdown-item @(IsCurrentTheme(theme.Value) ? "active" : "")" 
+                            @onclick="() => ChangeTheme(theme.Value)">
+                        <i class="@theme.Icon me-2"></i>
+                        @theme.Name
+                    </button>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Color Scheme Toggle (Auto/Light/Dark) -->
+    <button class="btn btn-outline-light btn-sm" @onclick="ToggleColorScheme" title="@GetColorSchemeTooltip()">
+        <i class="@GetColorSchemeIcon()"></i>
+    </button>
+</div>
+
+@code {
+    private string CurrentTheme = "default";
+    private string CurrentLanguage = "en";
+    private string ColorScheme = "auto"; // auto, light, dark
+
+    private readonly List<(string Value, string Name, string Icon)> SupportedCultures = new()
+    {
+        ("en", "English", "flag-usa"),
+        ("tr", "Türkçe", "flag"),
+        ("de", "Deutsch", "flag"),
+        ("fr", "Français", "flag"),
+        ("es", "Español", "flag")
+    };
+
+    private readonly List<(string Value, string Name, string Icon)> AvailableThemes = new()
+    {
+        ("default", "Default", "fas fa-palette"),
+        ("modern", "Modern", "fas fa-paint-brush"),
+        ("minimal", "Minimal", "fas fa-circle"),
+        ("corporate", "Corporate", "fas fa-building"),
+        ("high-contrast", "High Contrast", "fas fa-adjust")
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserPreferences();
+        ApplyTheme();
+        ApplyColorScheme();
+    }
+
+    private async Task LoadUserPreferences()
+    {
+        // Load from localStorage or user preferences
+        // This would typically come from a service or localStorage
+        CurrentTheme = "default";
+        CurrentLanguage = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        ColorScheme = "auto";
+    }
+
+    private async Task ChangeLanguage(string languageCode)
+    {
+        CurrentLanguage = languageCode;
+        
+        // Save preference
+        await SaveUserPreference("language", languageCode);
+        
+        // Change culture and reload
+        var culture = new System.Globalization.CultureInfo(languageCode);
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+        
+        // Navigate to refresh with new culture
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    }
+
+    private async Task ChangeTheme(string themeValue)
+    {
+        CurrentTheme = themeValue;
+        await SaveUserPreference("theme", themeValue);
+        ApplyTheme();
+    }
+
+    private async Task ToggleColorScheme()
+    {
+        ColorScheme = ColorScheme switch
+        {
+            "auto" => "light",
+            "light" => "dark",
+            "dark" => "auto",
+            _ => "auto"
+        };
+        
+        await SaveUserPreference("colorScheme", ColorScheme);
+        ApplyColorScheme();
+    }
+
+    private void ApplyTheme()
+    {
+        var body = "document.body";
+        var script = $"{body}.setAttribute('data-theme', '{CurrentTheme}');";
+        
+        // This would be executed via IJSRuntime in a real implementation
+        // For now, we'll rely on CSS variables
+    }
+
+    private void ApplyColorScheme()
+    {
+        var body = "document.body";
+        var actualScheme = ColorScheme;
+        
+        if (ColorScheme == "auto")
+        {
+            // Detect system preference
+            actualScheme = "light"; // Default fallback
+        }
+        
+        var script = $"{body}.setAttribute('data-color-scheme', '{actualScheme}');";
+        // Execute via IJSRuntime
+    }
+
+    private async Task SaveUserPreference(string key, string value)
+    {
+        // Save to localStorage or user preferences service
+        // await LocalStorage.SetItemAsync(key, value);
+    }
+
+    private string GetCurrentLanguageDisplay()
+    {
+        var culture = SupportedCultures.FirstOrDefault(c => c.Value == CurrentLanguage);
+        return culture.Name ?? "English";
+    }
+
+    private string GetThemeDisplay()
+    {
+        var theme = AvailableThemes.FirstOrDefault(t => t.Value == CurrentTheme);
+        return theme.Name ?? "Default";
+    }
+
+    private string GetThemeIcon()
+    {
+        var theme = AvailableThemes.FirstOrDefault(t => t.Value == CurrentTheme);
+        return theme.Icon ?? "fas fa-palette";
+    }
+
+    private string GetColorSchemeIcon()
+    {
+        return ColorScheme switch
+        {
+            "light" => "fas fa-sun",
+            "dark" => "fas fa-moon",
+            _ => "fas fa-circle-half-stroke"
+        };
+    }
+
+    private string GetColorSchemeTooltip()
+    {
+        return ColorScheme switch
+        {
+            "light" => L["Theme:SwitchToDark"],
+            "dark" => L["Theme:SwitchToAuto"],
+            _ => L["Theme:SwitchToLight"]
+        };
+    }
+
+    private bool IsCurrentCulture(string culture)
+    {
+        return CurrentLanguage == culture;
+    }
+
+    private bool IsCurrentTheme(string theme)
+    {
+        return CurrentTheme == theme;
+    }
+}

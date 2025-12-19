@@ -77,3 +77,9 @@ Write-Host "chmod 600 ~/.ssh/authorized_keys" -ForegroundColor White
 Write-Host "`nOr use this automated method:" -ForegroundColor Yellow
 Write-Host "`$pubkey = Get-Content `$env:USERPROFILE\.ssh\id_rsa.pub" -ForegroundColor Gray
 Write-Host "`$pubkey | ssh root@46.224.64.95 'mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys'" -ForegroundColor Gray
+
+
+
+
+
+

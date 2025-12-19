@@ -1,0 +1,307 @@
+@page "/analytics/pivot"
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Blazorise
+@using Blazorise.Components
+@inject HttpClient HttpClient
+
+<PageTitle>Pivot Analysis - DoganConsult Platform</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Row Class="justify-content-between">
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <h1>
+                    <i class="fas fa-table"></i> Pivot Analysis
+                </h1>
+            </Column>
+        </Row>
+    </CardHeader>
+    <CardBody>
+        
+        <Alert Color="Color.Info" Visible="true">
+            <AlertDescription>
+                Configure pivot table dimensions and metrics to analyze your data from different perspectives.
+            </AlertDescription>
+        </Alert>
+
+        <!-- Pivot Configuration Panel -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-cog"></i> Pivot Configuration</h4>
+            </CardHeader>
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Field>
+                            <FieldLabel>Row Dimension</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@rowDimension" Size="Size.Default">
+                                <SelectItem Value="@("Organization")">Organization</SelectItem>
+                                <SelectItem Value="@("Type")">Type</SelectItem>
+                                <SelectItem Value="@("Sector")">Sector</SelectItem>
+                                <SelectItem Value="@("Country")">Country</SelectItem>
+                                <SelectItem Value="@("Status")">Status</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Field>
+                            <FieldLabel>Column Dimension</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@columnDimension" Size="Size.Default">
+                                <SelectItem Value="@("Type")">Type</SelectItem>
+                                <SelectItem Value="@("Sector")">Sector</SelectItem>
+                                <SelectItem Value="@("Status")">Status</SelectItem>
+                                <SelectItem Value="@("Country")">Country</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Field>
+                            <FieldLabel>Aggregation</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@aggregationType" Size="Size.Default">
+                                <SelectItem Value="@("Count")">Count</SelectItem>
+                                <SelectItem Value="@("Sum")">Sum</SelectItem>
+                                <SelectItem Value="@("Average")">Average</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                </Row>
+                <Row Margin="Margin.Is3.FromTop">
+                    <Column>
+                        <Button Color="Color.Primary" Clicked="@GeneratePivotTable">
+                            <i class="fas fa-sync"></i> Generate Pivot Table
+                        </Button>
+                        <Button Color="Color.Success" Clicked="@ExportToExcel" Margin="Margin.Is2.FromStart">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </Button>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+        <!-- Pivot Table Results -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-chart-bar"></i> Pivot Results</h4>
+            </CardHeader>
+            <CardBody>
+                @if (isLoading)
+                {
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Generating pivot table...</p>
+                    </div>
+                }
+                else if (pivotData != null && pivotData.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>@rowDimension</th>
+                                    @foreach (var col in columnHeaders)
+                                    {
+                                        <th class="text-end">@col</th>
+                                    }
+                                    <th class="text-end"><strong>Total</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in pivotData)
+                                {
+                                    <tr>
+                                        <td><strong>@row.RowLabel</strong></td>
+                                        @foreach (var col in columnHeaders)
+                                        {
+                                            var value = row.Values.ContainsKey(col) ? row.Values[col] : 0;
+                                            <td class="text-end">@value</td>
+                                        }
+                                        <td class="text-end"><strong>@row.RowTotal</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-secondary">
+                                <tr>
+                                    <td><strong>Grand Total</strong></td>
+                                    @foreach (var col in columnHeaders)
+                                    {
+                                        var colTotal = pivotData.Sum(r => r.Values.ContainsKey(col) ? r.Values[col] : 0);
+                                        <td class="text-end"><strong>@colTotal</strong></td>
+                                    }
+                                    <td class="text-end"><strong>@grandTotal</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Statistics Summary -->
+                    <Row Margin="Margin.Is3.FromTop">
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Alert Color="Color.Info">
+                                <strong>Total Rows:</strong> @pivotData.Count
+                            </Alert>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Alert Color="Color.Info">
+                                <strong>Total Columns:</strong> @columnHeaders.Count
+                            </Alert>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Alert Color="Color.Info">
+                                <strong>Grand Total:</strong> @grandTotal
+                            </Alert>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Alert Color="Color.Info">
+                                <strong>Average:</strong> @(pivotData.Any() ? (grandTotal / pivotData.Count).ToString("N2") : "0")
+                            </Alert>
+                        </Column>
+                    </Row>
+                }
+                else
+                {
+                    <Alert Color="Color.Warning">
+                        <AlertDescription>
+                            <i class="fas fa-info-circle"></i> Configure the pivot dimensions and click "Generate Pivot Table" to view results.
+                        </AlertDescription>
+                    </Alert>
+                }
+            </CardBody>
+        </Card>
+
+        <!-- Insights & Recommendations -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-lightbulb"></i> AI-Powered Insights</h4>
+            </CardHeader>
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is6">
+                        <Alert Color="Color.Success">
+                            <Heading Size="HeadingSize.Is5">Top Performer</Heading>
+                            @if (pivotData != null && pivotData.Any())
+                            {
+                                var topRow = pivotData.OrderByDescending(r => r.RowTotal).FirstOrDefault();
+                                <p class="mb-0">
+                                    <strong>@topRow?.RowLabel</strong> leads with a total of <strong>@topRow?.RowTotal</strong>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">Generate pivot table to see insights</p>
+                            }
+                        </Alert>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is6">
+                        <Alert Color="Color.Warning">
+                            <Heading Size="HeadingSize.Is5">Needs Attention</Heading>
+                            @if (pivotData != null && pivotData.Any())
+                            {
+                                var bottomRow = pivotData.OrderBy(r => r.RowTotal).FirstOrDefault();
+                                <p class="mb-0">
+                                    <strong>@bottomRow?.RowLabel</strong> has the lowest total at <strong>@bottomRow?.RowTotal</strong>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">Generate pivot table to see insights</p>
+                            }
+                        </Alert>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+    </CardBody>
+</Card>
+
+@code {
+    private string rowDimension = "Organization";
+    private string columnDimension = "Type";
+    private string aggregationType = "Count";
+    private bool isLoading = false;
+    
+    private List<PivotRow> pivotData = new();
+    private List<string> columnHeaders = new();
+    private int grandTotal = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GeneratePivotTable();
+    }
+
+    private async Task GeneratePivotTable()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        await Task.Delay(500); // Simulate API call
+
+        // Generate sample data based on configuration
+        GenerateSamplePivotData();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void GenerateSamplePivotData()
+    {
+        pivotData.Clear();
+        columnHeaders.Clear();
+        grandTotal = 0;
+
+        // Seed data for demonstration
+        var random = new Random(42);
+
+        // Get dimension values based on selections
+        var rowValues = GetDimensionValues(rowDimension);
+        var colValues = GetDimensionValues(columnDimension);
+
+        columnHeaders = colValues;
+
+        foreach (var rowValue in rowValues)
+        {
+            var pivotRow = new PivotRow { RowLabel = rowValue };
+            int rowTotal = 0;
+
+            foreach (var colValue in colValues)
+            {
+                int value = random.Next(10, 200);
+                pivotRow.Values[colValue] = value;
+                rowTotal += value;
+            }
+
+            pivotRow.RowTotal = rowTotal;
+            grandTotal += rowTotal;
+            pivotData.Add(pivotRow);
+        }
+    }
+
+    private List<string> GetDimensionValues(string dimension)
+    {
+        return dimension switch
+        {
+            "Organization" => new List<string> { "Organization A", "Organization B", "Organization C" },
+            "Type" => new List<string> { "Client", "Partner", "Vendor", "Subsidiary" },
+            "Sector" => new List<string> { "Technology", "Finance", "Healthcare", "Manufacturing" },
+            "Status" => new List<string> { "Active", "Inactive", "Pending" },
+            "Country" => new List<string> { "USA", "UK", "Germany", "France", "Canada" },
+            _ => new List<string> { "Value1", "Value2", "Value3" }
+        };
+    }
+
+    private async Task ExportToExcel()
+    {
+        // TODO: Implement Excel export
+        await Task.CompletedTask;
+    }
+
+    private class PivotRow
+    {
+        public string RowLabel { get; set; } = string.Empty;
+        public Dictionary<string, int> Values { get; set; } = new();
+        public int RowTotal { get; set; }
+    }
+}

@@ -1,8 +1,27 @@
 {
   "culture": "ar",
   "texts": {
-    "AppName": "Organization",
+    "AppName": "المنظمة",
     "Menu:Home": "الصفحة الرئيسية",
+    "Menu:Dashboard": "لوحة المعلومات",
+    "Menu:Platform": "المنصة",
+    "Menu:WorkCenter": "مركز العمل",
+    "Menu:Approvals": "الموافقات",
+    "Menu:Organization": "المنظمة",
+    "Menu:Organizations": "المنظمات",
+    "Menu:Workspaces": "مساحات العمل",
+    "Menu:UserProfiles": "ملفات المستخدمين",
+    "Menu:Content": "المحتوى",
+    "Menu:Documents": "المستندات",
+    "Menu:AuditLogs": "سجلات المراجعة",
+    "Menu:AIAssistant": "المساعد الذكي",
+    "Menu:Administration": "الإدارة",
+    "Menu:Settings": "الإعدادات",
+    
+    "Navigation:Main": "التنقل الرئيسي",
+    "Navigation:AI": "الذكاء الاصطناعي",
+    "Navigation:Settings": "الإعدادات والتكوين",
+    
     "Welcome": "مرحباً",
     "LongWelcomeMessage": "مرحبا بكم في التطبيق. هذا مشروع بدء تشغيل يعتمد على إطار عمل ABP. لمزيد من المعلومات ، يرجى زيارة abp.io."
   }

@@ -1,6 +1,9 @@
 @page "/documents"
+@layout PlatformLayout
 @using DoganConsult.Document.Documents
+@using DoganConsult.Document.Permissions
 @using DoganConsult.Web.Blazor.Services
+@using Microsoft.AspNetCore.Authorization
 @using Volo.Abp.Application.Dtos
 
 <PageTitle>Document Management</PageTitle>
@@ -14,9 +17,12 @@
                         <h4 class="card-title mb-0">
                             <i class="fas fa-file-alt me-2"></i>Document Management
                         </h4>
-                        <button class="btn btn-primary" @onclick="OpenCreateModal">
-                            <i class="fas fa-plus me-1"></i>Add Document
-                        </button>
+                        @if (CanCreate)
+                        {
+                            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                                <i class="fas fa-plus me-1"></i>Add Document
+                            </button>
+                        }
                     </div>
                 </div>
                 
@@ -68,15 +74,24 @@
                                                 <td>@(doc.UploadDate?.ToString("yyyy-MM-dd") ?? "-")</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewDetails(doc)">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-warning" @onclick="() => EditDocument(doc)">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteDocument(doc)">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
+                                                        @if (CanViewAll)
+                                                        {
+                                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewDetails(doc)">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        }
+                                                        @if (CanEdit)
+                                                        {
+                                                            <button class="btn btn-sm btn-outline-warning" @onclick="() => EditDocument(doc)">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                        }
+                                                        @if (CanDelete)
+                                                        {
+                                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteDocument(doc)">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        }
                                                     </div>
                                                 </td>
                                             </tr>

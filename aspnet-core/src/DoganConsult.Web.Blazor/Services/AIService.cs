@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using DoganConsult.AI.Application.Contracts.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.DependencyInjection;
 
@@ -12,19 +13,21 @@ public class AIService : ITransientDependency
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<AIService> _logger;
-    private const string BaseUrl = "https://localhost:44331/api/ai";
+    private readonly string _baseUrl;
 
-    public AIService(HttpClient httpClient, ILogger<AIService> logger)
+    public AIService(HttpClient httpClient, ILogger<AIService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
+        var gatewayBaseUrl = configuration["RemoteServices:Default:BaseUrl"] ?? "http://localhost:5000";
+        _baseUrl = $"{gatewayBaseUrl.TrimEnd('/')}/api/ai";
     }
 
     public async Task<ChatResponseDto?> ChatAsync(ChatRequestDto request)
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/chat", request);
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/chat", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ChatResponseDto>();
         }
@@ -39,7 +42,7 @@ public class AIService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/thread", new { UserId = userId });
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/thread", new { UserId = userId });
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             return result.Trim('"');
@@ -55,7 +58,7 @@ public class AIService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/thread/{threadId}/continue", new { Message = message });
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/thread/{threadId}/continue", new { Message = message });
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ChatResponseDto>();
         }
@@ -70,7 +73,7 @@ public class AIService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/analyze-document", request);
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/analyze-document", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<DocumentAnalysisResultDto>();
         }
@@ -85,7 +88,7 @@ public class AIService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/compliance-check", request);
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/compliance-check", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ComplianceCheckResultDto>();
         }
@@ -100,7 +103,7 @@ public class AIService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/risk-assessment", request);
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/risk-assessment", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<RiskAssessmentResultDto>();
         }
@@ -115,7 +118,7 @@ public class AIService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/audit-summary", new { AuditData = auditData });
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/audit-summary", new { AuditData = auditData });
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }

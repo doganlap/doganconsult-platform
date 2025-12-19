@@ -814,3 +814,154 @@
         right: auto;
     }
 }
+
+/* ============================================
+   Platform Showcase & Marketing Styles
+   ============================================ */
+
+.platform-showcase-section {
+    margin-top: 2rem;
+}
+
+/* Module Cards - Hover Effect */
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--dc-shadow-xl);
+}
+
+/* Roadmap Timeline Styles */
+.roadmap-timeline {
+    position: relative;
+}
+
+.roadmap-quarter {
+    position: relative;
+    padding-left: 20px;
+    border-left: 3px solid var(--dc-gray-300);
+}
+
+.roadmap-quarter:last-child {
+    border-left-color: transparent;
+}
+
+.roadmap-quarter::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 10px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--dc-primary);
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px var(--dc-primary);
+}
+
+.roadmap-quarter:first-child::before {
+    background: var(--dc-success);
+    box-shadow: 0 0 0 3px var(--dc-success);
+}
+
+.quarter-badge {
+    font-size: 0.875rem;
+    display: inline-block;
+}
+
+/* SDK Code Blocks */
+pre {
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+pre code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Platform Stats in Hero */
+.platform-stats .stat-item {
+    opacity: 0.95;
+}
+
+/* Integration Accordion Customization */
+.accordion-button:not(.collapsed) {
+    background-color: var(--dc-light);
+    color: var(--dc-primary);
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: var(--dc-primary);
+}
+
+/* Module Icon Styles */
+.module-icon {
+    transition: transform 0.3s ease;
+}
+
+.hover-lift:hover .module-icon {
+    transform: scale(1.1);
+}
+
+/* Tab Content for Code Examples */
+.tab-content {
+    margin-top: 1rem;
+}
+
+.nav-tabs .nav-link {
+    color: var(--dc-gray-600);
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--dc-primary);
+    border-bottom-color: var(--dc-primary);
+    background: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom-color: var(--dc-gray-300);
+}
+
+/* Roadmap Cards */
+.roadmap-quarter .card {
+    transition: all 0.2s ease;
+}
+
+.roadmap-quarter .card:hover {
+    transform: translateX(4px);
+    box-shadow: var(--dc-shadow);
+}
+
+/* Badge Spacing in Module Cards */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .platform-showcase-section {
+        margin-top: 1rem;
+    }
+    
+    .roadmap-quarter {
+        padding-left: 16px;
+    }
+    
+    pre code {
+        font-size: 0.75rem;
+    }
+    
+    .quarter-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem !important;
+    }
+}

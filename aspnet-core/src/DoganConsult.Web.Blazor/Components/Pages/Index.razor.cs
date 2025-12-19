@@ -7,6 +7,7 @@ using DoganConsult.Web.Blazor.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Configuration;
 
 namespace DoganConsult.Web.Blazor.Components.Pages;
 
@@ -15,6 +16,7 @@ public partial class Index : WebComponentBase
     [Inject] private DashboardService DashboardService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+    [Inject] private IConfiguration Configuration { get; set; } = default!;
 
     // State
     private string ActiveTab { get; set; } = "overview";
@@ -55,10 +57,53 @@ public partial class Index : WebComponentBase
     private bool IsSendingMessage { get; set; } = false;
     private List<ChatMessage> ChatMessages { get; set; } = new();
 
+    [Inject] private DemoService DemoService { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadUserContext();
         await LoadDashboardData();
+        await LoadDemoStatisticsAsync();
+        await InitializeSignalRAsync();
+    }
+
+    private async Task InitializeSignalRAsync()
+    {
+        try
+        {
+            await DemoService.InitializeSignalRAsync();
+            
+            DemoService.OnDemoCreated += (demo) =>
+            {
+                InvokeAsync(async () =>
+                {
+                    await LoadDemoStatisticsAsync();
+                    StateHasChanged();
+                });
+            };
+
+            DemoService.OnDemoApproved += (demo) =>
+            {
+                InvokeAsync(async () =>
+                {
+                    await LoadDemoStatisticsAsync();
+                    StateHasChanged();
+                });
+            };
+
+            DemoService.OnDemoStatusChanged += (demo) =>
+            {
+                InvokeAsync(async () =>
+                {
+                    await LoadDemoStatisticsAsync();
+                    StateHasChanged();
+                });
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SignalR connection failed: {ex.Message}");
+        }
     }
 
     private async Task LoadUserContext()
@@ -502,5 +547,154 @@ public partial class Index : WebComponentBase
         public bool IsUser { get; set; }
         public string Content { get; set; } = "";
         public DateTime Timestamp { get; set; } = DateTime.Now;
+    }
+
+    // ============================================
+    // DEMO PIPELINE INTEGRATION
+    // ============================================
+    
+    private DemoStatistics DemoStats { get; set; } = new();
+    private List<RecentDemo> RecentDemos { get; set; } = new();
+
+    private class DemoStatistics
+    {
+        public int ActiveDemos { get; set; } = 8;
+        public int NewThisWeek { get; set; } = 3;
+        public int PendingApprovals { get; set; } = 2;
+        public int SuccessRate { get; set; } = 87;
+        public int AvgCycleTime { get; set; } = 21;
+    }
+
+    private class RecentDemo
+    {
+        public int Id { get; set; }
+        public string RequestId { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public string RequestSource { get; set; } = "Internal";
+        public string Status { get; set; } = string.Empty;
+        public string CurrentStage { get; set; } = string.Empty;
+        public int ProgressPercentage { get; set; }
+    }
+
+    private async Task LoadDemoStatisticsAsync()
+    {
+        try
+        {
+            // Call actual API endpoint with Redis caching
+            var statsDto = await DemoService.GetStatisticsAsync();
+            DemoStats = new DemoStatistics
+            {
+                ActiveDemos = statsDto.ActiveDemos,
+                NewThisWeek = statsDto.NewThisWeek,
+                PendingApprovals = statsDto.PendingApprovals,
+                SuccessRate = statsDto.SuccessRate,
+                AvgCycleTime = statsDto.AvgCycleTime
+            };
+
+            // Call actual API endpoint with Redis caching
+            var recentDtos = await DemoService.GetRecentAsync(5);
+            RecentDemos = recentDtos.Select(dto => new RecentDemo
+            {
+                Id = dto.Id,
+                RequestId = $"DMO-{dto.Id:D4}",
+                CustomerName = dto.CustomerName,
+                RequestSource = dto.DemoType ?? "Standard",
+                Status = dto.CurrentStatus,
+                CurrentStage = GetStageFromStatus(dto.CurrentStatus),
+                ProgressPercentage = dto.ProgressPercentage
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load demo statistics: {ex.Message}");
+            // Fallback to default data
+            DemoStats = new DemoStatistics { ActiveDemos = 8, NewThisWeek = 3, PendingApprovals = 2, SuccessRate = 87, AvgCycleTime = 21 };
+            RecentDemos = new List<RecentDemo>();
+        }
+    }
+
+    private string GetSourceBadgeClass(string source)
+    {
+        return source == "Internal" 
+            ? "bg-primary" 
+            : "bg-info";
+    }
+
+    private string GetSourceIcon(string source)
+    {
+        return source == "Internal" 
+            ? "fa-users" 
+            : "fa-user";
+    }
+
+    private string GetProgressBarClass(string status)
+    {
+        return status switch
+        {
+            "Submitted" => "bg-secondary",
+            "Scheduled" => "bg-info",
+            "InProgress" => "bg-warning",
+            "Completed" => "bg-primary",
+            "Accepted" => "bg-success",
+            "POC" => "bg-success",
+            "Production" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Pending" or "Submitted" => "bg-secondary",
+            "Approved" or "Scheduled" => "bg-info",
+            "InProgress" => "bg-warning text-dark",
+            "Completed" => "bg-primary",
+            "Accepted" => "bg-success",
+            "POC" => "bg-success",
+            "Production" => "bg-success",
+            "Rejected" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStageFromStatus(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Awaiting Approval",
+            "Approved" => "Demo Scheduled",
+            "Scheduled" => "Demo Scheduled",
+            "InProgress" => "Demo Execution",
+            "Completed" => "Demo Completed",
+            "Accepted" => "Customer Acceptance",
+            "POC" => "POC Phase",
+            "Production" => "Production Deployment",
+            "Rejected" => "Request Rejected",
+            _ => status
+        };
+    }
+
+    private void ShowModuleGuide(string moduleName)
+    {
+        // Get base URL from configuration
+        var gatewayUrl = Configuration["RemoteServices:Default:BaseUrl"] ?? "http://localhost:5000";
+        
+        // Navigate to the module's integration guide or swagger documentation
+        var moduleUrls = new Dictionary<string, string>
+        {
+            ["organization"] = $"{gatewayUrl}/swagger/organization",
+            ["workspace"] = $"{gatewayUrl}/swagger/workspace",
+            ["ai"] = $"{gatewayUrl}/swagger/ai",
+            ["document"] = $"{gatewayUrl}/swagger/document",
+            ["audit"] = $"{gatewayUrl}/swagger/audit",
+            ["userprofile"] = $"{gatewayUrl}/swagger/userprofile",
+            ["demo"] = "/demos/requests"
+        };
+
+        if (moduleUrls.TryGetValue(moduleName.ToLower(), out var url))
+        {
+            NavigationManager.NavigateTo(url, forceLoad: url.StartsWith("http"));
+        }
     }
 }

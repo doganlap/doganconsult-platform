@@ -1,0 +1,169 @@
+@using Microsoft.Extensions.Localization
+@using DoganConsult.Web.Localization
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<WebResource> L
+
+<nav class="dc-sidebar" id="sidebar">
+    <div class="dc-sidebar-header">
+        <div class="dc-sidebar-brand">
+            <i class="fas fa-layer-group dc-brand-icon"></i>
+            <span class="dc-brand-text">@L["AppName"]</span>
+        </div>
+        <button class="dc-sidebar-toggle" @onclick="ToggleSidebar">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+
+    <div class="dc-sidebar-content">
+        <div class="dc-sidebar-section">
+            <div class="dc-sidebar-section-title">@L["Navigation:Main"]</div>
+            <ul class="dc-nav-list">
+                <li class="dc-nav-item">
+                    <a href="/" class="dc-nav-link @GetActiveClass("/")">
+                        <i class="fas fa-home dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:Dashboard"]</span>
+                    </a>
+                </li>
+                <li class="dc-nav-item">
+                    <a href="/workspaces" class="dc-nav-link @GetActiveClass("/workspaces")">
+                        <i class="fas fa-layer-group dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:Workspaces"]</span>
+                    </a>
+                </li>
+                <li class="dc-nav-item">
+                    <a href="/documents" class="dc-nav-link @GetActiveClass("/documents")">
+                        <i class="fas fa-file-alt dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:Documents"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="dc-sidebar-section">
+            <div class="dc-sidebar-section-title">@L["Navigation:Organization"]</div>
+            <ul class="dc-nav-list">
+                <li class="dc-nav-item">
+                    <a href="/organizations" class="dc-nav-link @GetActiveClass("/organizations")">
+                        <i class="fas fa-building dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:Organizations"]</span>
+                    </a>
+                </li>
+                <li class="dc-nav-item">
+                    <a href="/user-profiles" class="dc-nav-link @GetActiveClass("/user-profiles")">
+                        <i class="fas fa-users dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:UserProfiles"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="dc-sidebar-section">
+            <div class="dc-sidebar-section-title">@L["Navigation:AI"]</div>
+            <ul class="dc-nav-list">
+                <li class="dc-nav-item">
+                    <a href="/ai-chat" class="dc-nav-link @GetActiveClass("/ai-chat")">
+                        <i class="fas fa-brain dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:AIAssistant"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="dc-sidebar-section">
+            <div class="dc-sidebar-section-title">@L["Navigation:Governance"]</div>
+            <ul class="dc-nav-list">
+                <li class="dc-nav-item">
+                    <a href="/approvals" class="dc-nav-link @GetActiveClass("/approvals")">
+                        <i class="fas fa-check-circle dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:Approvals"]</span>
+                        @if (PendingApprovals > 0)
+                        {
+                            <span class="dc-nav-badge">@PendingApprovals</span>
+                        }
+                    </a>
+                </li>
+                <li class="dc-nav-item">
+                    <a href="/audit-logs" class="dc-nav-link @GetActiveClass("/audit-logs")">
+                        <i class="fas fa-shield-alt dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:AuditLogs"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="dc-sidebar-section">
+            <div class="dc-sidebar-section-title">@L["Navigation:System"]</div>
+            <ul class="dc-nav-list">
+                <li class="dc-nav-item">
+                    <a href="/settings" class="dc-nav-link @GetActiveClass("/settings")">
+                        <i class="fas fa-cog dc-nav-icon"></i>
+                        <span class="dc-nav-text">@L["Menu:Settings"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="dc-sidebar-footer">
+        <div class="dc-user-profile">
+            <div class="dc-user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="dc-user-info">
+                <div class="dc-user-name">@CurrentUser</div>
+                <div class="dc-user-role">@L["Role:Administrator"]</div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="dc-sidebar-overlay" @onclick="CloseSidebar"></div>
+
+@code {
+    [Parameter] public int PendingApprovals { get; set; } = 0;
+    [Parameter] public string CurrentUser { get; set; } = "Admin";
+    [Parameter] public bool IsCollapsed { get; set; } = false;
+    [Parameter] public EventCallback<bool> IsCollapsedChanged { get; set; }
+    [Parameter] public EventCallback<bool> OnSidebarToggled { get; set; }
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private string GetActiveClass(string path)
+    {
+        var currentPath = new Uri(NavigationManager.Uri).AbsolutePath;
+        return currentPath == path || (path != "/" && currentPath.StartsWith(path)) ? "active" : "";
+    }
+
+    private async Task ToggleSidebar()
+    {
+        IsCollapsed = !IsCollapsed;
+        await IsCollapsedChanged.InvokeAsync(IsCollapsed);
+        if (OnSidebarToggled.HasDelegate)
+        {
+            await OnSidebarToggled.InvokeAsync(IsCollapsed);
+        }
+    }
+
+    private async Task CloseSidebar()
+    {
+        IsCollapsed = true;
+        await IsCollapsedChanged.InvokeAsync(IsCollapsed);
+        if (OnSidebarToggled.HasDelegate)
+        {
+            await OnSidebarToggled.InvokeAsync(IsCollapsed);
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

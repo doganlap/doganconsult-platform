@@ -57,4 +57,10 @@ public class WorkspaceApiController : WorkspaceController
     {
         return _workspaceAppService.DeleteAsync(id);
     }
+
+    [HttpGet("count")]
+    public Task<long> GetCountAsync()
+    {
+        return _workspaceAppService.GetCountAsync();
+    }
 }

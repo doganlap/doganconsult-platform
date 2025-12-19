@@ -30,13 +30,15 @@ $redisConfig = "interchange.proxy.rlwy.net:26424,password=sOJrVPlSFlDQQpMizveGoY
 
 # Services configuration
 $services = @(
-    @{Name="Identity"; Port=5002; Path="src/DoganConsult.Identity.HttpApi.Host"; DbKey="Identity"},
-    @{Name="Organization"; Port=5003; Path="src/DoganConsult.Organization.HttpApi.Host"; DbKey="Organization"},
-    @{Name="Workspace"; Port=5004; Path="src/DoganConsult.Workspace.HttpApi.Host"; DbKey="Workspace"},
-    @{Name="UserProfile"; Port=5005; Path="src/DoganConsult.UserProfile.HttpApi.Host"; DbKey="UserProfile"},
-    @{Name="Audit"; Port=5006; Path="src/DoganConsult.Audit.HttpApi.Host"; DbKey="Audit"},
-    @{Name="Document"; Port=5007; Path="src/DoganConsult.Document.HttpApi.Host"; DbKey="Document"},
-    @{Name="AI"; Port=5008; Path="src/DoganConsult.AI.HttpApi.Host"; DbKey="AI"}
+    @{Name="Identity"; Port=5002; Path="src/DoganConsult.Identity.HttpApi.Host"; DbKey="Identity"; IsApiHost=$true},
+    @{Name="Organization"; Port=5003; Path="src/DoganConsult.Organization.HttpApi.Host"; DbKey="Organization"; IsApiHost=$true},
+    @{Name="Workspace"; Port=5004; Path="src/DoganConsult.Workspace.HttpApi.Host"; DbKey="Workspace"; IsApiHost=$true},
+    @{Name="UserProfile"; Port=5005; Path="src/DoganConsult.UserProfile.HttpApi.Host"; DbKey="UserProfile"; IsApiHost=$true},
+    @{Name="Audit"; Port=5006; Path="src/DoganConsult.Audit.HttpApi.Host"; DbKey="Audit"; IsApiHost=$true},
+    @{Name="Document"; Port=5007; Path="src/DoganConsult.Document.HttpApi.Host"; DbKey="Document"; IsApiHost=$true},
+    @{Name="AI"; Port=5008; Path="src/DoganConsult.AI.HttpApi.Host"; DbKey="AI"; IsApiHost=$true},
+    @{Name="Gateway"; Port=5000; Path="src/gateway/DoganConsult.Gateway"; DbKey=$null; IsApiHost=$false},
+    @{Name="Blazor"; Port=5001; Path="src/DoganConsult.Web.Blazor"; DbKey=$null; IsApiHost=$false}
 )
 
 # Step 1: Build solution
@@ -48,40 +50,94 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Build HttpApi.Client projects in Release (they're often Debug by default)
+Write-Host "  Building HttpApi.Client projects in Release mode..." -ForegroundColor Gray
+Get-ChildItem -Path src -Filter "*HttpApi.Client.csproj" -Recurse | ForEach-Object {
+    Write-Host "    Building $($_.Name)..." -ForegroundColor DarkGray
+    dotnet build $_.FullName -c Release --no-restore
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "    Failed to build $($_.Name), retrying with restore..." -ForegroundColor Yellow
+        dotnet build $_.FullName -c Release
+    }
+}
+
 # Step 2: Create production appsettings
 Write-Host "`n[2/7] Creating production appsettings..." -ForegroundColor Yellow
+$identityService = $services | Where-Object { $_.Name -eq "Identity" } | Select-Object -First 1
+$authUrl = "http://${ServerIP}:$($identityService.Port)"
+$gatewayUrl = "http://${ServerIP}:5000"
+
 foreach ($service in $services) {
-    $appsettingsPath = "$($service.Path)/appsettings.Production.json"
-    $authUrl = "http://$ServerIP:$($services[0].Port)"
-    $selfUrl = "http://$ServerIP:$($service.Port)"
-    
-    $appsettings = @{
-        App = @{
-            SelfUrl = $selfUrl
-        }
-        ConnectionStrings = @{
-            Default = $dbConnections[$service.DbKey]
-        }
-        AuthServer = @{
-            Authority = $authUrl
-            RequireHttpsMetadata = $false
-        }
-        RemoteServices = @{
-            Default = @{
-                BaseUrl = "http://$ServerIP`:5000"
+    if ($service.IsApiHost -and $service.DbKey) {
+        # API Host services with database
+        $appsettingsPath = "$($service.Path)/appsettings.Production.json"
+        $selfUrl = "http://${ServerIP}:$($service.Port)"
+        
+        $appsettings = @{
+            App = @{
+                SelfUrl = $selfUrl
+            }
+            ConnectionStrings = @{
+                Default = $dbConnections[$service.DbKey]
+            }
+            AuthServer = @{
+                Authority = $authUrl
+                RequireHttpsMetadata = $false
+            }
+            RemoteServices = @{
+                Default = @{
+                    BaseUrl = $gatewayUrl
+                }
             }
         }
-    }
-    
-    if ($service.Name -eq "AI") {
-        $appsettings["Redis"] = @{
-            Configuration = $redisConfig
-            InstanceName = "DoganConsult:"
+        
+        if ($service.Name -eq "AI") {
+            $appsettings["Redis"] = @{
+                Configuration = $redisConfig
+                InstanceName = "DoganConsult:"
+            }
         }
+        
+        $appsettings | ConvertTo-Json -Depth 10 | Out-File -FilePath $appsettingsPath -Encoding UTF8
+        Write-Host "  Created: $appsettingsPath" -ForegroundColor Gray
     }
-    
-    $appsettings | ConvertTo-Json -Depth 10 | Out-File -FilePath $appsettingsPath -Encoding UTF8
-    Write-Host "  Created: $appsettingsPath" -ForegroundColor Gray
+    elseif ($service.Name -eq "Gateway") {
+        # Gateway service
+        $appsettingsPath = "$($service.Path)/appsettings.Production.json"
+        $selfUrl = "http://${ServerIP}:$($service.Port)"
+        
+        $appsettings = @{
+            App = @{
+                SelfUrl = $selfUrl
+            }
+        }
+        
+        $appsettings | ConvertTo-Json -Depth 10 | Out-File -FilePath $appsettingsPath -Encoding UTF8
+        Write-Host "  Created: $appsettingsPath" -ForegroundColor Gray
+    }
+    elseif ($service.Name -eq "Blazor") {
+        # Blazor UI service
+        $appsettingsPath = "$($service.Path)/appsettings.Production.json"
+        $selfUrl = "http://${ServerIP}:$($service.Port)"
+        
+        $appsettings = @{
+            App = @{
+                SelfUrl = $selfUrl
+            }
+            AuthServer = @{
+                Authority = $authUrl
+                RequireHttpsMetadata = $false
+            }
+            RemoteServices = @{
+                Default = @{
+                    BaseUrl = $gatewayUrl
+                }
+            }
+        }
+        
+        $appsettings | ConvertTo-Json -Depth 10 | Out-File -FilePath $appsettingsPath -Encoding UTF8
+        Write-Host "  Created: $appsettingsPath" -ForegroundColor Gray
+    }
 }
 
 # Step 3: Publish all services
@@ -95,7 +151,61 @@ foreach ($service in $services) {
     if (Test-Path $service.Path) {
         Write-Host "  Publishing $($service.Name)..." -ForegroundColor Gray
         $publishPath = "publish/$($service.Name)"
-        dotnet publish $service.Path -c Release -o $publishPath --no-build
+        
+        if ($service.Name -eq "Gateway") {
+            $csprojPath = "$($service.Path)/DoganConsult.Gateway.csproj"
+        }
+        elseif ($service.Name -eq "Blazor") {
+            $csprojPath = "$($service.Path)/DoganConsult.Web.Blazor.csproj"
+            # Publish Blazor with workaround for Gateway appsettings conflict
+            # Temporarily rename Gateway appsettings files
+            $gatewayPath = "src/gateway/DoganConsult.Gateway"
+            $gatewayAppSettings = @(
+                "$gatewayPath/appsettings.json",
+                "$gatewayPath/appsettings.Development.json",
+                "$gatewayPath/appsettings.Production.json"
+            )
+            $renamedFiles = @()
+            foreach ($file in $gatewayAppSettings) {
+                if (Test-Path $file) {
+                    $dir = Split-Path -Parent $file
+                    $name = Split-Path -Leaf $file
+                    $backupPath = Join-Path $dir "$name.backup_deploy"
+                    try {
+                        Copy-Item -Path $file -Destination $backupPath -Force
+                        Remove-Item -Path $file -Force
+                        $renamedFiles += @{Original=$file; Backup=$backupPath}
+                    } catch {
+                        Write-Host "    Warning: Could not backup $file" -ForegroundColor Yellow
+                    }
+                }
+            }
+            try {
+                # First try without --no-build, which ensures all dependencies are properly built
+                dotnet publish $csprojPath -c Release -o $publishPath
+            }
+            finally {
+                # Restore renamed files
+                foreach ($fileInfo in $renamedFiles) {
+                    if (Test-Path $fileInfo.Backup) {
+                        try {
+                            Copy-Item -Path $fileInfo.Backup -Destination $fileInfo.Original -Force
+                            Remove-Item -Path $fileInfo.Backup -Force
+                        } catch {
+                            Write-Host "    Warning: Could not restore $($fileInfo.Original)" -ForegroundColor Yellow
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            $csprojPath = "$($service.Path)/DoganConsult.$($service.Name).HttpApi.Host.csproj"
+            dotnet publish $csprojPath -c Release -o $publishPath --no-build
+        }
+        
+        if ($service.Name -ne "Blazor" -and $service.Name -ne "Gateway") {
+            # Already published above for non-Blazor, non-Gateway services
+        }
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Failed to publish $($service.Name)" -ForegroundColor Red
             exit 1
@@ -231,6 +341,56 @@ create_service "userprofile" "UserProfile" 5005
 create_service "audit" "Audit" 5006
 create_service "document" "Document" 5007
 create_service "ai" "AI" 5008
+
+# Gateway service (different DLL name)
+cat > /tmp/doganconsult-gateway.service <<EOF
+[Unit]
+Description=Dogan Consult Gateway Service
+After=network.target
+After=doganconsult-identity.service
+
+[Service]
+Type=notify
+User=doganconsult
+Group=doganconsult
+WorkingDirectory=`$SERVICES_PATH/Gateway
+ExecStart=/usr/bin/dotnet `$SERVICES_PATH/Gateway/DoganConsult.Gateway.dll
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=doganconsult-gateway
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://0.0.0.0:5000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Blazor UI service (different DLL name)
+cat > /tmp/doganconsult-blazor.service <<EOF
+[Unit]
+Description=Dogan Consult Blazor UI Service
+After=network.target
+After=doganconsult-gateway.service
+
+[Service]
+Type=notify
+User=doganconsult
+Group=doganconsult
+WorkingDirectory=`$SERVICES_PATH/Blazor
+ExecStart=/usr/bin/dotnet `$SERVICES_PATH/Blazor/DoganConsult.Web.Blazor.dll
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=doganconsult-blazor
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://0.0.0.0:5001
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
 # Install services
 cp /tmp/doganconsult-*.service /etc/systemd/system/

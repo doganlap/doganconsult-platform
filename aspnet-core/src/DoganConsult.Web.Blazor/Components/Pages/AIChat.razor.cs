@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DoganConsult.AI.Application.Contracts.Services;
+using DoganConsult.AI.Permissions;
+using DoganConsult.Web.Blazor.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using DoganConsult.AI.Application.Contracts.Services;
-using DoganConsult.Web.Blazor.Services;
 using Microsoft.JSInterop;
+using Volo.Abp.Authorization.Permissions;
 
 namespace DoganConsult.Web.Blazor.Components.Pages;
 
@@ -13,6 +15,10 @@ public partial class AIChat : ComponentBase
 {
     [Inject] private AIService AIService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private IPermissionChecker PermissionChecker { get; set; } = default!;
+    
+    // Permission checks
+    private bool CanUseAI = false;
 
     private ElementReference chatContainer;
     private List<ChatMessage> ChatMessages = new();
@@ -44,9 +50,20 @@ public partial class AIChat : ComponentBase
     private string RiskDescription = string.Empty;
     private RiskAssessmentResultDto? RiskResult = null;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPermissions();
+    }
+
+    private async Task LoadPermissions()
+    {
+        CanUseAI = await PermissionChecker.IsGrantedAsync(AIPermissions.AIRequests.Create);
+    }
+
     private async Task SendMessage()
     {
         if (string.IsNullOrWhiteSpace(CurrentMessage)) return;
+        if (!CanUseAI) return;
 
         var userMessage = CurrentMessage;
         CurrentMessage = string.Empty;

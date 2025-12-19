@@ -1,6 +1,9 @@
 @page "/user-profiles"
+@layout PlatformLayout
+@using DoganConsult.UserProfile.Permissions
 @using DoganConsult.UserProfile.UserProfiles
 @using DoganConsult.Web.Blazor.Services
+@using Microsoft.AspNetCore.Authorization
 @using Volo.Abp.Application.Dtos
 
 <PageTitle>User Profile Management</PageTitle>
@@ -14,9 +17,12 @@
                         <h4 class="card-title mb-0">
                             <i class="fas fa-users me-2"></i>User Profile Management
                         </h4>
-                        <button class="btn btn-primary" @onclick="OpenCreateModal">
-                            <i class="fas fa-plus me-1"></i>Add User
-                        </button>
+                        @if (CanCreate)
+                        {
+                            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                                <i class="fas fa-plus me-1"></i>Add User
+                            </button>
+                        }
                     </div>
                 </div>
                 

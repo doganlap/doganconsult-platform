@@ -1,6 +1,9 @@
 @page "/organizations"
+@layout PlatformLayout
+@using DoganConsult.Organization.Domain.Shared.Permissions
 @using DoganConsult.Web.Blazor.Organizations
 @using DoganConsult.Web.Blazor.Services
+@using Microsoft.AspNetCore.Authorization
 @using Volo.Abp.Application.Dtos
 
 <PageTitle>Organization Management</PageTitle>
@@ -14,9 +17,12 @@
                         <h4 class="card-title mb-0">
                             <i class="fas fa-building me-2"></i>Organization Management
                         </h4>
-                        <button class="btn btn-primary" @onclick="OpenCreateModal">
-                            <i class="fas fa-plus me-1"></i>Add Organization
-                        </button>
+                        @if (CanCreate)
+                        {
+                            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                                <i class="fas fa-plus me-1"></i>Add Organization
+                            </button>
+                        }
                     </div>
                 </div>
                 
@@ -730,9 +736,6 @@
 @code {
     private bool ShowFilters = false;
     private string SearchQuery = "";
-    private string SelectedType = "";
-    private string SelectedStatus = "";
-    private string SelectedSector = "";
     
     private void ToggleFilters()
     {
@@ -755,9 +758,6 @@
     private void ClearFilters()
     {
         SearchQuery = "";
-        SelectedType = "";
-        SelectedStatus = "";
-        SelectedSector = "";
     }
     
     private async Task ExportToCSV()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.DependencyInjection;
 
@@ -12,17 +13,32 @@ public class DashboardService : ITransientDependency
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<DashboardService> _logger;
+    private readonly IConfiguration _configuration;
     
-    private const string OrganizationUrl = "https://localhost:44337/api/organization";
-    private const string WorkspaceUrl = "https://localhost:44371/api/workspace";
-    private const string DocumentUrl = "https://localhost:44348/api/document";
-    private const string AuditUrl = "https://localhost:44375/api/audit";
-    private const string AIUrl = "https://localhost:44331/api/ai";
+    private readonly string _gatewayUrl;
+    private readonly string _organizationUrl;
+    private readonly string _workspaceUrl;
+    private readonly string _documentUrl;
+    private readonly string _auditUrl;
+    private readonly string _aiUrl;
 
-    public DashboardService(HttpClient httpClient, ILogger<DashboardService> logger)
+    public DashboardService(HttpClient httpClient, ILogger<DashboardService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
+        _configuration = configuration;
+        
+        // Use Gateway URL from configuration (defaults to RemoteServices:Default:BaseUrl)
+        _gatewayUrl = configuration["RemoteServices:Default:BaseUrl"] ?? "http://localhost:5000";
+        
+        // Build service URLs from gateway base URL
+        _organizationUrl = $"{_gatewayUrl}/api/organization";
+        _workspaceUrl = $"{_gatewayUrl}/api/workspace";
+        _documentUrl = $"{_gatewayUrl}/api/document";
+        _auditUrl = $"{_gatewayUrl}/api/audit";
+        _aiUrl = $"{_gatewayUrl}/api/ai";
+        
+        _logger.LogInformation("Dashboard Service initialized with Gateway URL: {GatewayUrl}", _gatewayUrl);
     }
 
     public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
@@ -34,10 +50,10 @@ public class DashboardService : ITransientDependency
             // Fetch counts from various services in parallel
             var tasks = new List<Task>
             {
-                Task.Run(async () => summary.TotalOrganizations = await GetCountAsync($"{OrganizationUrl}/organizations/count")),
-                Task.Run(async () => summary.TotalWorkspaces = await GetCountAsync($"{WorkspaceUrl}/workspaces/count")),
-                Task.Run(async () => summary.TotalDocuments = await GetCountAsync($"{DocumentUrl}/documents/count")),
-                Task.Run(async () => summary.PendingApprovals = await GetCountAsync($"{AuditUrl}/approvals/pending-count")),
+                Task.Run(async () => summary.TotalOrganizations = await GetCountAsync($"{_organizationUrl}/organizations/count")),
+                Task.Run(async () => summary.TotalWorkspaces = await GetCountAsync($"{_workspaceUrl}/workspaces/count")),
+                Task.Run(async () => summary.TotalDocuments = await GetCountAsync($"{_documentUrl}/documents/count")),
+                Task.Run(async () => summary.PendingApprovals = await GetCountAsync($"{_auditUrl}/approvals/pending-count")),
             };
             
             await Task.WhenAll(tasks);
@@ -73,7 +89,7 @@ public class DashboardService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.GetFromJsonAsync<List<ActivityItemDto>>($"{AuditUrl}/activities/recent?count={count}");
+            var response = await _httpClient.GetFromJsonAsync<List<ActivityItemDto>>($"{_auditUrl}/activities/recent?count={count}");
             return response ?? new List<ActivityItemDto>();
         }
         catch (Exception ex)
@@ -87,7 +103,7 @@ public class DashboardService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.GetFromJsonAsync<List<ChartDataPointDto>>($"{OrganizationUrl}/statistics/trends?days={days}");
+            var response = await _httpClient.GetFromJsonAsync<List<ChartDataPointDto>>($"{_organizationUrl}/statistics/trends?days={days}");
             return response ?? GetMockTrendData();
         }
         catch
@@ -100,7 +116,7 @@ public class DashboardService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.GetFromJsonAsync<List<ChartDataPointDto>>($"{DocumentUrl}/statistics/trends?days={days}");
+            var response = await _httpClient.GetFromJsonAsync<List<ChartDataPointDto>>($"{_documentUrl}/statistics/trends?days={days}");
             return response ?? GetMockTrendData();
         }
         catch
@@ -113,7 +129,7 @@ public class DashboardService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.GetFromJsonAsync<List<PivotDataDto>>($"{AuditUrl}/approvals/pivot");
+            var response = await _httpClient.GetFromJsonAsync<List<PivotDataDto>>($"{_auditUrl}/approvals/pivot");
             return response ?? GetMockPivotData();
         }
         catch
@@ -237,7 +253,7 @@ public class DashboardService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"{AIUrl}/personalized-guidance", request);
+            var response = await _httpClient.PostAsJsonAsync($"{_aiUrl}/personalized-guidance", request);
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<AIAgentResponseDto>() ?? GetMockAIGuidance(request);

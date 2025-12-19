@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+using DoganConsult.Workspace.Permissions;
 using DoganConsult.Workspace.Workspaces;
 using DoganConsult.Web.Blazor.Services;
-using Volo.Abp.Application.Dtos;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Authorization.Permissions;
 
 namespace DoganConsult.Web.Blazor.Components.Pages;
 
@@ -15,9 +17,16 @@ public partial class Workspaces : ComponentBase
 {
     [Inject] private WorkspaceService WorkspaceService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private IPermissionChecker PermissionChecker { get; set; } = default!;
 
     private List<WorkspaceDto> WorkspaceList = new();
     private IEnumerable<WorkspaceDto> WorkspaceItems => WorkspaceList;
+    
+    // Permission checks
+    private bool CanCreate = false;
+    private bool CanEdit = false;
+    private bool CanDelete = false;
+    private bool CanViewAll = false;
     
     private bool Loading = true;
     private bool ShowModal = false;
@@ -38,7 +47,16 @@ public partial class Workspaces : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPermissions();
         await LoadWorkspaces();
+    }
+
+    private async Task LoadPermissions()
+    {
+        CanCreate = await PermissionChecker.IsGrantedAsync(WorkspacePermissions.Workspaces.Create);
+        CanEdit = await PermissionChecker.IsGrantedAsync(WorkspacePermissions.Workspaces.Edit);
+        CanDelete = await PermissionChecker.IsGrantedAsync(WorkspacePermissions.Workspaces.Delete);
+        CanViewAll = await PermissionChecker.IsGrantedAsync(WorkspacePermissions.Workspaces.ViewAll);
     }
 
     private async Task LoadWorkspaces()

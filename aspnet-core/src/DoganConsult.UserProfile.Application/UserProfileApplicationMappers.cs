@@ -1,12 +1,17 @@
+using System.Collections.Generic;
 using Riok.Mapperly.Abstractions;
-using Volo.Abp.Mapperly;
+using DoganConsult.UserProfile.UserProfiles;
 
 namespace DoganConsult.UserProfile;
 
 [Mapper]
 public partial class UserProfileApplicationMappers
 {
-    /* You can configure your Mapperly mapping configuration here.
-     * Alternatively, you can split your mapping configurations
-     * into multiple mapper classes for a better organization. */
+    [MapProperty(nameof(UserProfiles.UserProfile.SystemRole), nameof(UserProfileDto.SystemRole))]
+    [MapProperty(nameof(UserProfiles.UserProfile.StakeholderType), nameof(UserProfileDto.StakeholderType))]
+    [MapperIgnoreSource(nameof(UserProfiles.UserProfile.ExtraProperties))]
+    [MapperIgnoreSource(nameof(UserProfiles.UserProfile.ConcurrencyStamp))]
+    public partial UserProfileDto ToUserProfileDto(UserProfiles.UserProfile source);
+    
+    public partial List<UserProfileDto> ToUserProfileDtoList(List<UserProfiles.UserProfile> source);
 }

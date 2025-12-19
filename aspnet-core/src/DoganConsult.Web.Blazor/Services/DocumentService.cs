@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using DoganConsult.Document.Documents;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.DependencyInjection;
@@ -14,19 +15,21 @@ public class DocumentService : ITransientDependency
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<DocumentService> _logger;
-    private const string BaseUrl = "https://localhost:44348/api/document/documents";
+    private readonly string _baseUrl;
 
-    public DocumentService(HttpClient httpClient, ILogger<DocumentService> logger)
+    public DocumentService(HttpClient httpClient, ILogger<DocumentService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
+        var gatewayBaseUrl = configuration["RemoteServices:Default:BaseUrl"] ?? "http://localhost:5000";
+        _baseUrl = $"{gatewayBaseUrl.TrimEnd('/')}/api/document/documents";
     }
 
     public async Task<PagedResultDto<DocumentDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
         try
         {
-            var url = $"{BaseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
+            var url = $"{_baseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
             if (!string.IsNullOrEmpty(input.Sorting))
             {
                 url += $"&Sorting={input.Sorting}";
@@ -45,7 +48,7 @@ public class DocumentService : ITransientDependency
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<DocumentDto>($"{BaseUrl}/{id}");
+            return await _httpClient.GetFromJsonAsync<DocumentDto>($"{_baseUrl}/{id}");
         }
         catch (Exception ex)
         {
@@ -58,7 +61,7 @@ public class DocumentService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync(BaseUrl, input);
+            var response = await _httpClient.PostAsJsonAsync(_baseUrl, input);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<DocumentDto>();
         }
@@ -73,7 +76,7 @@ public class DocumentService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/{id}", input);
+            var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{id}", input);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<DocumentDto>();
         }
@@ -88,7 +91,7 @@ public class DocumentService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}");
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}");
             response.EnsureSuccessStatusCode();
         }
         catch (Exception ex)

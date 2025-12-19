@@ -4,6 +4,12 @@
     "AppName": "Web",
     "Menu:Home": "Home",
     "Welcome": "Welcome",
-    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io."
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    "Permission:Demos": "Demo Process Management",
+    "Permission:Demos.Create": "Create Demo Requests",
+    "Permission:Demos.Edit": "Edit Demo Requests",
+    "Permission:Demos.Delete": "Delete Demo Requests",
+    "Permission:Demos.Approve": "Approve/Reject Demo Requests",
+    "Permission:Demos.ManageWorkflow": "Manage Demo Workflow"
   }
 }

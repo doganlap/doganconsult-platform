@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
 using DoganConsult.Audit.AuditLogs;
+using DoganConsult.Audit.Permissions;
 using DoganConsult.Web.Blazor.Services;
-using Volo.Abp.Application.Dtos;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Authorization.Permissions;
 
 namespace DoganConsult.Web.Blazor.Components.Pages;
 
@@ -14,9 +16,13 @@ public partial class AuditLogs : ComponentBase
 {
     [Inject] private AuditService AuditService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private IPermissionChecker PermissionChecker { get; set; } = default!;
 
     private List<AuditLogDto> AuditLogList = new();
     private IEnumerable<AuditLogDto> AuditLogItems => AuditLogList;
+    
+    // Permission checks
+    private bool CanViewAll = false;
     
     private bool Loading = true;
     private bool ShowDetailsModal = false;
@@ -36,7 +42,13 @@ public partial class AuditLogs : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPermissions();
         await LoadLogs();
+    }
+
+    private async Task LoadPermissions()
+    {
+        CanViewAll = await PermissionChecker.IsGrantedAsync(AuditPermissions.AuditLogs.ViewAll);
     }
 
     private async Task LoadLogs()

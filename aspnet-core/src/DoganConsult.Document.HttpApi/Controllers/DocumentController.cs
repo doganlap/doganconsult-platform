@@ -57,4 +57,10 @@ public class DocumentApiController : DocumentController
     {
         return _documentAppService.DeleteAsync(id);
     }
+
+    [HttpGet("count")]
+    public Task<long> GetCountAsync()
+    {
+        return _documentAppService.GetCountAsync();
+    }
 }

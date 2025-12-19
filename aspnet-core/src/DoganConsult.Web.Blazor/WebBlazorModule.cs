@@ -19,17 +19,14 @@ using OpenIddict.Validation.AspNetCore;
 using Volo.Abp;
 using Volo.Abp.Account.Web;
 using Volo.Abp.AspNetCore.Components.Web;
-using Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme;
-using Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme.Bundling;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Volo.Abp.AspNetCore.Components.Web.Theming.Routing;
+
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI;
 using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
-using Volo.Abp.AspNetCore.Mvc.UI.MultiTenancy;
+
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.Mapperly;
@@ -55,8 +52,7 @@ namespace DoganConsult.Web.Blazor;
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule),
     typeof(AbpAccountWebOpenIddictModule),
-    typeof(AbpAspNetCoreComponentsServerLeptonXLiteThemeModule),
-    typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
+
     typeof(AbpIdentityBlazorServerModule),
     typeof(AbpTenantManagementBlazorServerModule),
     typeof(AbpSettingManagementBlazorServerModule)
@@ -140,9 +136,13 @@ public class WebBlazorModule : AbpModule
         context.Services.AddTransient<DoganConsult.Web.Blazor.Services.DocumentService>();
         context.Services.AddTransient<DoganConsult.Web.Blazor.Services.AIService>();
         context.Services.AddTransient<DoganConsult.Web.Blazor.Services.AuditService>();
+        context.Services.AddTransient<DoganConsult.Web.Blazor.Services.DemoService>();
         
         // Register DG.OS Foundation services
         context.Services.AddScoped<DoganConsult.Web.Blazor.Services.DgThemeService>();
+
+        // Configure SignalR for real-time demo updates
+        context.Services.AddSignalR();
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -167,41 +167,7 @@ public class WebBlazorModule : AbpModule
     {
         Configure<AbpBundlingOptions>(options =>
         {
-            // MVC UI
-            options.StyleBundles.Configure(
-                LeptonXLiteThemeBundles.Styles.Global,
-                bundle =>
-                {
-                    bundle.AddFiles("/global-styles.css");
-                }
-            );
-            
-            options.ScriptBundles.Configure(
-                LeptonXLiteThemeBundles.Scripts.Global,
-                bundle =>
-                {
-                    bundle.AddFiles("/dc-sidebar.js");
-                }
-            );
-
-            //BLAZOR UI
-            options.StyleBundles.Configure(
-                BlazorLeptonXLiteThemeBundles.Styles.Global,
-                bundle =>
-                {
-                    bundle.AddFiles("/blazor-global-styles.css");
-                    //You can remove the following line if you don't use Blazor CSS isolation for components
-                    bundle.AddFiles(new BundleFile("/DoganConsult.Web.Blazor.styles.css", true));
-                }
-            );
-            
-            options.ScriptBundles.Configure(
-                BlazorLeptonXLiteThemeBundles.Scripts.Global,
-                bundle =>
-                {
-                    bundle.AddFiles("/dc-sidebar.js");
-                }
-            );
+            // Removed theme bundle configurations since LeptonXLite theme packages are not installed
         });
     }
 
@@ -286,6 +252,12 @@ public class WebBlazorModule : AbpModule
         app.UseRouting();
         app.UseAuthentication();
         app.UseAbpOpenIddictValidation();
+        
+        // Enable auto-login middleware AFTER authentication in development
+        if (env.IsDevelopment())
+        {
+            app.UseMiddleware<DoganConsult.Web.Blazor.Middleware.AutoLoginMiddleware>();
+        }
 
         if (MultiTenancyConsts.IsEnabled)
         {
@@ -307,6 +279,9 @@ public class WebBlazorModule : AbpModule
             builder.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode()
                 .AddAdditionalAssemblies(builder.ServiceProvider.GetRequiredService<IOptions<AbpRouterOptions>>().Value.AdditionalAssemblies.ToArray());
+
+            // Map SignalR hub for real-time demo updates
+            builder.MapHub<DoganConsult.Web.Blazor.Hubs.DemoHub>("/hubs/demo");
         });
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DoganConsult.UserProfile.Permissions;
 using DoganConsult.UserProfile.UserProfiles;
 using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.Application.Dtos;
@@ -14,12 +15,17 @@ namespace DoganConsult.UserProfile.UserProfiles;
 public class UserProfileAppService : ApplicationService, IUserProfileAppService
 {
     private readonly IRepository<UserProfile, Guid> _userProfileRepository;
+    private readonly UserProfileApplicationMappers _mapper;
 
-    public UserProfileAppService(IRepository<UserProfile, Guid> userProfileRepository)
+    public UserProfileAppService(
+        IRepository<UserProfile, Guid> userProfileRepository,
+        UserProfileApplicationMappers mapper)
     {
         _userProfileRepository = userProfileRepository;
+        _mapper = mapper;
     }
 
+    [Authorize(UserProfilePermissions.Profiles.Create)]
     public async Task<UserProfileDto> CreateAsync(CreateUpdateUserProfileDto input)
     {
         var userProfile = new UserProfile(
@@ -51,15 +57,17 @@ public class UserProfileAppService : ApplicationService, IUserProfileAppService
         };
 
         await _userProfileRepository.InsertAsync(userProfile);
-        return ObjectMapper.Map<UserProfile, UserProfileDto>(userProfile);
+        return _mapper.ToUserProfileDto(userProfile);
     }
 
+    [Authorize(UserProfilePermissions.Profiles.ViewAll)]
     public async Task<UserProfileDto> GetAsync(Guid id)
     {
         var userProfile = await _userProfileRepository.GetAsync(id);
-        return ObjectMapper.Map<UserProfile, UserProfileDto>(userProfile);
+        return _mapper.ToUserProfileDto(userProfile);
     }
 
+    [Authorize(UserProfilePermissions.Profiles.ViewAll)]
     public async Task<PagedResultDto<UserProfileDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
         var queryable = await _userProfileRepository.GetQueryableAsync();
@@ -72,10 +80,11 @@ public class UserProfileAppService : ApplicationService, IUserProfileAppService
         var totalCount = await _userProfileRepository.GetCountAsync();
         return new PagedResultDto<UserProfileDto>(
             totalCount,
-            ObjectMapper.Map<List<UserProfile>, List<UserProfileDto>>(userProfiles)
+            _mapper.ToUserProfileDtoList(userProfiles)
         );
     }
 
+    [Authorize(UserProfilePermissions.Profiles.Edit)]
     public async Task<UserProfileDto> UpdateAsync(Guid id, CreateUpdateUserProfileDto input)
     {
         var userProfile = await _userProfileRepository.GetAsync(id);
@@ -102,9 +111,10 @@ public class UserProfileAppService : ApplicationService, IUserProfileAppService
         userProfile.ProfileCompleted = input.ProfileCompleted;
 
         await _userProfileRepository.UpdateAsync(userProfile);
-        return ObjectMapper.Map<UserProfile, UserProfileDto>(userProfile);
+        return _mapper.ToUserProfileDto(userProfile);
     }
 
+    [Authorize(UserProfilePermissions.Profiles.Delete)]
     public async Task DeleteAsync(Guid id)
     {
         await _userProfileRepository.DeleteAsync(id);

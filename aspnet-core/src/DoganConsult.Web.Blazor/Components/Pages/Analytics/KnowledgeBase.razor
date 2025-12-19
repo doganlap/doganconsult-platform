@@ -1,0 +1,420 @@
+@page "/analytics/knowledge-base"
+
+<PageTitle>Knowledge Base - DoganConsult Platform</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Row Class="justify-content-between">
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <h1>
+                    <i class="fas fa-database"></i> Knowledge Base
+                </h1>
+            </Column>
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <Button Color="Color.Primary" Clicked="@(() => showCreateModal = true)">
+                    <i class="fas fa-plus"></i> New Article
+                </Button>
+            </Column>
+        </Row>
+    </CardHeader>
+    <CardBody>
+        
+        <!-- Search and Filter -->
+        <Card Margin="Margin.Is3.OnY" Background="Background.Light">
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is6">
+                        <Field>
+                            <FieldLabel>Search Articles</FieldLabel>
+                            <TextEdit Placeholder="Search by title, tags, or content..." @bind-Text="@searchText">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Field>
+                            <FieldLabel>Category</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@selectedCategory">
+                                <SelectItem Value="@("")">All Categories</SelectItem>
+                                <SelectItem Value="@("Getting Started")">Getting Started</SelectItem>
+                                <SelectItem Value="@("How-To")">How-To Guides</SelectItem>
+                                <SelectItem Value="@("Troubleshooting")">Troubleshooting</SelectItem>
+                                <SelectItem Value="@("Best Practices")">Best Practices</SelectItem>
+                                <SelectItem Value="@("FAQs")">FAQs</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Field>
+                            <FieldLabel>Sort By</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@sortBy">
+                                <SelectItem Value="@("recent")">Most Recent</SelectItem>
+                                <SelectItem Value="@("popular")">Most Popular</SelectItem>
+                                <SelectItem Value="@("title")">Title A-Z</SelectItem>
+                                <SelectItem Value="@("helpful")">Most Helpful</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+        <!-- Popular Categories -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-fire"></i> Popular Topics</h4>
+            </CardHeader>
+            <CardBody>
+                <Row>
+                    @foreach (var topic in popularTopics)
+                    {
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Card Background="Background.Primary" TextColor="TextColor.White" Margin="Margin.Is2.OnY">
+                                <CardBody Class="text-center">
+                                    <div style="font-size: 2rem;">
+                                        <i class="@topic.Icon"></i>
+                                    </div>
+                                    <h5 class="mt-3">@topic.Name</h5>
+                                    <p class="mb-0">@topic.ArticleCount articles</p>
+                                </CardBody>
+                            </Card>
+                        </Column>
+                    }
+                </Row>
+            </CardBody>
+        </Card>
+
+        <!-- Knowledge Base Articles -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-list"></i> Articles</h4>
+            </CardHeader>
+            <CardBody>
+                @foreach (var article in filteredArticles)
+                {
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <Row>
+                                <Column ColumnSize="ColumnSize.Is9">
+                                    <h5>
+                                        <Badge Color="Color.Primary">@article.Category</Badge>
+                                        @article.Title
+                                    </h5>
+                                    <p class="text-muted">@article.Summary</p>
+                                    <div>
+                                        @foreach (var tag in article.Tags)
+                                        {
+                                            <Badge Color="Color.Light" TextColor="TextColor.Dark" Margin="Margin.Is1.FromEnd">
+                                                <i class="fas fa-tag"></i> @tag
+                                            </Badge>
+                                        }
+                                    </div>
+                                </Column>
+                                <Column ColumnSize="ColumnSize.Is3" Class="text-end">
+                                    <div class="mb-2">
+                                        <i class="fas fa-eye text-muted"></i> @article.Views views
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-thumbs-up text-success"></i> @article.HelpfulVotes helpful
+                                    </div>
+                                    <Button Color="Color.Primary" Size="Size.Small" Clicked="@(() => ViewArticle(article.Id))">
+                                        <i class="fas fa-book-open"></i> Read Article
+                                    </Button>
+                                </Column>
+                            </Row>
+                        </CardBody>
+                    </Card>
+                }
+
+                @if (!filteredArticles.Any())
+                {
+                    <Alert Color="Color.Info">
+                        <AlertDescription>
+                            <i class="fas fa-info-circle"></i> No articles found matching your search criteria.
+                        </AlertDescription>
+                    </Alert>
+                }
+            </CardBody>
+        </Card>
+
+        <!-- Featured Articles -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-star"></i> Featured Articles</h4>
+            </CardHeader>
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Card Background="Background.Success" TextColor="TextColor.White">
+                            <CardBody>
+                                <h5><i class="fas fa-rocket"></i> Getting Started Guide</h5>
+                                <p>Complete guide to start using the platform effectively</p>
+                                <Button Color="Color.Light" Size="Size.Small">Read More</Button>
+                            </CardBody>
+                        </Card>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Card Background="Background.Info" TextColor="TextColor.White">
+                            <CardBody>
+                                <h5><i class="fas fa-shield-alt"></i> Security Best Practices</h5>
+                                <p>Learn how to keep your data secure and compliant</p>
+                                <Button Color="Color.Light" Size="Size.Small">Read More</Button>
+                            </CardBody>
+                        </Card>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Card Background="Background.Warning" TextColor="TextColor.Dark">
+                            <CardBody>
+                                <h5><i class="fas fa-tools"></i> Troubleshooting Common Issues</h5>
+                                <p>Quick solutions to frequently encountered problems</p>
+                                <Button Color="Color.Dark" Size="Size.Small">Read More</Button>
+                            </CardBody>
+                        </Card>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+    </CardBody>
+</Card>
+
+<!-- Create Article Modal -->
+<Modal @bind-Visible="@showCreateModal">
+    <ModalContent Centered="true" Size="ModalSize.Large">
+        <ModalHeader>
+            <ModalTitle>Create New Article</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Field>
+                <FieldLabel>Title</FieldLabel>
+                <TextEdit Placeholder="Enter article title" />
+            </Field>
+            <Field>
+                <FieldLabel>Category</FieldLabel>
+                <Select TValue="string">
+                    <SelectItem Value="@("Getting Started")">Getting Started</SelectItem>
+                    <SelectItem Value="@("How-To")">How-To Guides</SelectItem>
+                    <SelectItem Value="@("Troubleshooting")">Troubleshooting</SelectItem>
+                    <SelectItem Value="@("Best Practices")">Best Practices</SelectItem>
+                    <SelectItem Value="@("FAQs")">FAQs</SelectItem>
+                </Select>
+            </Field>
+            <Field>
+                <FieldLabel>Summary</FieldLabel>
+                <MemoEdit Rows="2" Placeholder="Brief summary of the article" />
+            </Field>
+            <Field>
+                <FieldLabel>Content</FieldLabel>
+                <MemoEdit Rows="10" Placeholder="Article content (supports Markdown)" />
+            </Field>
+            <Field>
+                <FieldLabel>Tags</FieldLabel>
+                <TextEdit Placeholder="Enter tags separated by commas" />
+            </Field>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@(() => showCreateModal = false)">Cancel</Button>
+            <Button Color="Color.Primary" Clicked="@SaveArticle">
+                <i class="fas fa-save"></i> Create Article
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+    private string searchText = "";
+    private string selectedCategory = "";
+    private string sortBy = "recent";
+    private bool showCreateModal = false;
+
+    private List<PopularTopic> popularTopics = new();
+    private List<KBArticle> articles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Seed data for demonstration
+        popularTopics = new List<PopularTopic>
+        {
+            new PopularTopic { Id = 1, Title = "Getting Started Guide", ArticleCount = 15, Icon = "fa-rocket", Color = "primary" },
+            new PopularTopic { Id = 2, Title = "User Management", ArticleCount = 23, Icon = "fa-users", Color = "success" },
+            new PopularTopic { Id = 3, Title = "Security & Compliance", ArticleCount = 18, Icon = "fa-shield-alt", Color = "danger" },
+            new PopularTopic { Id = 4, Title = "API Integration", ArticleCount = 12, Icon = "fa-plug", Color = "info" },
+            new PopularTopic { Id = 5, Title = "Troubleshooting", ArticleCount = 31, Icon = "fa-tools", Color = "warning" },
+            new PopularTopic { Id = 6, Title = "Best Practices", ArticleCount = 27, Icon = "fa-star", Color = "dark" }
+        };
+
+        articles = new List<KBArticle>
+        {
+            new KBArticle
+            {
+                Id = 1,
+                Title = "How to Create Your First Organization",
+                Category = "Getting Started",
+                Author = "System Administrator",
+                CreatedDate = DateTime.Now.AddDays(-45),
+                Views = 1247,
+                HelpfulVotes = 89,
+                IsFeatured = true,
+                Summary = "A comprehensive guide to creating and configuring your first organization in the platform."
+            },
+            new KBArticle
+            {
+                Id = 2,
+                Title = "Understanding User Roles and Permissions",
+                Category = "How-To",
+                Author = "Admin Team",
+                CreatedDate = DateTime.Now.AddDays(-30),
+                Views = 923,
+                HelpfulVotes = 67,
+                IsFeatured = true,
+                Summary = "Learn about different user roles, permission levels, and how to assign them effectively."
+            },
+            new KBArticle
+            {
+                Id = 3,
+                Title = "Configuring Two-Factor Authentication",
+                Category = "Best Practices",
+                Author = "Security Team",
+                CreatedDate = DateTime.Now.AddDays(-20),
+                Views = 756,
+                HelpfulVotes = 54,
+                IsFeatured = true,
+                Summary = "Step-by-step instructions for enabling and managing two-factor authentication for your users."
+            },
+            new KBArticle
+            {
+                Id = 4,
+                Title = "Troubleshooting Login Issues",
+                Category = "Troubleshooting",
+                Author = "Support Team",
+                CreatedDate = DateTime.Now.AddDays(-15),
+                Views = 1589,
+                HelpfulVotes = 112,
+                IsFeatured = false,
+                Summary = "Common login problems and their solutions, including password resets and account lockouts."
+            },
+            new KBArticle
+            {
+                Id = 5,
+                Title = "API Authentication and Rate Limits",
+                Category = "How-To",
+                Author = "Developer Team",
+                CreatedDate = DateTime.Now.AddDays(-10),
+                Views = 634,
+                HelpfulVotes = 48,
+                IsFeatured = false,
+                Summary = "Understanding API authentication methods, rate limiting policies, and best practices."
+            },
+            new KBArticle
+            {
+                Id = 6,
+                Title = "Data Export and Backup Procedures",
+                Category = "Best Practices",
+                Author = "Admin Team",
+                CreatedDate = DateTime.Now.AddDays(-8),
+                Views = 512,
+                HelpfulVotes = 41,
+                IsFeatured = false,
+                Summary = "How to export your data and implement regular backup procedures for business continuity."
+            },
+            new KBArticle
+            {
+                Id = 7,
+                Title = "Understanding Audit Logs",
+                Category = "Getting Started",
+                Author = "System Administrator",
+                CreatedDate = DateTime.Now.AddDays(-5),
+                Views = 445,
+                HelpfulVotes = 35,
+                IsFeatured = false,
+                Summary = "Learn how to read and interpret audit logs for compliance and security monitoring."
+            },
+            new KBArticle
+            {
+                Id = 8,
+                Title = "Optimizing System Performance",
+                Category = "Best Practices",
+                Author = "Technical Team",
+                CreatedDate = DateTime.Now.AddDays(-3),
+                Views = 389,
+                HelpfulVotes = 29,
+                IsFeatured = false,
+                Summary = "Tips and techniques for optimizing system performance and reducing resource usage."
+            },
+            new KBArticle
+            {
+                Id = 9,
+                Title = "Managing Document Workflows",
+                Category = "How-To",
+                Author = "Workflow Team",
+                CreatedDate = DateTime.Now.AddDays(-2),
+                Views = 267,
+                HelpfulVotes = 22,
+                IsFeatured = false,
+                Summary = "Creating and managing automated document workflows for approval processes."
+            },
+            new KBArticle
+            {
+                Id = 10,
+                Title = "Frequently Asked Questions",
+                Category = "FAQs",
+                Author = "Support Team",
+                CreatedDate = DateTime.Now.AddDays(-1),
+                Views = 1823,
+                HelpfulVotes = 145,
+                IsFeatured = true,
+                Summary = "Answers to the most commonly asked questions about using the platform effectively."
+            }
+        };
+
+        await Task.CompletedTask;
+    }
+
+    private List<KBArticle> filteredArticles => articles
+        .Where(a => string.IsNullOrEmpty(selectedCategory) || a.Category == selectedCategory)
+        .Where(a => string.IsNullOrEmpty(searchText) || 
+                    a.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                    a.Tags.Any(t => t.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+        .OrderByDescending(a => sortBy == "recent" ? a.Id : 
+                               sortBy == "popular" ? a.Views : 
+                               sortBy == "helpful" ? a.HelpfulVotes : 0)
+        .ToList();
+
+    private void ViewArticle(int id)
+    {
+        // Navigate to article detail page
+    }
+
+    private void SaveArticle()
+    {
+        showCreateModal = false;
+        // TODO: Implement article creation
+    }
+
+    private class PopularTopic
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+        public int ArticleCount { get; set; }
+    }
+
+    private class KBArticle
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; }
+        public string Summary { get; set; } = string.Empty;
+        public List<string> Tags { get; set; } = new();
+        public int Views { get; set; }
+        public int HelpfulVotes { get; set; }
+        public bool IsFeatured { get; set; }
+    }
+}

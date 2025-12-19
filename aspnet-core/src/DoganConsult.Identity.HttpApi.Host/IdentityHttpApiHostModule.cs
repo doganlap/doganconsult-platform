@@ -2,14 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using DoganConsult.Identity.EntityFrameworkCore;
 using DoganConsult.Identity.MultiTenancy;
+using DoganConsult.Identity.HealthChecks;
+using DoganConsult.Shared.Middleware;
+using DoganConsult.Identity.HealthChecks;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Microsoft.OpenApi.Models;
@@ -93,6 +101,7 @@ public class IdentityHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+        ConfigureHealthChecks(context, configuration);
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -198,6 +207,25 @@ public class IdentityHttpApiHostModule : AbpModule
         });
     }
 
+    private void ConfigureHealthChecks(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        var healthChecksBuilder = context.Services.AddHealthChecks();
+        
+        var connectionString = configuration.GetConnectionString("Default");
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            healthChecksBuilder.AddNpgSql(connectionString, name: "postgres", tags: new[] { "db", "sql", "postgresql" });
+        }
+
+        var redisConfiguration = configuration["Redis:Configuration"];
+        if (!string.IsNullOrEmpty(redisConfiguration))
+        {
+            healthChecksBuilder.AddRedis(redisConfiguration, name: "redis", tags: new[] { "cache", "redis" });
+        }
+
+        healthChecksBuilder.AddCheck<IdentityHealthCheck>("identity", tags: new[] { "app", "identity" });
+    }
+
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
@@ -216,6 +244,7 @@ public class IdentityHttpApiHostModule : AbpModule
         }
 
         app.UseCorrelationId();
+        app.UseMiddleware<SecurityHeadersMiddleware>();
         app.MapAbpStaticAssets();
         app.UseRouting();
         app.UseCors();
@@ -242,6 +271,45 @@ public class IdentityHttpApiHostModule : AbpModule
 
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
-        app.UseConfiguredEndpoints();
+        app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+        
+        app.UseConfiguredEndpoints(endpoints =>
+        {
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = async (context, report) =>
+                {
+                    context.Response.ContentType = "application/json";
+                    var result = JsonSerializer.Serialize(new
+                    {
+                        status = report.Status.ToString(),
+                        checks = report.Entries.Select(e => new
+                        {
+                            name = e.Key,
+                            status = e.Value.Status.ToString(),
+                            description = e.Value.Description,
+                            exception = e.Value.Exception?.Message,
+                            duration = e.Value.Duration.ToString()
+                        })
+                    }, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                    });
+                    await context.Response.WriteAsync(result);
+                }
+            });
+            
+            endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = check => check.Tags.Contains("db") || check.Tags.Contains("cache")
+            });
+            
+            endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = _ => false
+            });
+        });
     }
 }

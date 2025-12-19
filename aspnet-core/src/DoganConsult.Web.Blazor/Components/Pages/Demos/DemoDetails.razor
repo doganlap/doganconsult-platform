@@ -1,0 +1,766 @@
+@page "/demos/details/{RequestId:int}"
+@using Blazorise
+@using Blazorise.Components
+@using DoganConsult.Web.Demos
+@inject NavigationManager NavigationManager
+@inject Services.DemoService DemoService
+
+<PageTitle>Demo Request Details - DMO-@RequestId.ToString("D4")</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
+            <Heading Size="HeadingSize.Is3">
+                <Icon Name="IconName.Star" /> Demo Request #DMO-@RequestId.ToString("D4")
+            </Heading>
+            <Button Color="Color.Secondary" Clicked="@(() => NavigationManager.NavigateTo("/demos/requests"))">
+                <Icon Name="IconName.ArrowLeft" /> Back to List
+            </Button>
+        </Div>
+    </CardHeader>
+    <CardBody>
+        @if (demoRequest != null)
+        {
+            <!-- Status Header -->
+            <Row Margin="Margin.Is4.FromBottom">
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Alert Color="@GetStatusAlertColor(demoRequest.Status)" Visible="true">
+                        <Heading Size="HeadingSize.Is5">Current Status: @demoRequest.Status</Heading>
+                        <Paragraph>@demoRequest.CurrentStage</Paragraph>
+                    </Alert>
+                </Column>
+            </Row>
+            <!-- Request Source & Approval Section -->
+            <Row Margin="Margin.Is4.FromBottom">
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Card>
+                        <CardBody>
+                            <Row>
+                                <Column ColumnSize="ColumnSize.Is6">
+                                    <Heading Size="HeadingSize.Is6">Request Information</Heading>
+                                    <Paragraph>
+                                        <strong>Request Source:</strong>
+                                        <Badge Color="@(demoRequest.RequestSource == "Internal" ? Color.Primary : Color.Info)" Margin="Margin.Is2.FromStart">
+                                            <Icon Name="@(demoRequest.RequestSource == "Internal" ? IconName.Users : IconName.User)" />
+                                            @demoRequest.RequestSource Team
+                                        </Badge>
+                                    </Paragraph>
+                                    <Paragraph TextSize="TextSize.Small" TextColor="TextColor.Muted">
+                                        @(demoRequest.RequestSource == "Internal" ? "Initiated by sales/internal team" : "Submitted via customer form")
+                                    </Paragraph>
+                                </Column>
+                                <Column ColumnSize="ColumnSize.Is6">
+                                    <Heading Size="HeadingSize.Is6">Approval Status</Heading>
+                                    @if (demoRequest.RequestSource == "Customer")
+                                    {
+                                        <Paragraph>
+                                            <strong>Status:</strong>
+                                            <Badge Color="@GetApprovalColor(demoRequest.ApprovalStatus)" Margin="Margin.Is2.FromStart">
+                                                @demoRequest.ApprovalStatus
+                                            </Badge>
+                                        </Paragraph>
+                                        @if (demoRequest.ApprovalStatus == "Approved")
+                                        {
+                                            <Paragraph TextSize="TextSize.Small">
+                                                <Icon Name="IconName.Check" /> Approved by @demoRequest.ApprovedBy<br />
+                                                <Icon Name="IconName.Calendar" /> @demoRequest.ApprovedDate?.ToString("MMM dd, yyyy")
+                                            </Paragraph>
+                                        }
+                                        else if (demoRequest.ApprovalStatus == "Pending")
+                                        {
+                                            <Paragraph TextSize="TextSize.Small" TextColor="TextColor.Warning">
+                                                <Icon Name="IconName.Clock" /> Awaiting management approval
+                                            </Paragraph>
+                                            <Buttons Margin="Margin.Is2.FromTop">
+                                                <Button Color="Color.Success" Size="Size.Small">
+                                                    <Icon Name="IconName.Check" /> Approve
+                                                </Button>
+                                                <Button Color="Color.Danger" Size="Size.Small">
+                                                    <Icon Name="IconName.Ban" /> Reject
+                                                </Button>
+                                            </Buttons>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <Paragraph>
+                                            <Badge Color="Color.Success">
+                                                <Icon Name="IconName.CheckCircle" /> Auto-Approved
+                                            </Badge>
+                                        </Paragraph>
+                                        <Paragraph TextSize="TextSize.Small" TextColor="TextColor.Muted">
+                                            Internal requests are automatically approved
+                                        </Paragraph>
+                                    }
+                                </Column>
+                            </Row>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+            <!-- Progress Timeline -->
+            <Row Margin="Margin.Is4.FromBottom">
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Card>
+                        <CardHeader>
+                            <Heading Size="HeadingSize.Is5">Process Timeline</Heading>
+                        </CardHeader>
+                        <CardBody>
+                            <div class="timeline">
+                                <div class="@GetTimelineStepClass(1, demoRequest.ProgressPercentage)">
+                                    <div class="timeline-icon bg-primary">
+                                        <Icon Name="IconName.FileUpload" IconSize="IconSize.Large" />
+                                    </div>
+                                    <div class="timeline-content">
+                                        <Heading Size="HeadingSize.Is6">Request Submitted</Heading>
+                                        <Paragraph TextSize="TextSize.Small">@demoRequest.SubmittedDate.ToString("MMM dd, yyyy")</Paragraph>
+                                    </div>
+                                </div>
+
+                                <div class="@GetTimelineStepClass(2, demoRequest.ProgressPercentage)">
+                                    <div class="timeline-icon bg-info">
+                                        <Icon Name="IconName.Calendar" IconSize="IconSize.Large" />
+                                    </div>
+                                    <div class="timeline-content">
+                                        <Heading Size="HeadingSize.Is6">Demo Scheduled</Heading>
+                                        <Paragraph TextSize="TextSize.Small">
+                                            @(demoRequest.DemoDate?.ToString("MMM dd, yyyy") ?? "Pending")
+                                        </Paragraph>
+                                    </div>
+                                </div>
+
+                                <div class="@GetTimelineStepClass(3, demoRequest.ProgressPercentage)">
+                                    <div class="timeline-icon bg-warning">
+                                        <Icon Name="IconName.Play" IconSize="IconSize.Large" />
+                                    </div>
+                                    <div class="timeline-content">
+                                        <Heading Size="HeadingSize.Is6">Demo Execution</Heading>
+                                        <Paragraph TextSize="TextSize.Small">
+                                            @(demoRequest.Status == "InProgress" || demoRequest.ProgressPercentage > 30 ? "In Progress" : "Pending")
+                                        </Paragraph>
+                                    </div>
+                                </div>
+
+                                <div class="@GetTimelineStepClass(4, demoRequest.ProgressPercentage)">
+                                    <div class="timeline-icon bg-primary">
+                                        <Icon Name="IconName.CheckCircle" IconSize="IconSize.Large" />
+                                    </div>
+                                    <div class="timeline-content">
+                                        <Heading Size="HeadingSize.Is6">Demo Completed</Heading>
+                                        <Paragraph TextSize="TextSize.Small">
+                                            @(demoRequest.Status == "Completed" || demoRequest.ProgressPercentage >= 50 ? "Completed" : "Pending")
+                                        </Paragraph>
+                                    </div>
+                                </div>
+
+                                <div class="@GetTimelineStepClass(5, demoRequest.ProgressPercentage)">
+                                    <div class="timeline-icon bg-success">
+                                        <Icon Name="IconName.ThumbsUp" IconSize="IconSize.Large" />
+                                    </div>
+                                    <div class="timeline-content">
+                                        <Heading Size="HeadingSize.Is6">Customer Acceptance</Heading>
+                                        <Paragraph TextSize="TextSize.Small">
+                                            @(demoRequest.AcceptanceDate?.ToString("MMM dd, yyyy") ?? "Pending")
+                                        </Paragraph>
+                                    </div>
+                                </div>
+
+                                <div class="@GetTimelineStepClass(6, demoRequest.ProgressPercentage)">
+                                    <div class="timeline-icon bg-info">
+                                        <Icon Name="IconName.Settings" IconSize="IconSize.Large" />
+                                    </div>
+                                    <div class="timeline-content">
+                                        <Heading Size="HeadingSize.Is6">POC/Pilot</Heading>
+                                        <Paragraph TextSize="TextSize.Small">
+                                            @(demoRequest.PocStartDate?.ToString("MMM dd, yyyy") ?? "Pending")
+                                        </Paragraph>
+                                    </div>
+                                </div>
+
+                                <div class="@GetTimelineStepClass(7, demoRequest.ProgressPercentage)">
+                                    <div class="timeline-icon bg-dark">
+                                        <Icon Name="IconName.Star" IconSize="IconSize.Large" />
+                                    </div>
+                                    <div class="timeline-content">
+                                        <Heading Size="HeadingSize.Is6">Production</Heading>
+                                        <Paragraph TextSize="TextSize.Small">
+                                            @(demoRequest.ProductionDate?.ToString("MMM dd, yyyy") ?? "Pending")
+                                        </Paragraph>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <div class="progress" style="height: 30px;">
+                                    <div class="@($"progress-bar {GetProgressBarClass(demoRequest.Status)}")" 
+                                         style="@($"width: {demoRequest.ProgressPercentage}%")">
+                                        @demoRequest.ProgressPercentage% Complete
+                                    </div>
+                                </div>
+                            </div>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+
+            <Row>
+                <!-- Customer Information -->
+                <Column ColumnSize="ColumnSize.Is6">
+                    <Card Margin="Margin.Is3.FromBottom">
+                        <CardHeader>
+                            <Heading Size="HeadingSize.Is5">Customer Information</Heading>
+                        </CardHeader>
+                        <CardBody>
+                            <Field>
+                                <FieldLabel>Customer Name:</FieldLabel>
+                                <Paragraph><strong>@demoRequest.CustomerName</strong></Paragraph>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Email:</FieldLabel>
+                                <Paragraph>@demoRequest.CustomerEmail</Paragraph>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Company:</FieldLabel>
+                                <Paragraph>@demoRequest.CustomerName</Paragraph>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Industry:</FieldLabel>
+                                <Paragraph>Technology Services</Paragraph>
+                            </Field>
+                        </CardBody>
+                    </Card>
+                </Column>
+
+                <!-- Demo Information -->
+                <Column ColumnSize="ColumnSize.Is6">
+                    <Card Margin="Margin.Is3.FromBottom">
+                        <CardHeader>
+                            <Heading Size="HeadingSize.Is5">Demo Information</Heading>
+                        </CardHeader>
+                        <CardBody>
+                            <Field>
+                                <FieldLabel>Product/Service:</FieldLabel>
+                                <Paragraph><strong>@demoRequest.ProductName</strong></Paragraph>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Demo Type:</FieldLabel>
+                                <Paragraph>Full Platform Demonstration</Paragraph>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Duration:</FieldLabel>
+                                <Paragraph>2 hours</Paragraph>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Assigned Sales Engineer:</FieldLabel>
+                                <Paragraph>John Smith</Paragraph>
+                            </Field>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+
+            <!-- Requirements & Notes -->
+            <Row>
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Card Margin="Margin.Is3.FromBottom">
+                        <CardHeader>
+                            <Heading Size="HeadingSize.Is5">Requirements & Notes</Heading>
+                        </CardHeader>
+                        <CardBody>
+                            <Field>
+                                <FieldLabel>Customer Requirements:</FieldLabel>
+                                <Paragraph>
+                                    • Integration with existing CRM system<br />
+                                    • Multi-user collaboration features<br />
+                                    • Real-time analytics dashboard<br />
+                                    • Mobile application support<br />
+                                    • Custom branding options
+                                </Paragraph>
+                            </Field>
+                            <Field Margin="Margin.Is3.FromTop">
+                                <FieldLabel>Internal Notes:</FieldLabel>
+                                <Paragraph>
+                                    Customer is evaluating 3 competing solutions. Key decision maker: CTO.
+                                    Budget approved for Q1 2026. Focus demo on scalability and security features.
+                                </Paragraph>
+                            </Field>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+
+            <!-- Action Buttons -->
+            <Row>
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Card>
+                        <CardHeader>
+                            <Heading Size="HeadingSize.Is5">Actions</Heading>
+                        </CardHeader>
+                        <CardBody>
+                            <Buttons>
+                                @if (demoRequest.Status == "Submitted")
+                                {
+                                    <Button Color="Color.Primary">
+                                        <Icon Name="IconName.Calendar" /> Schedule Demo
+                                    </Button>
+                                }
+                                @if (demoRequest.Status == "Scheduled")
+                                {
+                                    <Button Color="Color.Warning">
+                                        <Icon Name="IconName.Play" /> Start Demo
+                                    </Button>
+                                }
+                                @if (demoRequest.Status == "InProgress")
+                                {
+                                    <Button Color="Color.Success">
+                                        <Icon Name="IconName.CheckCircle" /> Mark Completed
+                                    </Button>
+                                }
+                                @if (demoRequest.Status == "Completed")
+                                {
+                                    <Button Color="Color.Success">
+                                        <Icon Name="IconName.ThumbsUp" /> Record Acceptance
+                                    </Button>
+                                    <Button Color="Color.Danger">
+                                        <Icon Name="IconName.Times" /> Decline
+                                    </Button>
+                                }
+                                @if (demoRequest.Status == "Accepted")
+                                {
+                                    <Button Color="Color.Info">
+                                        <Icon Name="IconName.Settings" /> Start POC
+                                    </Button>
+                                }
+                                @if (demoRequest.Status == "POC")
+                                {
+                                    <Button Color="Color.Dark">
+                                        <Icon Name="IconName.Star" /> Move to Production
+                                    </Button>
+                                }
+                                <Button Color="Color.Secondary">
+                                    <Icon Name="IconName.Edit" /> Edit Details
+                                </Button>
+                                <Button Color="Color.Info">
+                                    <Icon Name="IconName.FileDownload" /> Export Report
+                                </Button>
+                            </Buttons>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+        }
+        else
+        {
+            <Alert Color="Color.Warning" Visible="true">
+                <Heading Size="HeadingSize.Is5">Demo Request Not Found</Heading>
+                <Paragraph>The requested demo could not be found.</Paragraph>
+            </Alert>
+        }
+    </CardBody>
+</Card>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 60px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-step {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-step.completed .timeline-icon {
+        opacity: 1;
+    }
+
+    .timeline-step.pending .timeline-icon {
+        opacity: 0.3;
+    }
+
+    .timeline-icon {
+        position: absolute;
+        left: -50px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 3px solid #007bff;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public int RequestId { get; set; }
+
+    private DemoRequestDetail? demoRequest;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDemoRequest();
+    }
+
+    private async Task LoadDemoRequest()
+    {
+        try
+        {
+            var dto = await DemoService.GetAsync(RequestId);
+            if (dto != null)
+            {
+                demoRequest = new DemoRequestDetail
+                {
+                    Id = dto.Id,
+                    CustomerName = dto.CustomerName,
+                    CustomerEmail = dto.CustomerEmail,
+                    ProductName = dto.DemoTitle,
+                    Status = dto.CurrentStatus,
+                    CurrentStage = GetStageFromStatus(dto.CurrentStatus),
+                SubmittedDate = dto.CreationTime,
+                DemoDate = dto.ScheduledDate,
+                AcceptanceDate = dto.ApprovedAt,
+                PocStartDate = dto.ScheduledDate,
+                ProductionDate = dto.CompletedAt,
+                ProgressPercentage = dto.ProgressPercentage,
+                RequestSource = dto.DemoType,
+                ApprovalStatus = dto.ApprovalStatus,
+                ApprovedDate = dto.ApprovedAt,
+                ApprovedBy = dto.ApprovedBy
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading demo request: {ex.Message}");
+            // Fallback to demo data
+            var allRequests = new List<DemoRequestDetail>
+        {
+            new DemoRequestDetail
+            {
+                Id = 1,
+                CustomerName = "Acme Corporation",
+                CustomerEmail = "john.smith@acme.com",
+                ProductName = "Enterprise Analytics Suite",
+                Status = "Production",
+                CurrentStage = "Production Deployment",
+                SubmittedDate = DateTime.Now.AddDays(-90),
+                DemoDate = DateTime.Now.AddDays(-85),
+                AcceptanceDate = DateTime.Now.AddDays(-75),
+                PocStartDate = DateTime.Now.AddDays(-60),
+                ProductionDate = DateTime.Now.AddDays(-15),
+                ProgressPercentage = 100,
+                RequestSource = "Internal",
+                ApprovalStatus = "Approved",
+                ApprovedDate = DateTime.Now.AddDays(-90),
+                ApprovedBy = "Sarah Johnson"
+            },
+            new DemoRequestDetail
+            {
+                Id = 2,
+                CustomerName = "Global Tech Solutions",
+                CustomerEmail = "sarah.jones@globaltech.com",
+                ProductName = "AI-Powered Dashboard",
+                Status = "POC",
+                CurrentStage = "POC Implementation",
+                SubmittedDate = DateTime.Now.AddDays(-45),
+                DemoDate = DateTime.Now.AddDays(-40),
+                AcceptanceDate = DateTime.Now.AddDays(-30),
+                PocStartDate = DateTime.Now.AddDays(-20),
+                ProgressPercentage = 75,
+                RequestSource = "Customer",
+                ApprovalStatus = "Approved",
+                ApprovedDate = DateTime.Now.AddDays(-43),
+                ApprovedBy = "Michael Chen"
+            },
+            new DemoRequestDetail
+            {
+                Id = 3,
+                CustomerName = "Innovative Systems Inc",
+                CustomerEmail = "mike.brown@innovative.com",
+                ProductName = "Document Management Platform",
+                Status = "Accepted",
+                CurrentStage = "Preparing POC",
+                SubmittedDate = DateTime.Now.AddDays(-25),
+                DemoDate = DateTime.Now.AddDays(-20),
+                AcceptanceDate = DateTime.Now.AddDays(-10),
+                ProgressPercentage = 60,
+                RequestSource = "Internal",
+                ApprovalStatus = "Approved",
+                ApprovedDate = DateTime.Now.AddDays(-25),
+                ApprovedBy = "Sarah Johnson"
+            },
+            new DemoRequestDetail
+            {
+                Id = 4,
+                CustomerName = "Digital Ventures LLC",
+                CustomerEmail = "emma.white@digitalventures.com",
+                ProductName = "Workflow Automation Suite",
+                Status = "Completed",
+                CurrentStage = "Awaiting Customer Acceptance",
+                SubmittedDate = DateTime.Now.AddDays(-15),
+                DemoDate = DateTime.Now.AddDays(-10),
+                ProgressPercentage = 50
+            },
+            new DemoRequestDetail
+            {
+                Id = 5,
+                CustomerName = "Enterprise Solutions Co",
+                CustomerEmail = "david.wilson@enterprise.com",
+                ProductName = "Cloud Infrastructure Manager",
+                Status = "InProgress",
+                CurrentStage = "Demo Execution",
+                SubmittedDate = DateTime.Now.AddDays(-8),
+                DemoDate = DateTime.Now.AddDays(-2),
+                ProgressPercentage = 40
+            },
+            new DemoRequestDetail
+            {
+                Id = 6,
+                CustomerName = "NextGen Industries",
+                CustomerEmail = "lisa.anderson@nextgen.com",
+                ProductName = "Analytics Dashboard Pro",
+                Status = "Scheduled",
+                CurrentStage = "Demo Preparation",
+                SubmittedDate = DateTime.Now.AddDays(-5),
+                DemoDate = DateTime.Now.AddDays(3),
+                ProgressPercentage = 25
+            },
+            new DemoRequestDetail
+            {
+                Id = 7,
+                CustomerName = "Smart Business Systems",
+                CustomerEmail = "robert.taylor@smartbiz.com",
+                ProductName = "CRM Integration Platform",
+                Status = "Submitted",
+                CurrentStage = "Pending Approval",
+                SubmittedDate = DateTime.Now.AddDays(-2),
+                ProgressPercentage = 5,
+                RequestSource = "Customer",
+                ApprovalStatus = "Pending",
+                ApprovedDate = null,
+                ApprovedBy = null
+            },
+            new DemoRequestDetail
+            {
+                Id = 8,
+                CustomerName = "Tech Innovators Group",
+                CustomerEmail = "jennifer.davis@techinnovators.com",
+                ProductName = "AI Assistant Platform",
+                Status = "Submitted",
+                CurrentStage = "Pending Scheduling",
+                SubmittedDate = DateTime.Now.AddDays(-1),
+                ProgressPercentage = 5
+            }
+            };
+
+            demoRequest = allRequests.FirstOrDefault(r => r.Id == RequestId);
+        }
+    }
+
+    private async Task HandleApprove()
+    {
+        try
+        {
+            await DemoService.ApproveAsync(RequestId, "Admin");
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error approving demo: {ex.Message}");
+        }
+    }
+
+    private async Task HandleReject()
+    {
+        try
+        {
+            await DemoService.RejectAsync(RequestId, "Admin", "Not meeting requirements");
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error rejecting demo: {ex.Message}");
+        }
+    }
+
+    private async Task HandleSchedule()
+    {
+        try
+        {
+            await DemoService.ScheduleAsync(RequestId, DateTime.UtcNow.AddDays(7));
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error scheduling demo: {ex.Message}");
+        }
+    }
+
+    private async Task HandleStart()
+    {
+        try
+        {
+            await DemoService.StartAsync(RequestId);
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error starting demo: {ex.Message}");
+        }
+    }
+
+    private async Task HandleComplete()
+    {
+        try
+        {
+            await DemoService.CompleteAsync(RequestId);
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error completing demo: {ex.Message}");
+        }
+    }
+
+    private async Task HandleAccept()
+    {
+        try
+        {
+            await DemoService.AcceptAsync(RequestId);
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error accepting demo: {ex.Message}");
+        }
+    }
+
+    private async Task HandleMoveToPoc()
+    {
+        try
+        {
+            await DemoService.MoveToPocAsync(RequestId);
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error moving to POC: {ex.Message}");
+        }
+    }
+
+    private async Task HandleMoveToProduction()
+    {
+        try
+        {
+            await DemoService.MoveToProductionAsync(RequestId);
+            await LoadDemoRequest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error moving to production: {ex.Message}");
+        }
+    }
+
+    private string GetStageFromStatus(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Awaiting Approval",
+            "Approved" => "Demo Scheduled",
+            "Scheduled" => "Demo Scheduled",
+            "InProgress" => "Demo Execution",
+            "Completed" => "Demo Completed",
+            "Accepted" => "Customer Acceptance",
+            "POC" => "POC Phase",
+            "Production" => "Production Deployment",
+            "Rejected" => "Request Rejected",
+            _ => status
+        };
+    }
+
+    private Color GetStatusAlertColor(string status)
+    {
+        return status switch
+        {
+            "Submitted" => Color.Secondary,
+            "Scheduled" => Color.Info,
+            "InProgress" => Color.Warning,
+            "Completed" => Color.Primary,
+            "Accepted" => Color.Success,
+            "POC" => Color.Info,
+            "Production" => Color.Dark,
+            _ => Color.Light
+        };
+    }
+
+    private string GetProgressBarClass(string status)
+    {
+        return status switch
+        {
+            "Submitted" => "bg-secondary",
+            "Scheduled" => "bg-info",
+            "InProgress" => "bg-warning",
+            "Completed" => "bg-primary",
+            "Accepted" => "bg-success",
+            "POC" => "bg-info",
+            "Production" => "bg-dark",
+            _ => "bg-light"
+        };
+    }
+
+    private string GetTimelineStepClass(int stepNumber, int progressPercentage)
+    {
+        var stepThreshold = (stepNumber - 1) * 15;
+        return progressPercentage > stepThreshold ? "timeline-step completed" : "timeline-step pending";
+    }
+
+    private Color GetApprovalColor(string approvalStatus)
+    {
+        return approvalStatus switch
+        {
+            "Approved" => Color.Success,
+            "Pending" => Color.Warning,
+            "Rejected" => Color.Danger,
+            _ => Color.Secondary
+        };
+    }
+
+    private class DemoRequestDetail
+    {
+        public int Id { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string CurrentStage { get; set; } = string.Empty;
+        public DateTime SubmittedDate { get; set; }
+        public DateTime? DemoDate { get; set; }
+        public DateTime? AcceptanceDate { get; set; }
+        public DateTime? PocStartDate { get; set; }
+        public DateTime? ProductionDate { get; set; }
+        public int ProgressPercentage { get; set; }
+        public string RequestSource { get; set; } = "Internal";
+        public string ApprovalStatus { get; set; } = "Approved";
+        public DateTime? ApprovedDate { get; set; }
+        public string? ApprovedBy { get; set; }
+    }
+}

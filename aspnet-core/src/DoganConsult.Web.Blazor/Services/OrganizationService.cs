@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using DoganConsult.Web.Blazor.Organizations;
 using Volo.Abp.Application.Dtos;
@@ -14,19 +15,21 @@ public class OrganizationService : ITransientDependency
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<OrganizationService> _logger;
-    private const string BaseUrl = "https://localhost:44337/api/organization/organizations";
+    private readonly string _baseUrl;
 
-    public OrganizationService(HttpClient httpClient, ILogger<OrganizationService> logger)
+    public OrganizationService(HttpClient httpClient, ILogger<OrganizationService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
+        var gatewayBaseUrl = configuration["RemoteServices:Default:BaseUrl"] ?? "http://localhost:5000";
+        _baseUrl = $"{gatewayBaseUrl.TrimEnd('/')}/api/organization/organizations";
     }
 
     public async Task<PagedResultDto<OrganizationDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
         try
         {
-            var url = $"{BaseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
+            var url = $"{_baseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
             if (!string.IsNullOrEmpty(input.Sorting))
             {
                 url += $"&Sorting={input.Sorting}";
@@ -46,7 +49,7 @@ public class OrganizationService : ITransientDependency
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<OrganizationDto>($"{BaseUrl}/{id}");
+            return await _httpClient.GetFromJsonAsync<OrganizationDto>($"{_baseUrl}/{id}");
         }
         catch (Exception ex)
         {
@@ -59,7 +62,7 @@ public class OrganizationService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync(BaseUrl, input);
+            var response = await _httpClient.PostAsJsonAsync(_baseUrl, input);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<OrganizationDto>();
         }
@@ -74,7 +77,7 @@ public class OrganizationService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/{id}", input);
+            var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{id}", input);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<OrganizationDto>();
         }
@@ -89,7 +92,7 @@ public class OrganizationService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}");
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}");
             response.EnsureSuccessStatusCode();
         }
         catch (Exception ex)

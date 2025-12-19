@@ -11,10 +11,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\DoganConsult.Organization.Application\DoganConsult.Organization.Application.csproj" />
     <ProjectReference Include="..\DoganConsult.Organization.Domain.Tests\DoganConsult.Organization.Domain.Tests.csproj" />
+    <ProjectReference Include="..\..\src\DoganConsult.Organization.EntityFrameworkCore\DoganConsult.Organization.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\DoganConsult.Organization.TestBase\DoganConsult.Organization.TestBase.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore.Sqlite" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
   </ItemGroup>
 
 </Project>

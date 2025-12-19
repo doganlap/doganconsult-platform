@@ -1,0 +1,668 @@
+@page "/demos/create"
+@page "/demos/create/{Source}"
+@using Blazorise
+@using Blazorise.Components
+@using DoganConsult.Web.Demos
+@inject NavigationManager NavigationManager
+@inject Services.DemoService DemoService
+
+<PageTitle>Create New Demo Request</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
+            <Heading Size="HeadingSize.Is3">
+                <Icon Name="IconName.Add" /> New Demo Request
+            </Heading>
+            <Button Color="Color.Secondary" Clicked="@(() => NavigationManager.NavigateTo("/demos/requests"))">
+                <Icon Name="IconName.ArrowLeft" /> Back to List
+            </Button>
+        </Div>
+    </CardHeader>
+    <CardBody>
+        <Alert Color="Color.Info" Visible="true">
+            <Heading Size="HeadingSize.Is5">📋 Demo Request Submission Wizard</Heading>
+            <Paragraph>Fill in the customer and demo details below to create a new demo request. The process will track from submission through production deployment.</Paragraph>
+        </Alert>
+
+        <!-- User Guidance Panel -->
+        <Card Background="Background.Light" Margin="Margin.Is3.FromBottom" Border="Border.Primary">
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is8">
+                        <Heading Size="HeadingSize.Is6" Margin="Margin.Is2.FromBottom">
+                            <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Solid" TextColor="TextColor.Primary" /> Quick Guide
+                        </Heading>
+                        <Paragraph Margin="Margin.Is0.FromBottom">
+                            <strong>Required Fields:</strong> Customer name, email, company name, and product/service<br/>
+                            <strong>Timeline:</strong> Most demo requests are scheduled within 3-5 business days<br/>
+                            <strong>Best Practices:</strong> Include detailed requirements and use cases for faster approval
+                        </Paragraph>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4" TextAlignment="TextAlignment.End">
+                        <Button Color="Color.Primary" Outline Clicked="@(() => showHelpPanel = !showHelpPanel)">
+                            <Icon Name="@(showHelpPanel ? IconName.ChevronUp : IconName.QuestionCircle)" /> @(showHelpPanel ? "Hide Help" : "Need Help?")
+                        </Button>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+        <!-- Expandable Help Panel -->
+        @if (showHelpPanel)
+        {
+            <Card Background="Background.Success" Border="Border.Success" Margin="Margin.Is3.FromBottom">
+                <CardBody>
+                    <Heading Size="HeadingSize.Is5" TextColor="TextColor.Success">
+                        <Icon Name="IconName.Lightbulb" /> Help & Best Practices
+                    </Heading>
+                    
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Heading Size="HeadingSize.Is6" TextColor="TextColor.Dark">📞 Customer Information</Heading>
+                            <UnorderedList>
+                                <UnorderedListItem><strong>Name:</strong> Full decision maker name</UnorderedListItem>
+                                <UnorderedListItem><strong>Email:</strong> Primary contact email</UnorderedListItem>
+                                <UnorderedListItem><strong>Phone:</strong> Include country code</UnorderedListItem>
+                                <UnorderedListItem><strong>Industry:</strong> Helps us customize the demo</UnorderedListItem>
+                            </UnorderedList>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Heading Size="HeadingSize.Is6" TextColor="TextColor.Dark">🎯 Demo Configuration</Heading>
+                            <UnorderedList>
+                                <UnorderedListItem><strong>Standard:</strong> Overview + basic features (1hr)</UnorderedListItem>
+                                <UnorderedListItem><strong>Extended:</strong> Detailed walkthrough (2hrs)</UnorderedListItem>
+                                <UnorderedListItem><strong>Technical:</strong> Deep dive for engineers (3hrs)</UnorderedListItem>
+                                <UnorderedListItem><strong>Executive:</strong> High-level ROI focus (30min)</UnorderedListItem>
+                            </UnorderedList>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Heading Size="HeadingSize.Is6" TextColor="TextColor.Dark">✅ Success Tips</Heading>
+                            <UnorderedList>
+                                <UnorderedListItem>Provide clear use cases and pain points</UnorderedListItem>
+                                <UnorderedListItem>List specific features they want to see</UnorderedListItem>
+                                <UnorderedListItem>Mention competing solutions (if any)</UnorderedListItem>
+                                <UnorderedListItem>Include decision timeline and budget</UnorderedListItem>
+                            </UnorderedList>
+                        </Column>
+                    </Row>
+
+                    <Alert Color="Color.Warning" Visible="true" Margin="Margin.Is3.FromTop">
+                        <Icon Name="IconName.ExclamationTriangle" /> <strong>Pro Tip:</strong> Requests with detailed requirements are approved 3x faster and get priority scheduling!
+                    </Alert>
+                </CardBody>
+            </Card>
+        }
+
+        <Validations @ref="validations" Mode="ValidationMode.Manual">
+            <Row>
+                <!-- Customer Information Section -->
+                <Column ColumnSize="ColumnSize.Is6">
+                    <Card Margin="Margin.Is3.FromBottom">
+                        <CardHeader>
+                            <Heading Size="HeadingSize.Is5">Customer Information</Heading>
+                        </CardHeader>
+                        <CardBody>
+                            <Validation>
+                                <Field>
+                                    <FieldLabel>
+                                        Customer Name * 
+                                        <Tooltip Text="Full name of the primary decision maker or contact person">
+                                            <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                        </Tooltip>
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@model.CustomerName" Placeholder="e.g., John Smith, Sarah Johnson">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                    <FieldHelp>Enter the full name of the person who will attend the demo</FieldHelp>
+                                </Field>
+                            </Validation>
+
+                            <Validation>
+                                <Field>
+                                    <FieldLabel>
+                                        Email Address * 
+                                        <Tooltip Text="Primary email address for all demo communications">
+                                            <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                        </Tooltip>
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@model.CustomerEmail" Placeholder="customer@company.com">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                    <FieldHelp>This email will receive demo confirmation and calendar invites</FieldHelp>
+                                </Field>
+                            </Validation>
+
+                            <Validation>
+                                <Field>
+                                    <FieldLabel>
+                                        Company Name * 
+                                        <Tooltip Text="Official company name for demo customization and reporting">
+                                            <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                        </Tooltip>
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@model.CompanyName" Placeholder="e.g., Acme Corporation, TechStart Inc">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                    <FieldHelp>Company name helps us prepare customized demo materials</FieldHelp>
+                                </Field>
+                            </Validation>
+
+                            <Field>
+                                <FieldLabel>
+                                    Phone Number 
+                                    <Tooltip Text="Optional but recommended for quick scheduling confirmations">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <TextEdit @bind-Text="@model.PhoneNumber" Placeholder="+1 (555) 123-4567" />
+                                <FieldHelp>Include country code for international numbers</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Industry 
+                                    <Tooltip Text="Select the industry to customize demo scenarios and examples">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <Select TValue="string" @bind-SelectedValue="@model.Industry">
+                                    <SelectItem Value="@("")">Select Industry</SelectItem>
+                                    <SelectItem Value="@("Technology")">Technology</SelectItem>
+                                    <SelectItem Value="@("Finance")">Finance</SelectItem>
+                                    <SelectItem Value="@("Healthcare")">Healthcare</SelectItem>
+                                    <SelectItem Value="@("Manufacturing")">Manufacturing</SelectItem>
+                                    <SelectItem Value="@("Retail")">Retail</SelectItem>
+                                    <SelectItem Value="@("Education")">Education</SelectItem>
+                                    <SelectItem Value="@("Other")">Other</SelectItem>
+                                </Select>
+                                <FieldHelp>Helps us show relevant industry-specific features and use cases</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Company Size 
+                                    <Tooltip Text="Number of employees helps determine appropriate solution tier">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <Select TValue="string" @bind-SelectedValue="@model.CompanySize">
+                                    <SelectItem Value="@("")">Select Size</SelectItem>
+                                    <SelectItem Value="@("1-10")">1-10 employees (Small)</SelectItem>
+                                    <SelectItem Value="@("11-50")">11-50 employees (Startup)</SelectItem>
+                                    <SelectItem Value="@("51-200")">51-200 employees (Mid-Market)</SelectItem>
+                                    <SelectItem Value="@("201-500")">201-500 employees (Enterprise)</SelectItem>
+                                    <SelectItem Value="@("501+")">501+ employees (Large Enterprise)</SelectItem>
+                                </Select>
+                                <FieldHelp>Company size helps us recommend the right solution tier and pricing</FieldHelp>
+                            </Field>
+                        </CardBody>
+                    </Card>
+                </Column>
+
+                <!-- Demo Information Section -->
+                <Column ColumnSize="ColumnSize.Is6">
+                    <Card Margin="Margin.Is3.FromBottom">
+                        <CardHeader>
+                            <Heading Size="HeadingSize.Is5">Demo Information</Heading>
+                        </CardHeader>
+                        <CardBody>
+                            <Validation>
+                                <Field>
+                                    <FieldLabel>
+                                        Product/Service * 
+                                        <Tooltip Text="Select the product or service the customer is interested in">
+                                            <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                        </Tooltip>
+                                    </FieldLabel>
+                                    <Select TValue="string" @bind-SelectedValue="@model.ProductName">
+                                        <SelectItem Value="@("")">Select Product</SelectItem>
+                                        <SelectItem Value="@("Enterprise Analytics Suite")">🎨 Enterprise Analytics Suite</SelectItem>
+                                        <SelectItem Value="@("AI-Powered Dashboard")">🤖 AI-Powered Dashboard</SelectItem>
+                                        <SelectItem Value="@("Document Management Platform")">📄 Document Management Platform</SelectItem>
+                                        <SelectItem Value="@("Workflow Automation Suite")">⚡ Workflow Automation Suite</SelectItem>
+                                        <SelectItem Value="@("Cloud Infrastructure Manager")">☁️ Cloud Infrastructure Manager</SelectItem>
+                                        <SelectItem Value="@("CRM Integration Platform")">🔗 CRM Integration Platform</SelectItem>
+                                        <SelectItem Value="@("Custom Solution")">🎯 Custom Solution</SelectItem>
+                                    </Select>
+                                    <ValidationError />
+                                    <FieldHelp>Choose the product to demonstrate - select "Custom Solution" if multiple products</FieldHelp>
+                                </Field>
+                            </Validation>
+
+                            <Field>
+                                <FieldLabel>
+                                    Demo Type 
+                                    <Tooltip Text="Choose the demo format based on audience and depth needed">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <Select TValue="string" @bind-SelectedValue="@model.DemoType">
+                                    <SelectItem Value="@("Standard")">📊 Standard Demo (1 hour) - Overview + key features</SelectItem>
+                                    <SelectItem Value="@("Extended")">📈 Extended Demo (2 hours) - Detailed walkthrough</SelectItem>
+                                    <SelectItem Value="@("Technical")">🔧 Technical Deep Dive (3 hours) - For technical teams</SelectItem>
+                                    <SelectItem Value="@("Executive")">👔 Executive Overview (30 min) - ROI focused</SelectItem>
+                                </Select>
+                                <FieldHelp>Standard demos work for most use cases. Choose Technical for developer audiences.</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Preferred Demo Date 
+                                    <Tooltip Text="Select your preferred date - we'll confirm within 1 business day">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <DateEdit TValue="DateTime?" @bind-Date="@model.PreferredDemoDate" />
+                                <FieldHelp>Typical lead time is 3-5 business days. We'll suggest alternatives if unavailable.</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Number of Attendees 
+                                    <Tooltip Text="How many people will attend? Helps us prepare materials">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <NumericEdit TValue="int" @bind-Value="@model.NumberOfAttendees" Min="1" Max="50" />
+                                <FieldHelp>We recommend 3-8 attendees for optimal engagement. Max 50 attendees.</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Urgency Level 
+                                    <Tooltip Text="How quickly do you need the demo? Affects prioritization">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <Select TValue="string" @bind-SelectedValue="@model.UrgencyLevel">
+                                    <SelectItem Value="@("Low")">🟢 Low - Within 30 days</SelectItem>
+                                    <SelectItem Value="@("Medium")">🟡 Medium - Within 2 weeks</SelectItem>
+                                    <SelectItem Value="@("High")">🟠 High - Within 1 week</SelectItem>
+                                    <SelectItem Value="@("Critical")">🔴 Critical - ASAP (24-48 hours)</SelectItem>
+                                </Select>
+                                <FieldHelp>Critical requests are reviewed immediately by management for priority scheduling</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Estimated Budget Range 
+                                    <Tooltip Text="Optional - helps us recommend appropriate solution tiers">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <Select TValue="string" @bind-SelectedValue="@model.BudgetRange">
+                                    <SelectItem Value="@("")">Select Range (Optional)</SelectItem>
+                                    <SelectItem Value="@("Under $10K")">💰 Under $10,000 (Starter)</SelectItem>
+                                    <SelectItem Value="@("$10K-$50K")">💰💰 $10,000 - $50,000 (Professional)</SelectItem>
+                                    <SelectItem Value="@("$50K-$100K")">💰💰💰 $50,000 - $100,000 (Business)</SelectItem>
+                                    <SelectItem Value="@("$100K-$500K")">💰💰💰💰 $100,000 - $500,000 (Enterprise)</SelectItem>
+                                    <SelectItem Value="@("$500K+")">💰💰💰💰💰 $500,000+ (Enterprise Plus)</SelectItem>
+                                </Select>
+                                <FieldHelp>Budget info helps us focus on features within your price range. Kept confidential.</FieldHelp>
+                            </Field>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+
+            <!-- Requirements Section -->
+            <Row>
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Card Margin="Margin.Is3.FromBottom" Border="Border.Success">
+                        <CardHeader Background="Background.Success">
+                            <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
+                                <Heading Size="HeadingSize.Is5" TextColor="TextColor.White">
+                                    <Icon Name="IconName.FileAlt" /> Requirements & Additional Information
+                                </Heading>
+                                <Button Color="Color.Light" Size="Size.Small" Clicked="@FillSampleRequirements">
+                                    <Icon Name="IconName.Star" /> Use Template
+                                </Button>
+                            </Div>
+                        </CardHeader>
+                        <CardBody>
+                            <Alert Color="Color.Success" Visible="true" Margin="Margin.Is2.FromBottom">
+                                <Icon Name="IconName.Star" /> <strong>Pro Tip:</strong> Detailed requirements increase approval speed by 3x! Click "Use Template" for suggested format.
+                            </Alert>
+
+                            <Field>
+                                <FieldLabel>
+                                    Key Requirements 
+                                    <Tooltip Text="Must-have features and capabilities for the customer">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <MemoEdit @bind-Text="@model.Requirements" Rows="4" Placeholder="Example: Multi-user collaboration, Real-time reporting, API integrations, Mobile access, SSO authentication"></MemoEdit>
+                                <FieldHelp>List specific features the customer needs. Be as detailed as possible (e.g., "Support for 100+ concurrent users")</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Primary Use Cases 
+                                    <Tooltip Text="How will the customer use the product? What workflows?">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <MemoEdit @bind-Text="@model.UseCases" Rows="3" Placeholder="Example: Sales team needs to track leads, Marketing needs campaign analytics, Management needs executive dashboards"></MemoEdit>
+                                <FieldHelp>Describe 2-3 main use cases we should demonstrate. Include who will use it and how.</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Specific Pain Points 
+                                    <Tooltip Text="What problems are they trying to solve? Current system issues?">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <MemoEdit @bind-Text="@model.PainPoints" Rows="3" Placeholder="Example: Current system is too slow, Data is siloed across departments, Manual reporting takes 10+ hours per week"></MemoEdit>
+                                <FieldHelp>What frustrations or inefficiencies are they experiencing? This helps us position our solution.</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Competing Solutions 
+                                    <Tooltip Text="What other products are they evaluating? (Helps with competitive positioning)">
+                                        <Icon Name="IconName.InfoCircle" IconStyle="IconStyle.Regular" TextColor="TextColor.Info" />
+                                    </Tooltip>
+                                </FieldLabel>
+                                <TextEdit @bind-Text="@model.CompetingSolutions" Placeholder="e.g., Salesforce, HubSpot, Microsoft Dynamics" />
+                                <FieldHelp>Optional but helpful - lets us prepare competitive comparisons and highlight our differentiators</FieldHelp>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>Decision Timeline</FieldLabel>
+                                <TextEdit @bind-Text="@model.DecisionTimeline" Placeholder="When does the customer plan to make a decision?" />
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>Internal Notes</FieldLabel>
+                                <MemoEdit @bind-Text="@model.InternalNotes" Rows="3" Placeholder="Add any internal notes for the sales team..."></MemoEdit>
+                            </Field>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+
+            <!-- Form Completion Summary -->
+            <Row>
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Card Background="Background.Light" Margin="Margin.Is3.FromBottom">
+                        <CardBody>
+                            <Heading Size="HeadingSize.Is6" Margin="Margin.Is2.FromBottom">
+                                <Icon Name="IconName.CheckCircle" TextColor="@GetCompletionColor()" /> Form Completion: @CalculateCompletionPercentage()%
+                            </Heading>
+                            <Progress Value="@CalculateCompletionPercentage()" Color="@GetProgressColor()" Striped="true">
+                                <ProgressBar>@CalculateCompletionPercentage()%</ProgressBar>
+                            </Progress>
+                            <Paragraph Margin="Margin.Is2.FromTop">
+                                @if (CalculateCompletionPercentage() < 50)
+                                {
+                                    <span class="text-warning">⚠️ Please fill in the required fields to submit</span>
+                                }
+                                else if (CalculateCompletionPercentage() < 75)
+                                {
+                                    <span class="text-info">ℹ️ Good start! Add more details for faster approval</span>
+                                }
+                                else
+                                {
+                                    <span class="text-success">✅ Great! Your request has excellent detail and will be prioritized</span>
+                                }
+                            </Paragraph>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </Row>
+
+            <!-- Action Buttons -->
+            <Row>
+                <Column ColumnSize="ColumnSize.Is12">
+                    <Div Flex="Flex.JustifyContent.End">
+                        <Buttons>
+                            <Button Color="Color.Secondary" Clicked="@CancelForm">
+                                <Icon Name="IconName.Times" /> Cancel
+                            </Button>
+                            <Button Color="Color.Primary" Clicked="@SaveDraft">
+                                <Icon Name="IconName.Save" /> Save as Draft
+                            </Button>
+                            <Button Color="Color.Success" Clicked="@SubmitRequest" Disabled="@(CalculateCompletionPercentage() < 50)">
+                                <Icon Name="IconName.Check" /> Submit Request
+                            </Button>
+                        </Buttons>
+                    </Div>
+                </Column>
+            </Row>
+        </Validations>
+    </CardBody>
+</Card>
+
+@code {
+    [Parameter]
+    public string? Source { get; set; }
+
+    private Validations? validations;
+    private DemoRequestModel model = new();
+    private bool showHelpPanel = false;
+
+    protected override void OnInitialized()
+    {
+        // Set source from URL parameter or default to Internal
+        if (!string.IsNullOrEmpty(Source))
+        {
+            model.RequestSource = Source;
+        }
+    }
+
+    private void FillSampleRequirements()
+    {
+        if (string.IsNullOrEmpty(model.ProductName))
+        {
+            model.ProductName = "Enterprise Analytics Suite";
+        }
+
+        // Smart template based on industry and product
+        var product = model.ProductName.ToLower();
+
+        // Generate contextual requirements
+        if (product.Contains("analytics") || product.Contains("dashboard"))
+        {
+            model.Requirements = @"• Real-time data visualization and reporting
+• Multi-user collaboration with role-based access
+• Custom dashboard creation and templating
+• Data export capabilities (CSV, Excel, PDF)
+• API integrations with existing data sources
+• Mobile-responsive design for on-the-go access";
+
+            model.UseCases = @"1. Executive dashboards with KPI tracking
+2. Sales pipeline analysis and conversion tracking
+3. Resource allocation and efficiency monitoring";
+
+            model.PainPoints = @"• Current reporting is manual and takes 10+ hours per week
+• Data is scattered across multiple systems
+• No real-time visibility into key metrics";
+        }
+        else if (product.Contains("workflow") || product.Contains("automation"))
+        {
+            model.Requirements = @"• Drag-and-drop workflow builder (no-code)
+• Integration with existing tools (email, CRM)
+• Conditional logic and branching
+• Automated notifications and escalations
+• Audit trail and compliance tracking";
+
+            model.UseCases = @"1. HR onboarding automation
+2. Invoice approval workflows
+3. Customer support ticket routing";
+
+            model.PainPoints = @"• Manual processes causing delays and errors
+• Approval bottlenecks slow down operations
+• Lack of visibility into process status";
+        }
+        else if (product.Contains("document"))
+        {
+            model.Requirements = @"• Centralized document storage with version control
+• Advanced search and tagging
+• Granular permission controls
+• Electronic signature integration
+• Collaboration tools (comments, annotations)";
+
+            model.UseCases = @"1. Contract management and version tracking
+2. Collaborative document editing
+3. Secure storage with retention policies";
+
+            model.PainPoints = @"• Documents stored in multiple locations
+• Version control issues causing confusion
+• Time wasted searching for documents";
+        }
+        else
+        {
+            model.Requirements = @"• List 3-5 must-have features and capabilities
+• Include any technical requirements
+• Specify integration requirements
+• Note compliance or regulatory requirements";
+
+            model.UseCases = @"1. Primary Use Case: [Describe main workflow]
+2. Secondary Use Case: [Describe supporting workflow]";
+
+            model.PainPoints = @"• Current manual process taking [X hours/week]
+• Integration issues with existing systems
+• Scalability limitations";
+        }
+
+        // Industry-specific additions
+        if (!string.IsNullOrEmpty(model.Industry))
+        {
+            if (model.Industry.ToLower().Contains("healthcare"))
+            {
+                model.Requirements += "\n• HIPAA compliance and data encryption";
+            }
+            else if (model.Industry.ToLower().Contains("finance"))
+            {
+                model.Requirements += "\n• SOC 2 compliance and audit trails";
+            }
+        }
+    }
+
+    private int CalculateCompletionPercentage()
+    {
+        int totalFields = 15; // Total meaningful fields
+        int completedFields = 0;
+
+        // Required fields (higher weight)
+        if (!string.IsNullOrEmpty(model.CustomerName)) completedFields++;
+        if (!string.IsNullOrEmpty(model.CustomerEmail)) completedFields++;
+        if (!string.IsNullOrEmpty(model.CompanyName)) completedFields++;
+        if (!string.IsNullOrEmpty(model.ProductName)) completedFields++;
+        
+        // Important optional fields
+        if (!string.IsNullOrEmpty(model.PhoneNumber)) completedFields++;
+        if (!string.IsNullOrEmpty(model.Industry)) completedFields++;
+        if (!string.IsNullOrEmpty(model.CompanySize)) completedFields++;
+        if (model.PreferredDemoDate.HasValue) completedFields++;
+        if (model.NumberOfAttendees > 0) completedFields++;
+        
+        // Requirements (high value fields)
+        if (!string.IsNullOrEmpty(model.Requirements)) completedFields++;
+        if (!string.IsNullOrEmpty(model.UseCases)) completedFields++;
+        if (!string.IsNullOrEmpty(model.PainPoints)) completedFields++;
+        
+        // Additional details
+        if (!string.IsNullOrEmpty(model.BudgetRange)) completedFields++;
+        if (!string.IsNullOrEmpty(model.CompetingSolutions)) completedFields++;
+        if (!string.IsNullOrEmpty(model.DecisionTimeline)) completedFields++;
+
+        return (int)((completedFields / (double)totalFields) * 100);
+    }
+
+    private Color GetProgressColor()
+    {
+        var percentage = CalculateCompletionPercentage();
+        if (percentage < 50) return Color.Warning;
+        if (percentage < 75) return Color.Info;
+        return Color.Success;
+    }
+
+    private TextColor GetCompletionColor()
+    {
+        var percentage = CalculateCompletionPercentage();
+        if (percentage < 50) return TextColor.Warning;
+        if (percentage < 75) return TextColor.Info;
+        return TextColor.Success;
+    }
+
+    private void CancelForm()
+    {
+        NavigationManager.NavigateTo("/demos/requests");
+    }
+
+    private async Task SaveDraft()
+    {
+        // Draft functionality - future enhancement
+        await Task.CompletedTask;
+        NavigationManager.NavigateTo("/demos/requests");
+    }
+
+    private async Task SubmitRequest()
+    {
+        if (!await validations!.ValidateAll())
+        {
+            return;
+        }
+
+        try
+        {
+            var createDto = new CreateDemoRequestDto
+            {
+                CustomerName = model.CustomerName,
+                CustomerEmail = model.CustomerEmail,
+                CustomerPhone = model.PhoneNumber,
+                CompanyName = model.CompanyName,
+                Industry = model.Industry,
+                DemoTitle = $"{model.ProductName} Demo",
+                DemoDescription = $"Demo for {model.CompanyName}",
+                DemoType = model.DemoType,
+                RequestedDate = model.PreferredDemoDate ?? DateTime.UtcNow.AddDays(7),
+                EstimatedDuration = 60,
+                SpecialRequirements = model.Requirements,
+                Priority = model.UrgencyLevel,
+                DemoEnvironment = "Cloud",
+                RequestSource = model.RequestSource
+            };
+
+            await DemoService.CreateAsync(createDto);
+            NavigationManager.NavigateTo("/demos/requests");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating demo request: {ex.Message}");
+            // TODO: Show error toast notification
+        }
+    }
+
+    private class DemoRequestModel
+    {
+        public string RequestSource { get; set; } = "Internal";
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Industry { get; set; } = string.Empty;
+        public string CompanySize { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public string DemoType { get; set; } = "Standard";
+        public DateTime? PreferredDemoDate { get; set; }
+        public int NumberOfAttendees { get; set; } = 5;
+        public string UrgencyLevel { get; set; } = "Medium";
+        public string BudgetRange { get; set; } = string.Empty;
+        public string Requirements { get; set; } = string.Empty;
+        public string UseCases { get; set; } = string.Empty;
+        public string PainPoints { get; set; } = string.Empty;
+        public string CompetingSolutions { get; set; } = string.Empty;
+        public string DecisionTimeline { get; set; } = string.Empty;
+        public string InternalNotes { get; set; } = string.Empty;
+    }
+}

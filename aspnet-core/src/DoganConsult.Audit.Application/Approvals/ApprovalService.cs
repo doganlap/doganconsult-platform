@@ -25,6 +25,7 @@ public class ApprovalService : ApplicationService, IApprovalService
     private readonly IRepository<ApprovalHistory, Guid> _historyRepository;
     private readonly IEmailSender _emailSender;
     private readonly ILogger<ApprovalService> _logger;
+    private readonly AuditApplicationMappers _mapper;
 
     public ApprovalService(
         IApprovalRequestRepository approvalRequestRepository,
@@ -32,7 +33,8 @@ public class ApprovalService : ApplicationService, IApprovalService
         IRepository<ApprovalRequest, Guid> approvalRepository,
         IRepository<ApprovalHistory, Guid> historyRepository,
         IEmailSender emailSender,
-        ILogger<ApprovalService> logger)
+        ILogger<ApprovalService> logger,
+        AuditApplicationMappers mapper)
     {
         _approvalRequestRepository = approvalRequestRepository;
         _approvalHistoryRepository = approvalHistoryRepository;
@@ -40,20 +42,21 @@ public class ApprovalService : ApplicationService, IApprovalService
         _historyRepository = historyRepository;
         _emailSender = emailSender;
         _logger = logger;
+        _mapper = mapper;
     }
 
     [Authorize(AuditPermissions.Approvals.Default)]
     public async Task<ApprovalRequestDto> GetAsync(Guid id)
     {
         var approval = await _approvalRequestRepository.GetAsync(id);
-        return ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(approval);
+        return _mapper.ToApprovalRequestDto(approval);
     }
 
     [Authorize(AuditPermissions.Approvals.Default)]
     public async Task<ApprovalRequestDto?> GetByRequestNumberAsync(string requestNumber)
     {
         var approval = await _approvalRequestRepository.FindByRequestNumberAsync(requestNumber);
-        return approval != null ? ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(approval) : null;
+        return approval != null ? _mapper.ToApprovalRequestDto(approval) : null;
     }
 
     [Authorize(AuditPermissions.Approvals.Default)]
@@ -95,7 +98,7 @@ public class ApprovalService : ApplicationService, IApprovalService
 
         return new PagedResultDto<ApprovalRequestDto>(
             totalCount,
-            ObjectMapper.Map<List<ApprovalRequest>, List<ApprovalRequestDto>>(items)
+            _mapper.ToApprovalRequestDtoList(items)
         );
     }
 
@@ -114,7 +117,7 @@ public class ApprovalService : ApplicationService, IApprovalService
 
         return new PagedResultDto<ApprovalRequestDto>(
             totalCount,
-            ObjectMapper.Map<List<ApprovalRequest>, List<ApprovalRequestDto>>(items)
+            _mapper.ToApprovalRequestDtoList(items)
         );
     }
 
@@ -135,7 +138,7 @@ public class ApprovalService : ApplicationService, IApprovalService
 
         return new PagedResultDto<ApprovalRequestDto>(
             totalCount,
-            ObjectMapper.Map<List<ApprovalRequest>, List<ApprovalRequestDto>>(items)
+            _mapper.ToApprovalRequestDtoList(items)
         );
     }
 
@@ -188,7 +191,7 @@ public class ApprovalService : ApplicationService, IApprovalService
         _logger.LogInformation("Approval request {RequestNumber} created for {EntityType} {EntityId}",
             approvalRequest.RequestNumber, input.EntityType, input.EntityId);
 
-        return ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(approvalRequest);
+        return _mapper.ToApprovalRequestDto(approvalRequest);
     }
 
     [Authorize(AuditPermissions.Approvals.Create)]
@@ -247,7 +250,7 @@ public class ApprovalService : ApplicationService, IApprovalService
         _logger.LogInformation("Approval request {RequestNumber} approved by {User}",
             approval.RequestNumber, CurrentUser.Name);
 
-        return ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(approval);
+        return _mapper.ToApprovalRequestDto(approval);
     }
 
     [Authorize(AuditPermissions.Approvals.Reject)]
@@ -283,7 +286,7 @@ public class ApprovalService : ApplicationService, IApprovalService
         _logger.LogInformation("Approval request {RequestNumber} rejected by {User}",
             approval.RequestNumber, CurrentUser.Name);
 
-        return ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(approval);
+        return _mapper.ToApprovalRequestDto(approval);
     }
 
     [Authorize(AuditPermissions.Approvals.Cancel)]
@@ -317,7 +320,7 @@ public class ApprovalService : ApplicationService, IApprovalService
         _logger.LogInformation("Approval request {RequestNumber} cancelled by requester",
             approval.RequestNumber);
 
-        return ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(approval);
+        return _mapper.ToApprovalRequestDto(approval);
     }
 
     [Authorize(AuditPermissions.Approvals.Reassign)]
@@ -347,14 +350,14 @@ public class ApprovalService : ApplicationService, IApprovalService
 
         await SendApprovalNotificationEmailAsync(approval);
 
-        return ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(approval);
+        return _mapper.ToApprovalRequestDto(approval);
     }
 
     [Authorize(AuditPermissions.Approvals.Default)]
     public async Task<List<ApprovalHistoryDto>> GetHistoryAsync(Guid approvalRequestId)
     {
         var history = await _approvalHistoryRepository.GetListByApprovalRequestAsync(approvalRequestId);
-        return ObjectMapper.Map<List<ApprovalHistory>, List<ApprovalHistoryDto>>(history);
+        return _mapper.ToApprovalHistoryDtoList(history);
     }
 
     [Authorize(AuditPermissions.Approvals.Default)]
@@ -441,7 +444,7 @@ public class ApprovalService : ApplicationService, IApprovalService
     {
         var approvals = await _approvalRequestRepository.GetListByEntityAsync(entityType, entityId);
         var latest = approvals.OrderByDescending(x => x.CreationTime).FirstOrDefault();
-        return latest != null ? ObjectMapper.Map<ApprovalRequest, ApprovalRequestDto>(latest) : null;
+        return latest != null ? _mapper.ToApprovalRequestDto(latest) : null;
     }
 
     private async Task AddHistoryEntryAsync(

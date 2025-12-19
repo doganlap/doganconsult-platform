@@ -1,12 +1,12 @@
-﻿@using Volo.Abp.AspNetCore.Components.Web.LeptonXLiteTheme.Themes.LeptonXLite
-@using Volo.Abp.AspNetCore.Components.Web.Theming.Routing
+﻿@using Volo.Abp.AspNetCore.Components.Web.Theming.Routing
 @using Microsoft.Extensions.Options
+@using DoganConsult.Web.Blazor.Components.Layout
 @inject IOptions<AbpRouterOptions> RouterOptions
 <Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="RouterOptions.Value.AdditionalAssemblies">
     <Found Context="routeData">
-        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(PlatformLayout)">
             <NotAuthorized>
-                <RedirectToLogin />
+                <p>You are not authorized to access this page.</p>
             </NotAuthorized>
         </AuthorizeRouteView>
     </Found>

@@ -12,4 +12,4 @@ public interface IOrganizationAppService : ICrudAppService<
     CreateUpdateOrganizationDto,
     CreateUpdateOrganizationDto>
 {
-}
+    Task<long> GetCountAsync();    Task<OrganizationStatisticsDto> GetStatisticsAsync();}

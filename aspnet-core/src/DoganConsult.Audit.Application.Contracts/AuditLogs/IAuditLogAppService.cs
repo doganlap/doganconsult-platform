@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -11,4 +12,5 @@ public interface IAuditLogAppService : IReadOnlyAppService<
     PagedAndSortedResultRequestDto>
 {
     Task<AuditLogDto> CreateAsync(CreateAuditLogDto input);
+    Task<List<AuditLogDto>> GetRecentActivitiesAsync(int count = 10);
 }

@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
-using DoganConsult.Web.Localization;
-using DoganConsult.Web.MultiTenancy;
-using Volo.Abp.Identity.Blazor;
-using Volo.Abp.SettingManagement.Blazor.Menus;
-using Volo.Abp.TenantManagement.Blazor.Navigation;
+using DoganConsult.Organization.Localization;
+using DoganConsult.Organization.Domain.Shared.Permissions;
 using Volo.Abp.UI.Navigation;
+using Volo.Abp.Authorization.Permissions;
+using Volo.Abp.Localization;
+using Volo.Abp.Identity.Blazor;
+using Volo.Abp.TenantManagement.Blazor;
 
 namespace DoganConsult.Web.Blazor.Menus;
 
@@ -18,118 +19,89 @@ public class WebMenuContributor : IMenuContributor
         }
     }
 
-    private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
+    private async Task ConfigureMainMenuAsync(MenuConfigurationContext context)
     {
-        var administration = context.Menu.GetAdministration();
-        var l = context.GetLocalizer<WebResource>();
+        var l = context.GetLocalizer<OrganizationResource>();
 
-        context.Menu.Items.Insert(
-            0,
-            new ApplicationMenuItem(
-                WebMenus.Home,
-                "Home",
+        // Clear existing menu items to replace with the new IA
+        context.Menu.Items.Clear();
+
+        // HOME (DASHBOARD)
+        context.Menu.AddItem(new ApplicationMenuItem(
+                "Platform.Home",
+                l["Menu:Home"],
                 "/",
-                icon: "fas fa-home",
-                order: 0
+                icon: "fas fa-home"
             )
         );
 
-        // Add Organization Management Menu
-        context.Menu.Items.Insert(
-            1,
-            new ApplicationMenuItem(
-                WebMenus.Organizations,
-                "Organizations",
-                "/organizations",
-                icon: "fas fa-building",
-                order: 1
+        // PLATFORM
+        context.Menu.AddItem(new ApplicationMenuItem(
+                name: "Platform",
+                displayName: l["Menu:Platform"],
+                icon: "fas fa-layer-group"
             )
+            .AddItem(new ApplicationMenuItem(
+                    name: "Platform.WorkCenter",
+                    displayName: l["Menu:WorkCenter"],
+                    url: "/work-center",
+                    icon: "fas fa-inbox"
+                ).RequirePermissions(OrganizationPermissions.Platform.WorkCenter))
+            .AddItem(new ApplicationMenuItem(
+                    name: "Platform.Approvals",
+                    displayName: l["Menu:Approvals"],
+                    url: "/approvals",
+                    icon: "fas fa-check-circle"
+                ).RequirePermissions(OrganizationPermissions.Platform.Approvals))
         );
 
-        // Add Workspaces Menu
-        context.Menu.Items.Insert(
-            2,
-            new ApplicationMenuItem(
-                "DoganConsult.Workspaces",
-                "Workspaces",
-                "/workspaces",
-                icon: "fas fa-folder-open",
-                order: 2
+        // ORGANIZATION
+        context.Menu.AddItem(new ApplicationMenuItem(
+                name: "Organization",
+                displayName: l["Menu:Organization"],
+                icon: "fas fa-sitemap"
             )
+            .AddItem(new ApplicationMenuItem(
+                    name: "Organization.Organizations",
+                    displayName: l["Menu:Organizations"],
+                    url: "/organizations",
+                    icon: "fas fa-building"
+                ).RequirePermissions(OrganizationPermissions.Org.Organizations))
+            .AddItem(new ApplicationMenuItem(
+                    name: "Organization.Workspaces",
+                    displayName: l["Menu:Workspaces"],
+                    url: "/workspaces",
+                    icon: "fas fa-network-wired"
+                ).RequirePermissions(OrganizationPermissions.Org.Workspaces))
+            .AddItem(new ApplicationMenuItem(
+                    name: "Organization.Profiles",
+                    displayName: l["Menu:UserProfiles"],
+                    url: "/user-profiles", // Changed from /profiles to match existing
+                    icon: "fas fa-id-card"
+                ).RequirePermissions(OrganizationPermissions.Org.Profiles))
         );
 
-        // Add Documents Menu
-        context.Menu.Items.Insert(
-            3,
-            new ApplicationMenuItem(
-                "DoganConsult.Documents",
-                "Documents",
-                "/documents",
-                icon: "fas fa-file-alt",
-                order: 3
+        // CONTENT
+        context.Menu.AddItem(new ApplicationMenuItem(
+                name: "Content",
+                displayName: l["Menu:Content"],
+                icon: "fas fa-folder-open"
             )
+            .AddItem(new ApplicationMenuItem(
+                    name: "Content.Documents",
+                    displayName: l["Menu:Documents"],
+                    url: "/documents",
+                    icon: "fas fa-file-lines"
+                ).RequirePermissions(OrganizationPermissions.Content.Documents))
+            .AddItem(new ApplicationMenuItem(
+                    name: "Content.AuditLogs",
+                    displayName: l["Menu:AuditLogs"],
+                    url: "/audit-logs",
+                    icon: "fas fa-clipboard-list"
+                ).RequirePermissions(OrganizationPermissions.Content.AuditLogs))
         );
 
-        // Add Users Menu
-        context.Menu.Items.Insert(
-            4,
-            new ApplicationMenuItem(
-                "DoganConsult.Users",
-                "User Profiles",
-                "/user-profiles",
-                icon: "fas fa-users",
-                order: 4
-            )
-        );
-
-        // Add AI Assistant Menu
-        context.Menu.Items.Insert(
-            5,
-            new ApplicationMenuItem(
-                "DoganConsult.AI",
-                "AI Chat",
-                "/ai-chat",
-                icon: "fas fa-robot",
-                order: 5
-            )
-        );
-
-        // Add Audit Logs Menu
-        context.Menu.Items.Insert(
-            6,
-            new ApplicationMenuItem(
-                "DoganConsult.AuditLogs",
-                "Audit Logs",
-                "/audit-logs",
-                icon: "fas fa-history",
-                order: 6
-            )
-        );
-
-        // Add Approvals Menu
-        context.Menu.Items.Insert(
-            7,
-            new ApplicationMenuItem(
-                "DoganConsult.Approvals",
-                "Approvals",
-                "/approvals",
-                icon: "fas fa-tasks",
-                order: 7
-            )
-        );
-
-        if (MultiTenancyConsts.IsEnabled)
-        {
-            administration.SetSubItemOrder(TenantManagementMenuNames.GroupName, 2);
-        }
-        else
-        {
-            administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
-        }
-
-        administration.SetSubItemOrder(IdentityMenuNames.GroupName, 3);
-        administration.SetSubItemOrder(SettingManagementMenus.GroupName, 4);
-
-        return Task.CompletedTask;
+        // ADMINISTRATION - Uses ABP's built-in administration menu
+        // ABP modules will auto-register their own menu items under Administration
     }
 }

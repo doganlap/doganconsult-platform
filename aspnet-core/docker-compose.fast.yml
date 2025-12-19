@@ -1,0 +1,209 @@
+version: '3.8'
+
+# Docker Compose - Uses Pre-built Binaries from publish/ folder
+# Run: docker-compose -f docker-compose.fast.yml up -d
+services:
+  identity-service:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-identity
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=nozomi.proxy.rlwy.net;Port=35537;Database=railway;Username=postgres;Password=mcmfdSTZUcDwqJtwkQXzJQSTurwVaQvz;SSL Mode=Require;
+      - AuthServer__Authority=http://identity-service:80
+      - App__SelfUrl=http://localhost:5002
+      - App__CorsOrigins=http://localhost:5001,http://localhost:5000
+    volumes:
+      - ./publish/Identity:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.Identity.HttpApi.Host.dll"]
+    networks:
+      - doganconsult-network
+    restart: unless-stopped
+
+  organization-service:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-organization
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=metro.proxy.rlwy.net;Port=47319;Database=railway;Username=postgres;Password=dEUIWJcxwajoHIoLwqTnAITbgXraTTKc;SSL Mode=Require;
+      - AuthServer__Authority=http://identity-service:80
+      - App__SelfUrl=http://localhost:5003
+      - App__CorsOrigins=http://localhost:5001,http://localhost:5000
+    volumes:
+      - ./publish/Organization:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.Organization.HttpApi.Host.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+    restart: unless-stopped
+
+  workspace-service:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-workspace
+    ports:
+      - "5004:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=switchyard.proxy.rlwy.net;Port=37561;Database=railway;Username=postgres;Password=EwciEISIVdnEulryLkVgqHOVlaqjiyML;SSL Mode=Require;
+      - AuthServer__Authority=http://identity-service:80
+      - App__SelfUrl=http://localhost:5004
+      - App__CorsOrigins=http://localhost:5001,http://localhost:5000
+    volumes:
+      - ./publish/Workspace:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.Workspace.HttpApi.Host.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+    restart: unless-stopped
+
+  userprofile-service:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-userprofile
+    ports:
+      - "5005:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=hopper.proxy.rlwy.net;Port=47669;Database=railway;Username=postgres;Password=lKZKCQxdrBpklnirrzTSzznhzofmdNlv;SSL Mode=Require;
+      - AuthServer__Authority=http://identity-service:80
+      - App__SelfUrl=http://localhost:5005
+      - App__CorsOrigins=http://localhost:5001,http://localhost:5000
+    volumes:
+      - ./publish/UserProfile:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.UserProfile.HttpApi.Host.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+    restart: unless-stopped
+
+  audit-service:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-audit
+    ports:
+      - "5006:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=crossover.proxy.rlwy.net;Port=17109;Database=railway;Username=postgres;Password=PxccVRRaJCXlJGVdrzDTCGfApuJQEFVo;SSL Mode=Require;
+      - AuthServer__Authority=http://identity-service:80
+      - App__SelfUrl=http://localhost:5006
+      - App__CorsOrigins=http://localhost:5001,http://localhost:5000
+    volumes:
+      - ./publish/Audit:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.Audit.HttpApi.Host.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+    restart: unless-stopped
+
+  document-service:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-document
+    ports:
+      - "5007:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=yamanote.proxy.rlwy.net;Port=35357;Database=railway;Username=postgres;Password=sCjZiToIMDSAznQNZZXcmAJlnLcElioE;SSL Mode=Require;
+      - AuthServer__Authority=http://identity-service:80
+      - App__SelfUrl=http://localhost:5007
+      - App__CorsOrigins=http://localhost:5001,http://localhost:5000
+    volumes:
+      - ./publish/Document:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.Document.HttpApi.Host.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+    restart: unless-stopped
+
+  ai-service:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-ai
+    ports:
+      - "5008:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=ballast.proxy.rlwy.net;Port=53629;Database=railway;Username=postgres;Password=RRcrRrKgksUqapCckJJqBUIyWBhoNDJg;SSL Mode=Require;
+      - AuthServer__Authority=http://identity-service:80
+      - App__SelfUrl=http://localhost:5008
+      - App__CorsOrigins=http://localhost:5001,http://localhost:5000
+      - "Redis__Configuration=interchange.proxy.rlwy.net:26424,password=sOJrVPlSFlDQQpMizveGoYpFyzuNiPIv,ssl=false,abortConnect=false"
+      - "Redis__InstanceName=DoganConsult:"
+    volumes:
+      - ./publish/AI:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.AI.HttpApi.Host.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+    restart: unless-stopped
+
+  api-gateway:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-gateway
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - App__SelfUrl=http://localhost:5000
+    volumes:
+      - ./publish/Gateway:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.Gateway.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - identity-service
+      - organization-service
+      - workspace-service
+      - userprofile-service
+      - audit-service
+      - document-service
+      - ai-service
+    restart: unless-stopped
+
+  web-ui:
+    image: mcr.microsoft.com/dotnet/aspnet:10.0
+    container_name: dc-blazor
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - App__SelfUrl=http://localhost:5001
+      - AuthServer__Authority=http://identity-service:80
+      - RemoteServices__Default__BaseUrl=http://api-gateway:80
+    volumes:
+      - ./publish/Blazor:/app
+    working_dir: /app
+    command: ["dotnet", "DoganConsult.Web.Blazor.dll"]
+    networks:
+      - doganconsult-network
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+networks:
+  doganconsult-network:
+    driver: bridge
+

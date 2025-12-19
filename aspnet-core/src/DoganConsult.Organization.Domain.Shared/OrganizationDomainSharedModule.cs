@@ -1,5 +1,7 @@
+using DoganConsult.Organization.Domain.Shared.Permissions;
 using DoganConsult.Organization.Localization;
 using Volo.Abp.AuditLogging;
+using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.BackgroundJobs;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
@@ -38,6 +40,11 @@ public class OrganizationDomainSharedModule : AbpModule
         Configure<AbpVirtualFileSystemOptions>(options =>
         {
             options.FileSets.AddEmbedded<OrganizationDomainSharedModule>();
+        });
+
+        Configure<AbpPermissionOptions>(options =>
+        {
+            options.DefinitionProviders.Add<OrganizationPermissionDefinitionProvider>();
         });
 
         Configure<AbpLocalizationOptions>(options =>

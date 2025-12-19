@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DoganConsult.Web.Demos;
+using Microsoft.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
@@ -24,6 +26,9 @@ public class WebDbContext :
     ITenantManagementDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
+
+    // Demo Management
+    public DbSet<DemoRequest> DemoRequests { get; set; }
 
     #region Entities from the modules
 
@@ -76,11 +81,37 @@ public class WebDbContext :
 
         /* Configure your own tables/entities inside here */
 
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(WebConsts.DbTablePrefix + "YourEntities", WebConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+        // Configure DemoRequest entity
+        builder.Entity<DemoRequest>(b =>
+        {
+            b.ToTable(WebConsts.DbTablePrefix + "DemoRequests", WebConsts.DbSchema);
+            b.ConfigureByConvention(); // Auto configure for the base class props
+
+            // Configure properties
+            b.Property(x => x.CustomerName).IsRequired().HasMaxLength(256);
+            b.Property(x => x.CustomerEmail).IsRequired().HasMaxLength(256);
+            b.Property(x => x.CustomerPhone).HasMaxLength(50);
+            b.Property(x => x.CompanyName).HasMaxLength(256);
+            b.Property(x => x.Industry).HasMaxLength(128);
+            
+            b.Property(x => x.DemoTitle).IsRequired().HasMaxLength(512);
+            b.Property(x => x.DemoType).IsRequired().HasMaxLength(128);
+            b.Property(x => x.DemoEnvironment).HasMaxLength(256);
+            
+            b.Property(x => x.Priority).IsRequired().HasMaxLength(50);
+            b.Property(x => x.CurrentStatus).IsRequired().HasMaxLength(50);
+            b.Property(x => x.ApprovalStatus).IsRequired().HasMaxLength(50);
+            
+            b.Property(x => x.AssignedTo).HasMaxLength(256);
+            b.Property(x => x.ApprovedBy).HasMaxLength(256);
+            b.Property(x => x.RejectedBy).HasMaxLength(256);
+
+            // Add indexes for common queries
+            b.HasIndex(x => x.CurrentStatus);
+            b.HasIndex(x => x.ApprovalStatus);
+            b.HasIndex(x => x.Priority);
+            b.HasIndex(x => x.AssignedTo);
+            b.HasIndex(x => x.RequestedDate);
+        });
     }
 }

@@ -33,3 +33,9 @@ Write-Host "Commands prepared. Run manually:" -ForegroundColor Cyan
 Write-Host "ssh root@$ServerIP" -ForegroundColor White
 Write-Host "Then paste these commands:" -ForegroundColor Gray
 Write-Host $commands -ForegroundColor Gray
+
+
+
+
+
+

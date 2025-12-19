@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using DoganConsult.Audit.AuditLogs;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.DependencyInjection;
@@ -13,19 +14,21 @@ public class AuditService : ITransientDependency
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<AuditService> _logger;
-    private const string BaseUrl = "https://localhost:44375/api/audit/audit-logs";
+    private readonly string _baseUrl;
 
-    public AuditService(HttpClient httpClient, ILogger<AuditService> logger)
+    public AuditService(HttpClient httpClient, ILogger<AuditService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
+        var gatewayBaseUrl = configuration["RemoteServices:Default:BaseUrl"] ?? "http://localhost:5000";
+        _baseUrl = $"{gatewayBaseUrl.TrimEnd('/')}/api/audit/audit-logs";
     }
 
     public async Task<PagedResultDto<AuditLogDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
         try
         {
-            var url = $"{BaseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
+            var url = $"{_baseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
             if (!string.IsNullOrEmpty(input.Sorting))
             {
                 url += $"&Sorting={input.Sorting}";
@@ -45,7 +48,7 @@ public class AuditService : ITransientDependency
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<AuditLogDto>($"{BaseUrl}/{id}");
+            return await _httpClient.GetFromJsonAsync<AuditLogDto>($"{_baseUrl}/{id}");
         }
         catch (Exception ex)
         {
@@ -58,7 +61,7 @@ public class AuditService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync(BaseUrl, input);
+            var response = await _httpClient.PostAsJsonAsync(_baseUrl, input);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<AuditLogDto>();
         }

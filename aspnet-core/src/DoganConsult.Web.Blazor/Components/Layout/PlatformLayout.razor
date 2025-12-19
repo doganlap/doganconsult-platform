@@ -1,0 +1,175 @@
+@inherits LayoutComponentBase
+@using Volo.Abp.Localization
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@using DoganConsult.Web.Localization
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<WebResource> L
+
+<div class="dc-layout @(IsSidebarCollapsed ? "sidebar-collapsed" : "")">
+    <!-- Sidebar Navigation -->
+    <SideNavigation @bind-IsCollapsed="IsSidebarCollapsed" 
+                   PendingApprovals="PendingApprovals" 
+                   CurrentUser="CurrentUserName" 
+                   OnSidebarToggled="OnSidebarToggled" />
+
+    <!-- Main Content Area -->
+    <div class="dc-main-wrapper">
+        <!-- Global Header -->
+        <header class="dc-global-header">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <!-- Left: Mobile Menu Toggle -->
+                    <div class="col-auto d-md-none">
+                        <button class="btn btn-outline-light" @onclick="ToggleMobileSidebar">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+
+                    <!-- Center: Breadcrumbs -->
+                    <div class="col">
+                        <nav aria-label="breadcrumb" class="dc-breadcrumb">
+                            <ol class="breadcrumb mb-0">
+                                @if (!string.IsNullOrEmpty(CurrentPageTitle))
+                                {
+                                    <li class="breadcrumb-item">
+                                        <a href="/">@L["Menu:Home"]</a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        @CurrentPageTitle
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        @L["Menu:Home"]
+                                    </li>
+                                }
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <!-- Right: Theme Controls & User Menu -->
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Theme Selector -->
+                            <ThemeSelector />
+
+                            <!-- Notifications -->
+                            <button class="btn btn-outline-light btn-icon" title="@L["Notifications"]">
+                                <i class="fas fa-bell"></i>
+                                @if (NotificationCount > 0)
+                                {
+                                    <span class="badge bg-danger">@NotificationCount</span>
+                                }
+                            </button>
+
+                            <!-- User Profile -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    <span class="d-none d-md-inline">@CurrentUserName</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                    <li><a class="dropdown-item" href="/user-profiles"><i class="fas fa-user me-2"></i>@L["Menu:Profile"]</a></li>
+                                    <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i>@L["Menu:Settings"]</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="/Account/Logout"><i class="fas fa-sign-out-alt me-2"></i>@L["Menu:Logout"]</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dc-main-content">
+            <div class="dc-content-wrapper">
+                @Body
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dc-global-footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <small class="text-muted">
+                            © @DateTime.Now.Year @L["CompanyName"]. @L["AllRightsReserved"]
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <small class="text-muted">
+                            v10.0.0 | <a href="/user-manual" class="text-muted">@L["Menu:Help"]</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+@code {
+    private string CurrentPageTitle { get; set; } = string.Empty;
+    private bool IsSidebarCollapsed { get; set; } = false;
+    private int PendingApprovals { get; set; } = 2;
+    private int NotificationCount { get; set; } = 3;
+    private string CurrentUserName { get; set; } = "Admin";
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        UpdatePageTitle();
+        LoadUserData();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdatePageTitle();
+        StateHasChanged();
+    }
+
+    private void UpdatePageTitle()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        var path = uri.AbsolutePath.ToLowerInvariant();
+
+        CurrentPageTitle = path switch
+        {
+            "/organizations" => L["Menu:Organizations"],
+            "/workspaces" => L["Menu:Workspaces"],
+            "/documents" => L["Menu:Documents"],
+            "/user-profiles" => L["Menu:UserProfiles"],
+            "/ai-chat" => L["Menu:AIChat"],
+            "/audit-logs" => L["Menu:AuditLogs"],
+            "/approvals" => L["Menu:Approvals"],
+            "/user-manual" => L["Menu:Help"],
+            "/settings" => L["Menu:Settings"],
+            _ => string.Empty
+        };
+    }
+
+    private void LoadUserData()
+    {
+        // Load user-specific data like notifications, approvals, etc.
+        // This would typically come from a service
+    }
+
+    private void OnSidebarToggled(bool collapsed)
+    {
+        IsSidebarCollapsed = collapsed;
+        StateHasChanged();
+    }
+
+    private void ToggleMobileSidebar()
+    {
+        // Handle mobile sidebar toggle
+        IsSidebarCollapsed = !IsSidebarCollapsed;
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

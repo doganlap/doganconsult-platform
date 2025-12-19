@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DoganConsult.Document.Documents;
+using DoganConsult.Document.Permissions;
+using DoganConsult.Web.Blazor.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using DoganConsult.Document.Documents;
-using DoganConsult.Web.Blazor.Services;
-using Volo.Abp.Application.Dtos;
 using Microsoft.JSInterop;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Authorization.Permissions;
 
 namespace DoganConsult.Web.Blazor.Components.Pages;
 
@@ -15,9 +17,16 @@ public partial class Documents : ComponentBase
 {
     [Inject] private DocumentService DocumentService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private IPermissionChecker PermissionChecker { get; set; } = default!;
 
     private List<DocumentDto> DocumentList = new();
     private IEnumerable<DocumentDto> DocumentItems => DocumentList;
+    
+    // Permission checks
+    private bool CanCreate = false;
+    private bool CanEdit = false;
+    private bool CanDelete = false;
+    private bool CanViewAll = false;
     
     private bool Loading = true;
     private bool ShowModal = false;
@@ -38,7 +47,16 @@ public partial class Documents : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPermissions();
         await LoadDocuments();
+    }
+
+    private async Task LoadPermissions()
+    {
+        CanCreate = await PermissionChecker.IsGrantedAsync(DocumentPermissions.Documents.Create);
+        CanEdit = await PermissionChecker.IsGrantedAsync(DocumentPermissions.Documents.Edit);
+        CanDelete = await PermissionChecker.IsGrantedAsync(DocumentPermissions.Documents.Delete);
+        CanViewAll = await PermissionChecker.IsGrantedAsync(DocumentPermissions.Documents.ViewAll);
     }
 
     private async Task LoadDocuments()

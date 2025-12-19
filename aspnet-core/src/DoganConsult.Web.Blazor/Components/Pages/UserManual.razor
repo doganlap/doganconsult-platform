@@ -1,0 +1,618 @@
+@page "/docs/user-manual"
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+
+<PageTitle>User Manual - DoganConsult Platform</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Row Class="justify-content-between">
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <h1>
+                    <i class="fas fa-book"></i> DoganConsult Platform - User Manual
+                </h1>
+            </Column>
+        </Row>
+    </CardHeader>
+    <CardBody>
+        
+        <Alert Color="Color.Info" Visible="true">
+            <AlertDescription>
+                <strong>Welcome to DoganConsult Platform!</strong> This comprehensive guide will help you navigate and use all features of the platform effectively.
+            </AlertDescription>
+        </Alert>
+
+        <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
+            <Items>
+                <Tab Name="overview">Overview</Tab>
+                <Tab Name="getting-started">Getting Started</Tab>
+                <Tab Name="organizations">Organizations</Tab>
+                <Tab Name="workspaces">Workspaces</Tab>
+                <Tab Name="documents">Documents</Tab>
+                <Tab Name="ai-assistant">AI Assistant</Tab>
+                <Tab Name="audit">Audit & Approvals</Tab>
+                <Tab Name="user-profiles">User Profiles</Tab>
+                <Tab Name="troubleshooting">Troubleshooting</Tab>
+            </Items>
+            <Content>
+                <!-- Overview Tab -->
+                <TabPanel Name="overview">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-info-circle"></i> Platform Overview</h2>
+                            <Divider />
+                            
+                            <h3>What is DoganConsult Platform?</h3>
+                            <p>
+                                DoganConsult Platform is a comprehensive enterprise management system built with ABP Framework and .NET 10.0. 
+                                It provides a complete solution for managing organizations, workspaces, documents, and user workflows with advanced 
+                                AI capabilities and robust audit trails.
+                            </p>
+
+                            <h3>Key Features</h3>
+                            <ul>
+                                <li><strong>Organization Management</strong> - Manage multiple organizations with detailed information, sectors, and relationships</li>
+                                <li><strong>Workspace Collaboration</strong> - Create and manage workspaces for team collaboration</li>
+                                <li><strong>Document Management</strong> - Upload, version, and organize documents with full access control</li>
+                                <li><strong>AI-Powered Assistant</strong> - Get intelligent guidance and automate tasks with specialized AI agents</li>
+                                <li><strong>Audit & Approvals</strong> - Track all changes and manage approval workflows</li>
+                                <li><strong>User Profile Management</strong> - Manage user information and permissions</li>
+                                <li><strong>Advanced Security</strong> - OAuth 2.0 / OpenID Connect authentication with role-based access control</li>
+                                <li><strong>Multi-Tenancy</strong> - Support for multiple tenants with data isolation</li>
+                            </ul>
+
+                            <h3>Architecture</h3>
+                            <Row>
+                                <Column ColumnSize="ColumnSize.Is6">
+                                    <Alert Color="Color.Light">
+                                        <strong>Frontend:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li>Blazor Server</li>
+                                            <li>LeptonXLite Theme</li>
+                                            <li>Bootstrap 5</li>
+                                            <li>Blazorise Components</li>
+                                        </ul>
+                                    </Alert>
+                                </Column>
+                                <Column ColumnSize="ColumnSize.Is6">
+                                    <Alert Color="Color.Light">
+                                        <strong>Backend:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li>.NET 10.0</li>
+                                            <li>ABP Framework</li>
+                                            <li>Microservices Architecture</li>
+                                            <li>PostgreSQL Database</li>
+                                            <li>Redis Caching</li>
+                                            <li>YARP API Gateway</li>
+                                        </ul>
+                                    </Alert>
+                                </Column>
+                            </Row>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- Getting Started Tab -->
+                <TabPanel Name="getting-started">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-rocket"></i> Getting Started</h2>
+                            <Divider />
+                            
+                            <h3>1. Accessing the Platform</h3>
+                            <p>Navigate to: <code>https://localhost:44373</code></p>
+                            <Alert Color="Color.Success">
+                                <strong>Development Mode:</strong> Auto-login is enabled with the <code>admin</code> user. 
+                                In production, you'll need to log in with your credentials.
+                            </Alert>
+
+                            <h3>2. Dashboard Overview</h3>
+                            <p>After logging in, you'll see the dashboard with:</p>
+                            <ul>
+                                <li><strong>Statistics Cards</strong> - Quick counts of organizations, workspaces, documents, and pending approvals</li>
+                                <li><strong>Recent Activities</strong> - Latest actions taken across the platform</li>
+                                <li><strong>Pending Approvals</strong> - Items requiring your approval</li>
+                                <li><strong>Trends Chart</strong> - Organization growth over the last 6 months</li>
+                            </ul>
+
+                            <h3>3. Navigation Menu</h3>
+                            <p>Use the left sidebar to navigate between:</p>
+                            <ul>
+                                <li><i class="fas fa-home"></i> <strong>Dashboard</strong> - Overview and statistics</li>
+                                <li><i class="fas fa-building"></i> <strong>Organizations</strong> - Manage organizations</li>
+                                <li><i class="fas fa-briefcase"></i> <strong>Workspaces</strong> - Team collaboration spaces</li>
+                                <li><i class="fas fa-file"></i> <strong>Documents</strong> - Document library</li>
+                                <li><i class="fas fa-user"></i> <strong>User Profiles</strong> - User management</li>
+                                <li><i class="fas fa-robot"></i> <strong>AI Chat</strong> - AI assistant</li>
+                                <li><i class="fas fa-history"></i> <strong>Audit Logs</strong> - Activity tracking</li>
+                                <li><i class="fas fa-check"></i> <strong>Approvals</strong> - Approval workflows</li>
+                            </ul>
+
+                            <h3>4. User Interface Tips</h3>
+                            <Alert Color="Color.Info">
+                                <ul class="mb-0">
+                                    <li><strong>Search:</strong> Most lists have search functionality at the top</li>
+                                    <li><strong>Filters:</strong> Use filter dropdowns to narrow down results</li>
+                                    <li><strong>Actions:</strong> Click the <Badge Color="Color.Primary">New</Badge> button to create items</li>
+                                    <li><strong>Pagination:</strong> Navigate between pages at the bottom of lists</li>
+                                    <li><strong>Export:</strong> Use <Badge Color="Color.Success">Export to Excel</Badge> to download data</li>
+                                </ul>
+                            </Alert>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- Organizations Tab -->
+                <TabPanel Name="organizations">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-building"></i> Managing Organizations</h2>
+                            <Divider />
+                            
+                            <h3>Creating a New Organization</h3>
+                            <ol>
+                                <li>Navigate to <strong>Organizations</strong> from the menu</li>
+                                <li>Click <Badge Color="Color.Primary">New Organization</Badge></li>
+                                <li>Fill in the required fields:
+                                    <ul>
+                                        <li><strong>Code:</strong> Unique identifier (e.g., "ORG-001")</li>
+                                        <li><strong>Name:</strong> Organization name</li>
+                                        <li><strong>Type:</strong> Select from Client, Partner, Vendor, Subsidiary, etc.</li>
+                                        <li><strong>Sector:</strong> Industry sector</li>
+                                        <li><strong>Country & City:</strong> Location information</li>
+                                        <li><strong>Status:</strong> Active or Inactive</li>
+                                    </ul>
+                                </li>
+                                <li>Click <Badge Color="Color.Success">Save</Badge></li>
+                            </ol>
+
+                            <h3>Editing Organizations</h3>
+                            <p>Click the <i class="fas fa-edit"></i> <strong>Edit</strong> button next to any organization to modify its details.</p>
+
+                            <h3>Advanced Search & Filtering</h3>
+                            <Alert Color="Color.Light">
+                                <strong>Available Filters:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li><strong>Search:</strong> Search by name or code</li>
+                                    <li><strong>Type Filter:</strong> Filter by organization type</li>
+                                    <li><strong>Industry Filter:</strong> Filter by sector</li>
+                                    <li><strong>Status Filter:</strong> Show active or inactive organizations</li>
+                                </ul>
+                            </Alert>
+
+                            <h3>Exporting Data</h3>
+                            <p>Click <Badge Color="Color.Success"><i class="fas fa-file-excel"></i> Export to Excel</Badge> to download the organization list as an Excel file.</p>
+
+                            <h3>Deleting Organizations</h3>
+                            <Alert Color="Color.Warning">
+                                <strong>Warning:</strong> Deleting an organization is permanent. Make sure to review all associated data before deletion.
+                            </Alert>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- Workspaces Tab -->
+                <TabPanel Name="workspaces">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-briefcase"></i> Managing Workspaces</h2>
+                            <Divider />
+                            
+                            <h3>What are Workspaces?</h3>
+                            <p>
+                                Workspaces are collaborative environments where team members can work together on projects, 
+                                share documents, and manage tasks related to specific organizations or initiatives.
+                            </p>
+
+                            <h3>Creating a Workspace</h3>
+                            <ol>
+                                <li>Go to <strong>Workspaces</strong> in the menu</li>
+                                <li>Click <Badge Color="Color.Primary">New Workspace</Badge></li>
+                                <li>Enter workspace details:
+                                    <ul>
+                                        <li><strong>Code:</strong> Unique workspace code</li>
+                                        <li><strong>Name:</strong> Descriptive name</li>
+                                        <li><strong>Organization:</strong> Link to an organization</li>
+                                        <li><strong>Description:</strong> Purpose and goals</li>
+                                        <li><strong>Status:</strong> Active or Inactive</li>
+                                    </ul>
+                                </li>
+                                <li>Click <Badge Color="Color.Success">Save</Badge></li>
+                            </ol>
+
+                            <h3>Workspace Features</h3>
+                            <ul>
+                                <li><strong>Members:</strong> Add team members to collaborate</li>
+                                <li><strong>Permissions:</strong> Control who can view/edit workspace content</li>
+                                <li><strong>Settings:</strong> Configure workspace-specific settings</li>
+                                <li><strong>Documents:</strong> Link documents to the workspace</li>
+                            </ul>
+
+                            <h3>Best Practices</h3>
+                            <Alert Color="Color.Info">
+                                <ul class="mb-0">
+                                    <li>Use descriptive names for easy identification</li>
+                                    <li>Link workspaces to relevant organizations</li>
+                                    <li>Regularly review and update workspace status</li>
+                                    <li>Archive completed workspaces instead of deleting</li>
+                                </ul>
+                            </Alert>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- Documents Tab -->
+                <TabPanel Name="documents">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-file"></i> Document Management</h2>
+                            <Divider />
+                            
+                            <h3>Uploading Documents</h3>
+                            <ol>
+                                <li>Navigate to <strong>Documents</strong></li>
+                                <li>Click <Badge Color="Color.Primary">New Document</Badge></li>
+                                <li>Fill in document information:
+                                    <ul>
+                                        <li><strong>Name:</strong> Document title</li>
+                                        <li><strong>File:</strong> Upload the file</li>
+                                        <li><strong>Category:</strong> Document classification</li>
+                                        <li><strong>Organization/Workspace:</strong> Link to context</li>
+                                        <li><strong>Access Control:</strong> Who can view/edit</li>
+                                        <li><strong>Tags:</strong> For easy searching</li>
+                                    </ul>
+                                </li>
+                                <li>Click <Badge Color="Color.Success">Upload</Badge></li>
+                            </ol>
+
+                            <h3>Document Versioning</h3>
+                            <p>
+                                Each document maintains a version history. When you update a document, 
+                                the system automatically creates a new version while preserving the old ones.
+                            </p>
+
+                            <h3>Access Control</h3>
+                            <Alert Color="Color.Warning">
+                                <strong>Important:</strong> Set appropriate access controls to protect sensitive documents. 
+                                Options include:
+                                <ul class="mb-0 mt-2">
+                                    <li><strong>Public:</strong> Everyone can view</li>
+                                    <li><strong>Organization:</strong> Only organization members</li>
+                                    <li><strong>Workspace:</strong> Only workspace members</li>
+                                    <li><strong>Private:</strong> Only you</li>
+                                </ul>
+                            </Alert>
+
+                            <h3>Searching Documents</h3>
+                            <p>Use the search bar and filters to find documents by:</p>
+                            <ul>
+                                <li>Name or description</li>
+                                <li>File type (PDF, Word, Excel, etc.)</li>
+                                <li>Category</li>
+                                <li>Tags</li>
+                                <li>Upload date</li>
+                                <li>Organization or workspace</li>
+                            </ul>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- AI Assistant Tab -->
+                <TabPanel Name="ai-assistant">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-robot"></i> AI Assistant</h2>
+                            <Divider />
+                            
+                            <h3>What is the AI Assistant?</h3>
+                            <p>
+                                The AI Assistant is a powerful feature that provides intelligent guidance, 
+                                automates tasks, and helps you work more efficiently using advanced AI models.
+                            </p>
+
+                            <h3>Specialized AI Agents</h3>
+                            <Row>
+                                <Column ColumnSize="ColumnSize.Is4">
+                                    <Alert Color="Color.Primary">
+                                        <h4>General Assistant</h4>
+                                        <p class="mb-0">Handles general queries and provides platform guidance</p>
+                                    </Alert>
+                                </Column>
+                                <Column ColumnSize="ColumnSize.Is4">
+                                    <Alert Color="Color.Success">
+                                        <h4>Audit Agent</h4>
+                                        <p class="mb-0">Analyzes audit logs and compliance data</p>
+                                    </Alert>
+                                </Column>
+                                <Column ColumnSize="ColumnSize.Is4">
+                                    <Alert Color="Color.Info">
+                                        <h4>Compliance Agent</h4>
+                                        <p class="mb-0">Helps with regulatory compliance checks</p>
+                                    </Alert>
+                                </Column>
+                            </Row>
+
+                            <h3>Using the AI Chat</h3>
+                            <ol>
+                                <li>Navigate to <strong>AI Chat</strong> from the menu</li>
+                                <li>Select an agent based on your needs</li>
+                                <li>Type your question or request in the chat box</li>
+                                <li>Press <strong>Enter</strong> or click <Badge Color="Color.Primary">Send</Badge></li>
+                                <li>Review the AI's response and follow-up as needed</li>
+                            </ol>
+
+                            <h3>Example Use Cases</h3>
+                            <Alert Color="Color.Light">
+                                <ul class="mb-0">
+                                    <li>"Show me organizations created in the last month"</li>
+                                    <li>"Analyze recent audit logs for security issues"</li>
+                                    <li>"What documents need approval?"</li>
+                                    <li>"Create a summary report of workspace activities"</li>
+                                    <li>"Check compliance status for organization XYZ"</li>
+                                </ul>
+                            </Alert>
+
+                            <h3>Tips for Best Results</h3>
+                            <ul>
+                                <li>Be specific in your questions</li>
+                                <li>Provide context when needed</li>
+                                <li>Use the specialized agents for domain-specific tasks</li>
+                                <li>Review AI suggestions before taking action</li>
+                            </ul>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- Audit & Approvals Tab -->
+                <TabPanel Name="audit">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-history"></i> Audit Logs & Approvals</h2>
+                            <Divider />
+                            
+                            <h3>Audit Logs</h3>
+                            <p>
+                                The platform maintains comprehensive audit logs of all actions performed by users. 
+                                This ensures accountability and provides a complete history of changes.
+                            </p>
+
+                            <h4>What is Logged?</h4>
+                            <ul>
+                                <li>Create, update, and delete operations</li>
+                                <li>User login/logout events</li>
+                                <li>Permission changes</li>
+                                <li>Document uploads and modifications</li>
+                                <li>Approval decisions</li>
+                                <li>System configuration changes</li>
+                            </ul>
+
+                            <h4>Viewing Audit Logs</h4>
+                            <ol>
+                                <li>Go to <strong>Audit Logs</strong> in the menu</li>
+                                <li>Use filters to narrow down:
+                                    <ul>
+                                        <li>Date range</li>
+                                        <li>User</li>
+                                        <li>Action type</li>
+                                        <li>Entity type</li>
+                                    </ul>
+                                </li>
+                                <li>Click on any log entry to see details</li>
+                            </ol>
+
+                            <Divider />
+
+                            <h3>Approval Workflows</h3>
+                            <p>
+                                Critical actions require approval before taking effect. This ensures proper oversight 
+                                and prevents unauthorized changes.
+                            </p>
+
+                            <h4>Approval Process</h4>
+                            <ol>
+                                <li><strong>Request:</strong> User submits an item for approval</li>
+                                <li><strong>Assignment:</strong> System assigns to appropriate approver</li>
+                                <li><strong>Review:</strong> Approver reviews the request</li>
+                                <li><strong>Decision:</strong> Approver approves, rejects, or requests changes</li>
+                                <li><strong>Notification:</strong> Requester is notified of the decision</li>
+                            </ol>
+
+                            <h4>Managing Approvals</h4>
+                            <p>Go to <strong>Approvals</strong> to:</p>
+                            <ul>
+                                <li><strong>My Pending:</strong> Items awaiting your approval</li>
+                                <li><strong>My Requests:</strong> Items you've submitted for approval</li>
+                                <li><strong>History:</strong> Past approval decisions</li>
+                            </ul>
+
+                            <Alert Color="Color.Info">
+                                <strong>Quick Actions:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li><Badge Color="Color.Success">Approve</Badge> - Approve the request</li>
+                                    <li><Badge Color="Color.Danger">Reject</Badge> - Reject with comments</li>
+                                    <li><Badge Color="Color.Warning">Reassign</Badge> - Send to another approver</li>
+                                    <li><Badge Color="Color.Secondary">Cancel</Badge> - Withdraw your request</li>
+                                </ul>
+                            </Alert>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- User Profiles Tab -->
+                <TabPanel Name="user-profiles">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-user"></i> User Profile Management</h2>
+                            <Divider />
+                            
+                            <h3>Managing User Profiles</h3>
+                            <p>
+                                User profiles contain information about platform users, including contact details, 
+                                roles, permissions, and preferences.
+                            </p>
+
+                            <h3>Creating Users</h3>
+                            <ol>
+                                <li>Navigate to <strong>User Profiles</strong></li>
+                                <li>Click <Badge Color="Color.Primary">New User</Badge></li>
+                                <li>Enter user information:
+                                    <ul>
+                                        <li><strong>Username:</strong> Login identifier</li>
+                                        <li><strong>Email:</strong> Contact email</li>
+                                        <li><strong>Full Name:</strong> Display name</li>
+                                        <li><strong>Phone:</strong> Contact number</li>
+                                        <li><strong>Department:</strong> Organizational unit</li>
+                                        <li><strong>Job Title:</strong> Position</li>
+                                    </ul>
+                                </li>
+                                <li>Assign roles and permissions</li>
+                                <li>Click <Badge Color="Color.Success">Create</Badge></li>
+                            </ol>
+
+                            <h3>Roles & Permissions</h3>
+                            <Alert Color="Color.Light">
+                                <strong>Common Roles:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li><strong>Admin:</strong> Full system access</li>
+                                    <li><strong>Manager:</strong> Organization and workspace management</li>
+                                    <li><strong>User:</strong> Standard user access</li>
+                                    <li><strong>Viewer:</strong> Read-only access</li>
+                                </ul>
+                            </Alert>
+
+                            <h3>User Status</h3>
+                            <ul>
+                                <li><Badge Color="Color.Success">Active</Badge> - User can log in</li>
+                                <li><Badge Color="Color.Warning">Inactive</Badge> - User account disabled</li>
+                                <li><Badge Color="Color.Danger">Locked</Badge> - Too many failed login attempts</li>
+                            </ul>
+
+                            <h3>Password Management</h3>
+                            <Alert Color="Color.Warning">
+                                <strong>Security Best Practices:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Enforce strong password policies</li>
+                                    <li>Require regular password changes</li>
+                                    <li>Enable two-factor authentication</li>
+                                    <li>Lock accounts after failed attempts</li>
+                                </ul>
+                            </Alert>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+
+                <!-- Troubleshooting Tab -->
+                <TabPanel Name="troubleshooting">
+                    <Card Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <h2><i class="fas fa-tools"></i> Troubleshooting</h2>
+                            <Divider />
+                            
+                            <h3>Common Issues & Solutions</h3>
+
+                            <Alert Color="Color.Warning">
+                                <h4><i class="fas fa-exclamation-triangle"></i> Cannot Log In</h4>
+                                <strong>Solutions:</strong>
+                                <ul class="mb-0">
+                                    <li>Check username and password</li>
+                                    <li>Ensure Caps Lock is off</li>
+                                    <li>Contact administrator if account is locked</li>
+                                    <li>Clear browser cache and cookies</li>
+                                </ul>
+                            </Alert>
+
+                            <Alert Color="Color.Warning">
+                                <h4><i class="fas fa-exclamation-triangle"></i> Page Not Loading</h4>
+                                <strong>Solutions:</strong>
+                                <ul class="mb-0">
+                                    <li>Refresh the page (F5 or Ctrl+R)</li>
+                                    <li>Clear browser cache</li>
+                                    <li>Try a different browser</li>
+                                    <li>Check your internet connection</li>
+                                </ul>
+                            </Alert>
+
+                            <Alert Color="Color.Warning">
+                                <h4><i class="fas fa-exclamation-triangle"></i> File Upload Fails</h4>
+                                <strong>Solutions:</strong>
+                                <ul class="mb-0">
+                                    <li>Check file size (max 10MB)</li>
+                                    <li>Verify file type is supported</li>
+                                    <li>Ensure stable internet connection</li>
+                                    <li>Try uploading a smaller file first</li>
+                                </ul>
+                            </Alert>
+
+                            <Alert Color="Color.Warning">
+                                <h4><i class="fas fa-exclamation-triangle"></i> Permission Denied</h4>
+                                <strong>Solutions:</strong>
+                                <ul class="mb-0">
+                                    <li>Verify you have the required role</li>
+                                    <li>Contact administrator for access</li>
+                                    <li>Check if resource is restricted</li>
+                                    <li>Ensure organization/workspace membership</li>
+                                </ul>
+                            </Alert>
+
+                            <Divider />
+
+                            <h3>Getting Help</h3>
+                            <Row>
+                                <Column ColumnSize="ColumnSize.Is6">
+                                    <Alert Color="Color.Primary">
+                                        <h4><i class="fas fa-question-circle"></i> Need Support?</h4>
+                                        <p>Contact your system administrator or IT support team for assistance.</p>
+                                    </Alert>
+                                </Column>
+                                <Column ColumnSize="ColumnSize.Is6">
+                                    <Alert Color="Color.Info">
+                                        <h4><i class="fas fa-robot"></i> Try AI Assistant</h4>
+                                        <p>Use the AI Chat for quick answers to common questions.</p>
+                                    </Alert>
+                                </Column>
+                            </Row>
+
+                            <h3>System Information</h3>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHeaderCell>Component</TableHeaderCell>
+                                        <TableHeaderCell>Details</TableHeaderCell>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableRowCell><strong>Platform Version</strong></TableRowCell>
+                                        <TableRowCell>1.0.0</TableRowCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableRowCell><strong>Framework</strong></TableRowCell>
+                                        <TableRowCell>ABP Framework 10.0 / .NET 10.0</TableRowCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableRowCell><strong>Database</strong></TableRowCell>
+                                        <TableRowCell>PostgreSQL (Railway)</TableRowCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableRowCell><strong>Authentication</strong></TableRowCell>
+                                        <TableRowCell>OpenIddict (OAuth 2.0 + OpenID Connect)</TableRowCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </CardBody>
+                    </Card>
+                </TabPanel>
+            </Content>
+        </Tabs>
+
+    </CardBody>
+</Card>
+
+@code {
+    private string selectedTab = "overview";
+
+    private Task OnSelectedTabChanged(string name)
+    {
+        selectedTab = name;
+        return Task.CompletedTask;
+    }
+}

@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.Npgsql" Version="8.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Volo.Abp.AspNetCore.MultiTenancy" Version="10.0.1" />
@@ -28,6 +30,7 @@
     <ProjectReference Include="..\DoganConsult.UserProfile.Application\DoganConsult.UserProfile.Application.csproj" />
     <ProjectReference Include="..\DoganConsult.UserProfile.EntityFrameworkCore\DoganConsult.UserProfile.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\DoganConsult.UserProfile.HttpApi\DoganConsult.UserProfile.HttpApi.csproj" />
+    <ProjectReference Include="..\DoganConsult.Shared.Middleware\DoganConsult.Shared.Middleware.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -170,6 +170,41 @@ public class ApprovalController : AbpControllerBase
     {
         return _approvalService.GetLatestForEntityAsync(entityType, entityId);
     }
+
+    /// <summary>
+    /// Get approval pivot data for analytics
+    /// </summary>
+    [HttpGet("pivot")]
+    public async Task<object> GetPivotAsync()
+    {
+        var statistics = await _approvalService.GetStatisticsAsync();
+        return new
+        {
+            ByStatus = new
+            {
+                Pending = statistics.TotalPending,
+                Approved = statistics.TotalApproved,
+                Rejected = statistics.TotalRejected,
+                Cancelled = statistics.TotalCancelled,
+                Expired = statistics.TotalExpired
+            },
+            ByEntityType = new
+            {
+                Organizations = statistics.PendingOrganizations,
+                Workspaces = statistics.PendingWorkspaces,
+                Documents = statistics.PendingDocuments,
+                UserProfiles = statistics.PendingUserProfiles
+            },
+            MyStats = new
+            {
+                MyPendingApprovals = statistics.MyPendingApprovals,
+                MySubmittedRequests = statistics.MySubmittedRequests,
+                MyApprovedToday = statistics.MyApprovedToday,
+                MyRejectedToday = statistics.MyRejectedToday
+            },
+            AverageApprovalTimeHours = statistics.AverageApprovalTimeHours
+        };
+    }
 }
 
 /// <summary>

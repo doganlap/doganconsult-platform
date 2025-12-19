@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DoganConsult.Document.Documents;
+using DoganConsult.Document.Permissions;
 using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -14,12 +15,17 @@ namespace DoganConsult.Document.Documents;
 public class DocumentAppService : ApplicationService, IDocumentAppService
 {
     private readonly IRepository<Document, Guid> _documentRepository;
+    private readonly DocumentObjectMapper _mapper;
 
-    public DocumentAppService(IRepository<Document, Guid> documentRepository)
+    public DocumentAppService(
+        IRepository<Document, Guid> documentRepository,
+        DocumentObjectMapper mapper)
     {
         _documentRepository = documentRepository;
+        _mapper = mapper;
     }
 
+    [Authorize(DocumentPermissions.Documents.Create)]
     public async Task<DocumentDto> CreateAsync(CreateUpdateDocumentDto input)
     {
         var document = new Document(
@@ -49,31 +55,34 @@ public class DocumentAppService : ApplicationService, IDocumentAppService
         };
 
         await _documentRepository.InsertAsync(document);
-        return ObjectMapper.Map<Document, DocumentDto>(document);
+        return _mapper.ToDocumentDto(document);
     }
 
+    [Authorize(DocumentPermissions.Documents.ViewAll)]
     public async Task<DocumentDto> GetAsync(Guid id)
     {
         var document = await _documentRepository.GetAsync(id);
-        return ObjectMapper.Map<Document, DocumentDto>(document);
+        return _mapper.ToDocumentDto(document);
     }
 
+    [Authorize(DocumentPermissions.Documents.ViewAll)]
     public async Task<PagedResultDto<DocumentDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
         var queryable = await _documentRepository.GetQueryableAsync();
-        var documents = queryable
+        var query = queryable
             .OrderBy(x => x.Name)
             .Skip(input.SkipCount)
-            .Take(input.MaxResultCount)
-            .ToList();
+            .Take(input.MaxResultCount);
+        var documents = await AsyncExecuter.ToListAsync(query);
 
         var totalCount = await _documentRepository.GetCountAsync();
         return new PagedResultDto<DocumentDto>(
             totalCount,
-            ObjectMapper.Map<List<Document>, List<DocumentDto>>(documents)
+            _mapper.ToDocumentDtos(documents)
         );
     }
 
+    [Authorize(DocumentPermissions.Documents.Edit)]
     public async Task<DocumentDto> UpdateAsync(Guid id, CreateUpdateDocumentDto input)
     {
         var document = await _documentRepository.GetAsync(id);
@@ -96,11 +105,18 @@ public class DocumentAppService : ApplicationService, IDocumentAppService
         document.Metadata = input.Metadata ?? document.Metadata;
 
         await _documentRepository.UpdateAsync(document);
-        return ObjectMapper.Map<Document, DocumentDto>(document);
+        return _mapper.ToDocumentDto(document);
     }
 
+    [Authorize(DocumentPermissions.Documents.Delete)]
     public async Task DeleteAsync(Guid id)
     {
         await _documentRepository.DeleteAsync(id);
+    }
+
+    [Authorize(DocumentPermissions.Documents.ViewAll)]
+    public async Task<long> GetCountAsync()
+    {
+        return await _documentRepository.GetCountAsync();
     }
 }

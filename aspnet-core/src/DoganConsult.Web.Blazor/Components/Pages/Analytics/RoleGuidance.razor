@@ -1,0 +1,238 @@
+@page "/analytics/role-guidance"
+
+<PageTitle>Role Guidance - DoganConsult Platform</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Row Class="justify-content-between">
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <h1>
+                    <i class="fas fa-user-shield"></i> Role Guidance
+                </h1>
+            </Column>
+        </Row>
+    </CardHeader>
+    <CardBody>
+        
+        <Alert Color="Color.Info" Visible="true">
+            <AlertDescription>
+                Get role-specific guidance and recommendations based on your permissions and responsibilities.
+            </AlertDescription>
+        </Alert>
+
+        <!-- Current Role Information -->
+        <Card Margin="Margin.Is3.OnY" Background="Background.Light">
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is2" Class="text-center">
+                        <div style="font-size: 4rem; color: var(--bs-primary);">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is10">
+                        <h3>Your Current Role: <Badge Color="Color.Primary">Administrator</Badge></h3>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-info-circle"></i> You have full access to all platform features and administrative functions.
+                        </p>
+                        <Divider />
+                        <Row Margin="Margin.Is2.FromTop">
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <strong>Permissions:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Create, Edit, Delete Organizations</li>
+                                    <li>Manage Users and Roles</li>
+                                    <li>Access All Workspaces</li>
+                                    <li>Approve/Reject All Requests</li>
+                                </ul>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <strong>Responsibilities:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>System Configuration</li>
+                                    <li>User Management</li>
+                                    <li>Security & Compliance</li>
+                                    <li>Data Governance</li>
+                                </ul>
+                            </Column>
+                        </Row>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+        <!-- Recommended Actions -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-tasks"></i> Recommended Actions for Your Role</h4>
+            </CardHeader>
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Card Background="Background.Success" TextColor="TextColor.White" Margin="Margin.Is2.OnY">
+                            <CardBody>
+                                <h5><i class="fas fa-check-circle"></i> Daily Tasks</h5>
+                                <ul class="mb-0">
+                                    <li>Review pending approvals</li>
+                                    <li>Check system health</li>
+                                    <li>Monitor user activities</li>
+                                    <li>Respond to support tickets</li>
+                                </ul>
+                            </CardBody>
+                        </Card>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Card Background="Background.Warning" TextColor="TextColor.Dark" Margin="Margin.Is2.OnY">
+                            <CardBody>
+                                <h5><i class="fas fa-calendar-week"></i> Weekly Tasks</h5>
+                                <ul class="mb-0">
+                                    <li>Review audit logs</li>
+                                    <li>Analyze usage metrics</li>
+                                    <li>Update security policies</li>
+                                    <li>Backup verification</li>
+                                </ul>
+                            </CardBody>
+                        </Card>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Card Background="Background.Info" TextColor="TextColor.White" Margin="Margin.Is2.OnY">
+                            <CardBody>
+                                <h5><i class="fas fa-calendar-alt"></i> Monthly Tasks</h5>
+                                <ul class="mb-0">
+                                    <li>Performance reviews</li>
+                                    <li>Compliance audits</li>
+                                    <li>System updates</li>
+                                    <li>Strategic planning</li>
+                                </ul>
+                            </CardBody>
+                        </Card>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+        <!-- Role-Specific Best Practices -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-star"></i> Best Practices for Administrators</h4>
+            </CardHeader>
+            <CardBody>
+                <Accordion>
+                    <Collapse Visible="@collapse1Visible">
+                        <CollapseHeader>
+                            <Heading Size="HeadingSize.Is5">
+                                <AccordionToggle Clicked="@(() => collapse1Visible = !collapse1Visible)">
+                                    <i class="fas fa-shield-alt"></i> Security Management
+                                </AccordionToggle>
+                            </Heading>
+                        </CollapseHeader>
+                        <CollapseBody>
+                            <ul>
+                                <li><strong>Regular Security Audits:</strong> Conduct monthly security reviews of user permissions and access logs</li>
+                                <li><strong>Password Policies:</strong> Enforce strong password requirements and regular updates</li>
+                                <li><strong>Two-Factor Authentication:</strong> Enable 2FA for all administrative accounts</li>
+                                <li><strong>Session Management:</strong> Configure appropriate session timeout values</li>
+                                <li><strong>Backup Strategy:</strong> Maintain regular backups and test restoration procedures</li>
+                            </ul>
+                        </CollapseBody>
+                    </Collapse>
+
+                    <Collapse Visible="@collapse2Visible">
+                        <CollapseHeader>
+                            <Heading Size="HeadingSize.Is5">
+                                <AccordionToggle Clicked="@(() => collapse2Visible = !collapse2Visible)">
+                                    <i class="fas fa-users-cog"></i> User Management
+                                </AccordionToggle>
+                            </Heading>
+                        </CollapseHeader>
+                        <CollapseBody>
+                            <ul>
+                                <li><strong>Onboarding:</strong> Create standardized user onboarding procedures</li>
+                                <li><strong>Role Assignment:</strong> Follow the principle of least privilege when assigning roles</li>
+                                <li><strong>Regular Reviews:</strong> Quarterly review of user access and permissions</li>
+                                <li><strong>Offboarding:</strong> Immediate access revocation for departed users</li>
+                                <li><strong>Training:</strong> Provide role-specific training to new users</li>
+                            </ul>
+                        </CollapseBody>
+                    </Collapse>
+
+                    <Collapse Visible="@collapse3Visible">
+                        <CollapseHeader>
+                            <Heading Size="HeadingSize.Is5">
+                                <AccordionToggle Clicked="@(() => collapse3Visible = !collapse3Visible)">
+                                    <i class="fas fa-chart-line"></i> Performance Optimization
+                                </AccordionToggle>
+                            </Heading>
+                        </CollapseHeader>
+                        <CollapseBody>
+                            <ul>
+                                <li><strong>Monitor Resources:</strong> Track system performance metrics regularly</li>
+                                <li><strong>Database Optimization:</strong> Run database maintenance tasks weekly</li>
+                                <li><strong>Cache Management:</strong> Configure and monitor Redis caching</li>
+                                <li><strong>Load Balancing:</strong> Ensure even distribution of workload</li>
+                                <li><strong>Query Optimization:</strong> Identify and optimize slow queries</li>
+                            </ul>
+                        </CollapseBody>
+                    </Collapse>
+
+                    <Collapse Visible="@collapse4Visible">
+                        <CollapseHeader>
+                            <Heading Size="HeadingSize.Is5">
+                                <AccordionToggle Clicked="@(() => collapse4Visible = !collapse4Visible)">
+                                    <i class="fas fa-balance-scale"></i> Compliance & Governance
+                                </AccordionToggle>
+                            </Heading>
+                        </CollapseHeader>
+                        <CollapseBody>
+                            <ul>
+                                <li><strong>Audit Trails:</strong> Maintain comprehensive logs of all system changes</li>
+                                <li><strong>Data Privacy:</strong> Ensure compliance with GDPR and other regulations</li>
+                                <li><strong>Documentation:</strong> Keep all policies and procedures up to date</li>
+                                <li><strong>Incident Response:</strong> Have a documented incident response plan</li>
+                                <li><strong>Regular Reporting:</strong> Generate compliance reports for stakeholders</li>
+                            </ul>
+                        </CollapseBody>
+                    </Collapse>
+                </Accordion>
+            </CardBody>
+        </Card>
+
+        <!-- Quick Access Resources -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-link"></i> Quick Access Resources</h4>
+            </CardHeader>
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Button Color="Color.Primary" Block="true" To="/docs/user-manual">
+                            <i class="fas fa-book"></i> User Manual
+                        </Button>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Button Color="Color.Success" Block="true" To="/analytics/knowledge-base">
+                            <i class="fas fa-database"></i> Knowledge Base
+                        </Button>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Button Color="Color.Info" Block="true" To="/audit-logs">
+                            <i class="fas fa-history"></i> Audit Logs
+                        </Button>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Button Color="Color.Warning" Block="true" To="/approvals">
+                            <i class="fas fa-check"></i> Approvals
+                        </Button>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+    </CardBody>
+</Card>
+
+@code {
+    private bool collapse1Visible = false;
+    private bool collapse2Visible = false;
+    private bool collapse3Visible = false;
+    private bool collapse4Visible = false;
+}

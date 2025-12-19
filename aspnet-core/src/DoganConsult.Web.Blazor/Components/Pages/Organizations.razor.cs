@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+using DoganConsult.Organization.Domain.Shared.Permissions;
 using DoganConsult.Web.Blazor.Organizations;
 using DoganConsult.Web.Blazor.Services;
-using Volo.Abp.Application.Dtos;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Authorization.Permissions;
 
 namespace DoganConsult.Web.Blazor.Components.Pages;
 
@@ -16,9 +18,16 @@ public partial class Organizations : ComponentBase
 {
     [Inject] private OrganizationService OrganizationService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private IPermissionChecker PermissionChecker { get; set; } = default!;
 
     private List<OrganizationDto> OrganizationList = new();
     private IEnumerable<OrganizationDto> OrganizationItems => OrganizationList;
+    
+    // Permission checks
+    private bool CanCreate = false;
+    private bool CanEdit = false;
+    private bool CanDelete = false;
+    private bool CanViewAll = false;
     
     private bool Loading = true;
     private bool ShowModal = false;
@@ -71,7 +80,16 @@ public partial class Organizations : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPermissions();
         await LoadOrganizations();
+    }
+
+    private async Task LoadPermissions()
+    {
+        CanCreate = await PermissionChecker.IsGrantedAsync(OrganizationPermissions.Content.DocumentsCreate);
+        CanEdit = await PermissionChecker.IsGrantedAsync(OrganizationPermissions.Org.WorkspacesManage);
+        CanDelete = await PermissionChecker.IsGrantedAsync(OrganizationPermissions.Content.DocumentsDelete);
+        CanViewAll = await PermissionChecker.IsGrantedAsync(OrganizationPermissions.Org.Organizations);
     }
 
     private async Task LoadOrganizations()

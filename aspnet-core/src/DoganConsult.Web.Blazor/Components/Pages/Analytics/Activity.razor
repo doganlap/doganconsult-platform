@@ -1,0 +1,451 @@
+@page "/analytics/activity"
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient HttpClient
+
+<PageTitle>Activity Analytics - DoganConsult Platform</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Row Class="justify-content-between">
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <h1>
+                    <i class="fas fa-chart-line"></i> Activity Analytics
+                </h1>
+            </Column>
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <Button Color="Color.Success" Clicked="@RefreshData">
+                    <i class="fas fa-sync"></i> Refresh
+                </Button>
+            </Column>
+        </Row>
+    </CardHeader>
+    <CardBody>
+        
+        <!-- Time Range Filter -->
+        <Card Margin="Margin.Is3.OnY" Background="Background.Light">
+            <CardBody>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Field>
+                            <FieldLabel>Time Range</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@timeRange">
+                                <SelectItem Value="@("today")">Today</SelectItem>
+                                <SelectItem Value="@("week")">Last 7 Days</SelectItem>
+                                <SelectItem Value="@("month")">Last 30 Days</SelectItem>
+                                <SelectItem Value="@("quarter")">Last 90 Days</SelectItem>
+                                <SelectItem Value="@("year")">Last Year</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Field>
+                            <FieldLabel>Activity Type</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@activityType">
+                                <SelectItem Value="@("")">All Types</SelectItem>
+                                <SelectItem Value="@("Create")">Create</SelectItem>
+                                <SelectItem Value="@("Update")">Update</SelectItem>
+                                <SelectItem Value="@("Delete")">Delete</SelectItem>
+                                <SelectItem Value="@("Login")">Login</SelectItem>
+                                <SelectItem Value="@("Approval")">Approval</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Field>
+                            <FieldLabel>User</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@selectedUser">
+                                <SelectItem Value="@("")">All Users</SelectItem>
+                                <SelectItem Value="@("admin")">Admin</SelectItem>
+                                <SelectItem Value="@("user1")">User 1</SelectItem>
+                                <SelectItem Value="@("user2")">User 2</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is3">
+                        <Field>
+                            <FieldLabel>Module</FieldLabel>
+                            <Select TValue="string" @bind-SelectedValue="@selectedModule">
+                                <SelectItem Value="@("")">All Modules</SelectItem>
+                                <SelectItem Value="@("Organization")">Organizations</SelectItem>
+                                <SelectItem Value="@("Workspace")">Workspaces</SelectItem>
+                                <SelectItem Value="@("Document")">Documents</SelectItem>
+                                <SelectItem Value="@("Approval")">Approvals</SelectItem>
+                            </Select>
+                        </Field>
+                    </Column>
+                </Row>
+            </CardBody>
+        </Card>
+
+        <!-- Activity Summary Cards -->
+        <Row Margin="Margin.Is3.OnY">
+            <Column ColumnSize="ColumnSize.Is3">
+                <Card Background="Background.Primary" TextColor="TextColor.White">
+                    <CardBody Class="text-center">
+                        <h2 class="mb-0">2,543</h2>
+                        <p class="mb-0">Total Activities</p>
+                        <small><i class="fas fa-arrow-up"></i> 15% from last period</small>
+                    </CardBody>
+                </Card>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is3">
+                <Card Background="Background.Success" TextColor="TextColor.White">
+                    <CardBody Class="text-center">
+                        <h2 class="mb-0">1,832</h2>
+                        <p class="mb-0">User Actions</p>
+                        <small><i class="fas fa-arrow-up"></i> 8% from last period</small>
+                    </CardBody>
+                </Card>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is3">
+                <Card Background="Background.Info" TextColor="TextColor.White">
+                    <CardBody Class="text-center">
+                        <h2 class="mb-0">456</h2>
+                        <p class="mb-0">System Events</p>
+                        <small><i class="fas fa-arrow-down"></i> 3% from last period</small>
+                    </CardBody>
+                </Card>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is3">
+                <Card Background="Background.Warning" TextColor="TextColor.Dark">
+                    <CardBody Class="text-center">
+                        <h2 class="mb-0">255</h2>
+                        <p class="mb-0">Approvals Processed</p>
+                        <small><i class="fas fa-arrow-up"></i> 22% from last period</small>
+                    </CardBody>
+                </Card>
+            </Column>
+        </Row>
+
+        <!-- Activity Timeline Chart -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-chart-area"></i> Activity Timeline</h4>
+            </CardHeader>
+            <CardBody>
+                <div style="height: 300px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line" style="font-size: 4rem;"></i>
+                        <p class="mt-3 mb-0">Activity timeline chart will be rendered here</p>
+                        <small>Using Chart.js or other charting library</small>
+                    </div>
+                </div>
+            </CardBody>
+        </Card>
+
+        <!-- Activity by Type -->
+        <Row Margin="Margin.Is3.OnY">
+            <Column ColumnSize="ColumnSize.Is6">
+                <Card>
+                    <CardHeader>
+                        <h4><i class="fas fa-pie-chart"></i> Activity by Type</h4>
+                    </CardHeader>
+                    <CardBody>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHeaderCell>Type</TableHeaderCell>
+                                    <TableHeaderCell>Count</TableHeaderCell>
+                                    <TableHeaderCell>Percentage</TableHeaderCell>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow>
+                                    <TableRowCell><Badge Color="Color.Success">Create</Badge></TableRowCell>
+                                    <TableRowCell>1,234</TableRowCell>
+                                    <TableRowCell>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 48%">48%</div>
+                                        </div>
+                                    </TableRowCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableRowCell><Badge Color="Color.Info">Update</Badge></TableRowCell>
+                                    <TableRowCell>856</TableRowCell>
+                                    <TableRowCell>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: 34%">34%</div>
+                                        </div>
+                                    </TableRowCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableRowCell><Badge Color="Color.Danger">Delete</Badge></TableRowCell>
+                                    <TableRowCell>198</TableRowCell>
+                                    <TableRowCell>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 8%">8%</div>
+                                        </div>
+                                    </TableRowCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableRowCell><Badge Color="Color.Primary">Login</Badge></TableRowCell>
+                                    <TableRowCell>255</TableRowCell>
+                                    <TableRowCell>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 10%">10%</div>
+                                        </div>
+                                    </TableRowCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </CardBody>
+                </Card>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is6">
+                <Card>
+                    <CardHeader>
+                        <h4><i class="fas fa-users"></i> Top Active Users</h4>
+                    </CardHeader>
+                    <CardBody>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHeaderCell>User</TableHeaderCell>
+                                    <TableHeaderCell>Activities</TableHeaderCell>
+                                    <TableHeaderCell>Last Active</TableHeaderCell>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow>
+                                    <TableRowCell>
+                                        <i class="fas fa-user-circle text-primary"></i> Admin User
+                                    </TableRowCell>
+                                    <TableRowCell><Badge Color="Color.Primary">543</Badge></TableRowCell>
+                                    <TableRowCell>5 minutes ago</TableRowCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableRowCell>
+                                        <i class="fas fa-user-circle text-success"></i> John Doe
+                                    </TableRowCell>
+                                    <TableRowCell><Badge Color="Color.Success">421</Badge></TableRowCell>
+                                    <TableRowCell>15 minutes ago</TableRowCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableRowCell>
+                                        <i class="fas fa-user-circle text-info"></i> Jane Smith
+                                    </TableRowCell>
+                                    <TableRowCell><Badge Color="Color.Info">387</Badge></TableRowCell>
+                                    <TableRowCell>32 minutes ago</TableRowCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableRowCell>
+                                        <i class="fas fa-user-circle text-warning"></i> Bob Johnson
+                                    </TableRowCell>
+                                    <TableRowCell><Badge Color="Color.Warning">298</Badge></TableRowCell>
+                                    <TableRowCell>1 hour ago</TableRowCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </CardBody>
+                </Card>
+            </Column>
+        </Row>
+
+        <!-- Recent Activities List -->
+        <Card Margin="Margin.Is3.OnY">
+            <CardHeader>
+                <h4><i class="fas fa-history"></i> Recent Activities</h4>
+            </CardHeader>
+            <CardBody>
+                <Table Striped="true" Hoverable="true">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHeaderCell>Time</TableHeaderCell>
+                            <TableHeaderCell>User</TableHeaderCell>
+                            <TableHeaderCell>Action</TableHeaderCell>
+                            <TableHeaderCell>Module</TableHeaderCell>
+                            <TableHeaderCell>Details</TableHeaderCell>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        @foreach (var activity in recentActivities)
+                        {
+                            <TableRow>
+                                <TableRowCell>@activity.Time</TableRowCell>
+                                <TableRowCell>@activity.User</TableRowCell>
+                                <TableRowCell>
+                                    <Badge Color="@GetActivityBadgeColor(activity.Action)">@activity.Action</Badge>
+                                </TableRowCell>
+                                <TableRowCell>@activity.Module</TableRowCell>
+                                <TableRowCell>@activity.Details</TableRowCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
+            </CardBody>
+        </Card>
+
+    </CardBody>
+</Card>
+
+@code {
+    private string timeRange = "week";
+    private string activityType = "";
+    private string selectedUser = "";
+    private string selectedModule = "";
+
+    private List<ActivityRecord> recentActivities = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Seed data for demonstration
+        recentActivities = new List<ActivityRecord>
+        {
+            new ActivityRecord
+            {
+                Id = 1,
+                Timestamp = DateTime.Now.AddMinutes(-5),
+                User = "john.doe@company.com",
+                ActivityType = "Login",
+                Module = "Authentication",
+                Details = "User logged in successfully from IP 192.168.1.100",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 2,
+                Timestamp = DateTime.Now.AddMinutes(-12),
+                User = "admin@system.com",
+                ActivityType = "Create",
+                Module = "Organization",
+                Details = "Created new organization: Tech Innovations Inc",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 3,
+                Timestamp = DateTime.Now.AddMinutes(-18),
+                User = "jane.smith@company.com",
+                ActivityType = "Update",
+                Module = "User Profile",
+                Details = "Updated profile information and contact details",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 4,
+                Timestamp = DateTime.Now.AddMinutes(-25),
+                User = "bob.wilson@company.com",
+                ActivityType = "Upload",
+                Module = "Documents",
+                Details = "Uploaded document: Q4_Financial_Report.pdf (2.3 MB)",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 5,
+                Timestamp = DateTime.Now.AddMinutes(-32),
+                User = "system@platform.com",
+                ActivityType = "System",
+                Module = "Background Jobs",
+                Details = "Automated backup completed successfully",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 6,
+                Timestamp = DateTime.Now.AddMinutes(-40),
+                User = "alice.johnson@company.com",
+                ActivityType = "Approval",
+                Module = "Workflow",
+                Details = "Approved document review workflow for Project Alpha",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 7,
+                Timestamp = DateTime.Now.AddMinutes(-48),
+                User = "mike.brown@company.com",
+                ActivityType = "Delete",
+                Module = "Documents",
+                Details = "Deleted obsolete document: Old_Policy_Draft.docx",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 8,
+                Timestamp = DateTime.Now.AddMinutes(-55),
+                User = "sarah.davis@company.com",
+                ActivityType = "Login",
+                Module = "Authentication",
+                Details = "Failed login attempt - incorrect password",
+                Status = "Failed"
+            },
+            new ActivityRecord
+            {
+                Id = 9,
+                Timestamp = DateTime.Now.AddHours(-1).AddMinutes(-5),
+                User = "admin@system.com",
+                ActivityType = "Update",
+                Module = "Settings",
+                Details = "Updated system security settings and password policy",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 10,
+                Timestamp = DateTime.Now.AddHours(-1).AddMinutes(-20),
+                User = "tom.anderson@company.com",
+                ActivityType = "Create",
+                Module = "Workspace",
+                Details = "Created new workspace: Marketing Campaign 2025",
+                Status = "Success"
+            },
+            new ActivityRecord
+            {
+                Id = 11,
+                Timestamp = DateTime.Now.AddHours(-1).AddMinutes(-35),
+                User = "emma.white@company.com",
+                ActivityType = "Approval",
+                Module = "Workflow",
+                Details = "Pending approval for budget allocation request",
+                Status = "Pending"
+            },
+            new ActivityRecord
+            {
+                Id = 12,
+                Timestamp = DateTime.Now.AddHours(-2),
+                User = "system@platform.com",
+                ActivityType = "System",
+                Module = "Maintenance",
+                Details = "Scheduled database optimization completed",
+                Status = "Success"
+            }
+        };
+
+        await Task.CompletedTask;
+    }
+
+    private async Task RefreshData()
+    {
+        await Task.Delay(500);
+        StateHasChanged();
+    }
+
+    private Color GetActivityBadgeColor(string action)
+    {
+        return action switch
+        {
+            "Create" => Color.Success,
+            "Update" => Color.Info,
+            "Delete" => Color.Danger,
+            "Login" => Color.Primary,
+            "Approval" => Color.Warning,
+            _ => Color.Secondary
+        };
+    }
+
+    private class ActivityRecord
+    {
+        public int Id { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string Time { get; set; } = string.Empty;
+        public string User { get; set; } = string.Empty;
+        public string Action { get; set; } = string.Empty;
+        public string ActivityType { get; set; } = string.Empty;
+        public string Module { get; set; } = string.Empty;
+        public string Details { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+}

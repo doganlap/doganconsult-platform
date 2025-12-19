@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using DoganConsult.UserProfile.UserProfiles;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.DependencyInjection;
@@ -14,19 +15,21 @@ public class UserProfileService : ITransientDependency
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<UserProfileService> _logger;
-    private const string BaseUrl = "https://localhost:44383/api/userprofile/user-profiles";
+    private readonly string _baseUrl;
 
-    public UserProfileService(HttpClient httpClient, ILogger<UserProfileService> logger)
+    public UserProfileService(HttpClient httpClient, ILogger<UserProfileService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
+        var gatewayBaseUrl = configuration["RemoteServices:Default:BaseUrl"] ?? "http://localhost:5000";
+        _baseUrl = $"{gatewayBaseUrl.TrimEnd('/')}/api/userprofile/user-profiles";
     }
 
     public async Task<PagedResultDto<UserProfileDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
         try
         {
-            var url = $"{BaseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
+            var url = $"{_baseUrl}?SkipCount={input.SkipCount}&MaxResultCount={input.MaxResultCount}";
             if (!string.IsNullOrEmpty(input.Sorting))
             {
                 url += $"&Sorting={input.Sorting}";
@@ -45,7 +48,7 @@ public class UserProfileService : ITransientDependency
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<UserProfileDto>($"{BaseUrl}/{id}");
+            return await _httpClient.GetFromJsonAsync<UserProfileDto>($"{_baseUrl}/{id}");
         }
         catch (Exception ex)
         {
@@ -58,7 +61,7 @@ public class UserProfileService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync(BaseUrl, input);
+            var response = await _httpClient.PostAsJsonAsync(_baseUrl, input);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<UserProfileDto>();
         }
@@ -73,7 +76,7 @@ public class UserProfileService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/{id}", input);
+            var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{id}", input);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<UserProfileDto>();
         }
@@ -88,7 +91,7 @@ public class UserProfileService : ITransientDependency
     {
         try
         {
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}");
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}");
             response.EnsureSuccessStatusCode();
         }
         catch (Exception ex)

@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+using DoganConsult.UserProfile.Permissions;
 using DoganConsult.UserProfile.UserProfiles;
 using DoganConsult.Web.Blazor.Services;
-using Volo.Abp.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
+using Volo.Abp.Application.Dtos;
 
 namespace DoganConsult.Web.Blazor.Components.Pages;
 
@@ -15,9 +17,17 @@ public partial class UserProfiles : ComponentBase
 {
     [Inject] private UserProfileService UserProfileService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private IAuthorizationService AuthorizationService { get; set; } = default!;
 
     private List<UserProfileDto> UserProfileList = new();
     private IEnumerable<UserProfileDto> UserProfileItems => UserProfileList;
+    
+    // Note: Permission checks initialized but not yet wired to UI
+    // TODO: Implement permission-based UI controls
+    private bool CanCreate = false;
+    private bool CanEdit = false;
+    private bool CanDelete = false;
+    private bool CanViewAll = false;
     
     private bool Loading = true;
     private bool ShowModal = false;

@@ -1,0 +1,380 @@
+@page "/demos/requests"
+@using Blazorise
+@using Blazorise.DataGrid
+@using DoganConsult.Web.Demos
+@inject NavigationManager NavigationManager
+@inject Services.DemoService DemoService
+
+<PageTitle>Demo Requests</PageTitle>
+
+<Card>
+    <CardHeader>
+        <Heading Size="HeadingSize.Is3">
+            <Icon Name="IconName.Star" /> Demo Process Management
+        </Heading>
+    </CardHeader>
+    <CardBody>
+        <Row>
+            <Column ColumnSize="ColumnSize.Is12">
+                <Div Flex="Flex.JustifyContent.Between" Margin="Margin.Is3.FromBottom">
+                    <Div>
+                        <Buttons>
+                            <Button Color="Color.Primary" Clicked="@(() => NavigationManager.NavigateTo("/demos/create/Internal"))">
+                                <Icon Name="IconName.Users" /> New Internal Request
+                            </Button>
+                            <Button Color="Color.Info" Outline="true" Clicked="@(() => NavigationManager.NavigateTo("/demos/create/Customer"))">
+                                <Icon Name="IconName.User" /> New Customer Request
+                            </Button>
+                        </Buttons>
+                    </Div>
+                    <Div>
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">Status Filter:</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is8">
+                                <Select TValue="string" @bind-SelectedValue="@statusFilter" Size="Size.Small">
+                                    <SelectItem Value="@("All")">All Statuses</SelectItem>
+                                    <SelectItem Value="@("Submitted")">Submitted</SelectItem>
+                                    <SelectItem Value="@("Scheduled")">Scheduled</SelectItem>
+                                    <SelectItem Value="@("InProgress")">In Progress</SelectItem>
+                                    <SelectItem Value="@("Completed")">Completed</SelectItem>
+                                    <SelectItem Value="@("Accepted")">Accepted</SelectItem>
+                                    <SelectItem Value="@("POC")">POC/Pilot</SelectItem>
+                                    <SelectItem Value="@("Production")">Production</SelectItem>
+                                </Select>
+                            </FieldBody>
+                        </Field>
+                    </Div>
+                </Div>
+            </Column>
+        </Row>
+
+        <Row>
+            <Column ColumnSize="ColumnSize.Is12">
+                <Card Margin="Margin.Is3.FromBottom">
+                    <CardBody>
+                        <Row>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <Card Border="Border.Primary" Margin="Margin.Is2.FromBottom">
+                                    <CardBody TextAlignment="TextAlignment.Center">
+                                        <Heading Size="HeadingSize.Is2" TextColor="TextColor.Primary">@demoRequests.Count(d => d.Status == "Submitted")</Heading>
+                                        <Paragraph TextSize="TextSize.Small" TextColor="TextColor.Muted">New Requests</Paragraph>
+                                    </CardBody>
+                                </Card>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <Card Border="Border.Info" Margin="Margin.Is2.FromBottom">
+                                    <CardBody TextAlignment="TextAlignment.Center">
+                                        <Heading Size="HeadingSize.Is2" TextColor="TextColor.Info">@demoRequests.Count(d => d.Status == "InProgress")</Heading>
+                                        <Paragraph TextSize="TextSize.Small" TextColor="TextColor.Muted">In Progress</Paragraph>
+                                    </CardBody>
+                                </Card>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <Card Border="Border.Success" Margin="Margin.Is2.FromBottom">
+                                    <CardBody TextAlignment="TextAlignment.Center">
+                                        <Heading Size="HeadingSize.Is2" TextColor="TextColor.Success">@demoRequests.Count(d => d.Status == "Accepted")</Heading>
+                                        <Paragraph TextSize="TextSize.Small" TextColor="TextColor.Muted">Accepted</Paragraph>
+                                    </CardBody>
+                                </Card>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <Card Border="Border.Dark" Margin="Margin.Is2.FromBottom">
+                                    <CardBody TextAlignment="TextAlignment.Center">
+                                        <Heading Size="HeadingSize.Is2" TextColor="TextColor.Dark">@demoRequests.Count(d => d.Status == "Production")</Heading>
+                                        <Paragraph TextSize="TextSize.Small" TextColor="TextColor.Muted">In Production</Paragraph>
+                                    </CardBody>
+                                </Card>
+                            </Column>
+                        </Row>
+                    </CardBody>
+                </Card>
+            </Column>
+        </Row>
+
+        <Row>
+            <Column ColumnSize="ColumnSize.Is12">
+                <Table Striped="true" Hoverable="true" Responsive="true">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHeaderCell>Request ID</TableHeaderCell>
+                            <TableHeaderCell>Customer</TableHeaderCell>
+                            <TableHeaderCell>Product/Service</TableHeaderCell>
+                            <TableHeaderCell>Status</TableHeaderCell>
+                            <TableHeaderCell>Stage</TableHeaderCell>
+                            <TableHeaderCell>Submitted Date</TableHeaderCell>
+                            <TableHeaderCell>Progress</TableHeaderCell>
+                            <TableHeaderCell>Actions</TableHeaderCell>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        @foreach (var request in FilteredRequests)
+                        {
+                            <TableRow>
+                                <TableRowCell>
+                                    <Badge Color="Color.Secondary">DMO-@request.Id.ToString("D4")</Badge>
+                                </TableRowCell>
+                                <TableRowCell>
+                                    <strong>@request.CustomerName</strong>
+                                    <br />
+                                    <small class="text-muted">@request.CustomerEmail</small>
+                                </TableRowCell>
+                                <TableRowCell>@request.ProductName</TableRowCell>
+                                <TableRowCell>
+                                    <Badge Color="@GetStatusColor(request.Status)">@request.Status</Badge>
+                                </TableRowCell>
+                                <TableRowCell>
+                                    <small class="text-muted">@request.CurrentStage</small>
+                                </TableRowCell>
+                                <TableRowCell>@request.SubmittedDate.ToString("MMM dd, yyyy")</TableRowCell>
+                                <TableRowCell>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="@($"progress-bar {GetProgressBarClass(request.Status)}")" 
+                                             style="@($"width: {request.ProgressPercentage}%")">
+                                            @request.ProgressPercentage%
+                                        </div>
+                                    </div>
+                                </TableRowCell>
+                                <TableRowCell>
+                                    <Buttons>
+                                        <Button Color="Color.Info" Size="Size.Small" 
+                                                Clicked="@(() => NavigationManager.NavigateTo($"/demos/details/{request.Id}"))">
+                                            <Icon Name="IconName.Eye" /> View
+                                        </Button>
+                                    </Buttons>
+                                </TableRowCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
+            </Column>
+        </Row>
+    </CardBody>
+</Card>
+
+@code {
+    private List<DemoRequest> demoRequests = new();
+    private string statusFilter = "All";
+
+    private IEnumerable<DemoRequest> FilteredRequests => 
+        statusFilter == "All" 
+            ? demoRequests 
+            : demoRequests.Where(d => d.Status == statusFilter);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDemoRequests();
+    }
+
+    private async Task LoadDemoRequests()
+    {
+        try
+        {
+            var status = statusFilter == "All" ? null : statusFilter;
+
+            var dtos = await DemoService.GetListAsync(status);
+            demoRequests = dtos.Select(dto => new DemoRequest
+            {
+                Id = dto.Id,
+                CustomerName = dto.CustomerName,
+                CustomerEmail = dto.CustomerEmail,
+                ProductName = dto.DemoTitle,
+                Status = dto.CurrentStatus,
+                CurrentStage = GetStageFromStatus(dto.CurrentStatus),
+                SubmittedDate = dto.CreationTime,
+                DemoDate = dto.ScheduledDate,
+                AcceptanceDate = dto.ApprovedAt,
+                PocStartDate = dto.ScheduledDate,
+                ProductionDate = dto.CompletedAt,
+                ProgressPercentage = dto.ProgressPercentage
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading demo requests: {ex.Message}");
+            // Fallback to empty list
+            demoRequests = new List<DemoRequest>
+        {
+            new DemoRequest
+            {
+                Id = 1,
+                CustomerName = "Acme Corporation",
+                CustomerEmail = "john.smith@acme.com",
+                ProductName = "Enterprise Analytics Suite",
+                Status = "Production",
+                CurrentStage = "Production Deployment",
+                SubmittedDate = DateTime.Now.AddDays(-90),
+                DemoDate = DateTime.Now.AddDays(-85),
+                AcceptanceDate = DateTime.Now.AddDays(-75),
+                PocStartDate = DateTime.Now.AddDays(-60),
+                ProductionDate = DateTime.Now.AddDays(-15),
+                ProgressPercentage = 100
+            },
+            new DemoRequest
+            {
+                Id = 2,
+                CustomerName = "Global Tech Solutions",
+                CustomerEmail = "sarah.jones@globaltech.com",
+                ProductName = "AI-Powered Dashboard",
+                Status = "POC",
+                CurrentStage = "POC Implementation",
+                SubmittedDate = DateTime.Now.AddDays(-45),
+                DemoDate = DateTime.Now.AddDays(-40),
+                AcceptanceDate = DateTime.Now.AddDays(-30),
+                PocStartDate = DateTime.Now.AddDays(-20),
+                ProgressPercentage = 75
+            },
+            new DemoRequest
+            {
+                Id = 3,
+                CustomerName = "Innovative Systems Inc",
+                CustomerEmail = "mike.brown@innovative.com",
+                ProductName = "Document Management Platform",
+                Status = "Accepted",
+                CurrentStage = "Preparing POC",
+                SubmittedDate = DateTime.Now.AddDays(-25),
+                DemoDate = DateTime.Now.AddDays(-20),
+                AcceptanceDate = DateTime.Now.AddDays(-10),
+                ProgressPercentage = 60
+            },
+            new DemoRequest
+            {
+                Id = 4,
+                CustomerName = "Digital Ventures LLC",
+                CustomerEmail = "emma.white@digitalventures.com",
+                ProductName = "Workflow Automation Suite",
+                Status = "Completed",
+                CurrentStage = "Awaiting Customer Acceptance",
+                SubmittedDate = DateTime.Now.AddDays(-15),
+                DemoDate = DateTime.Now.AddDays(-10),
+                ProgressPercentage = 50
+            },
+            new DemoRequest
+            {
+                Id = 5,
+                CustomerName = "Enterprise Solutions Co",
+                CustomerEmail = "david.wilson@enterprise.com",
+                ProductName = "Cloud Infrastructure Manager",
+                Status = "InProgress",
+                CurrentStage = "Demo Execution",
+                SubmittedDate = DateTime.Now.AddDays(-8),
+                DemoDate = DateTime.Now.AddDays(-2),
+                ProgressPercentage = 40
+            },
+            new DemoRequest
+            {
+                Id = 6,
+                CustomerName = "NextGen Industries",
+                CustomerEmail = "lisa.anderson@nextgen.com",
+                ProductName = "Analytics Dashboard Pro",
+                Status = "Scheduled",
+                CurrentStage = "Demo Preparation",
+                SubmittedDate = DateTime.Now.AddDays(-5),
+                DemoDate = DateTime.Now.AddDays(3),
+                ProgressPercentage = 25
+            },
+            new DemoRequest
+            {
+                Id = 7,
+                CustomerName = "Smart Business Systems",
+                CustomerEmail = "robert.taylor@smartbiz.com",
+                ProductName = "CRM Integration Platform",
+                Status = "Submitted",
+                CurrentStage = "Initial Review",
+                SubmittedDate = DateTime.Now.AddDays(-2),
+                ProgressPercentage = 10
+            },
+            new DemoRequest
+            {
+                Id = 8,
+                CustomerName = "Tech Innovators Group",
+                CustomerEmail = "jennifer.davis@techinnovators.com",
+                ProductName = "AI Assistant Platform",
+                Status = "Submitted",
+                CurrentStage = "Pending Scheduling",
+                SubmittedDate = DateTime.Now.AddDays(-1),
+                ProgressPercentage = 5
+            }
+            };
+        }
+    }
+
+    private async Task ApplyFilter()
+    {
+        await LoadDemoRequests();
+    }
+
+    private string GetStageFromStatus(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Awaiting Approval",
+            "Approved" => "Demo Scheduled",
+            "Scheduled" => "Demo Scheduled",
+            "InProgress" => "Demo Execution",
+            "Completed" => "Demo Completed",
+            "Accepted" => "Customer Acceptance",
+            "POC" => "POC Phase",
+            "Production" => "Production Deployment",
+            "Rejected" => "Request Rejected",
+            _ => status
+        };
+    }
+
+    private Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Pending" or "Submitted" => Color.Secondary,
+            "Approved" or "Scheduled" => Color.Info,
+            "InProgress" => Color.Warning,
+            "Completed" => Color.Primary,
+            "Accepted" => Color.Success,
+            "POC" => Color.Info,
+            "Production" => Color.Dark,
+            "Rejected" => Color.Danger,
+            _ => Color.Light
+        };
+    }
+
+    private Color GetApprovalColor(string approvalStatus)
+    {
+        return approvalStatus switch
+        {
+            "Approved" => Color.Success,
+            "Pending" => Color.Warning,
+            "Rejected" => Color.Danger,
+            _ => Color.Secondary
+        };
+    }
+
+    private string GetProgressBarClass(string status)
+    {
+        return status switch
+        {
+            "Submitted" => "bg-secondary",
+            "Scheduled" => "bg-info",
+            "InProgress" => "bg-warning",
+            "Completed" => "bg-primary",
+            "Accepted" => "bg-success",
+            "POC" => "bg-info",
+            "Production" => "bg-dark",
+            _ => "bg-light"
+        };
+    }
+
+    private class DemoRequest
+    {
+        public int Id { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string CurrentStage { get; set; } = string.Empty;
+        public DateTime SubmittedDate { get; set; }
+        public DateTime? DemoDate { get; set; }
+        public DateTime? AcceptanceDate { get; set; }
+        public DateTime? PocStartDate { get; set; }
+        public DateTime? ProductionDate { get; set; }
+        public int ProgressPercentage { get; set; }
+    }
+}

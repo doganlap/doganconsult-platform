@@ -1,6 +1,9 @@
 @page "/workspaces"
+@layout PlatformLayout
+@using DoganConsult.Workspace.Permissions
 @using DoganConsult.Workspace.Workspaces
 @using DoganConsult.Web.Blazor.Services
+@using Microsoft.AspNetCore.Authorization
 @using Volo.Abp.Application.Dtos
 
 <PageTitle>Workspace Management</PageTitle>
@@ -14,9 +17,12 @@
                         <h4 class="card-title mb-0">
                             <i class="fas fa-folder-open me-2"></i>Workspace Management
                         </h4>
-                        <button class="btn btn-primary" @onclick="OpenCreateModal">
-                            <i class="fas fa-plus me-1"></i>Add Workspace
-                        </button>
+                        @if (CanCreate)
+                        {
+                            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                                <i class="fas fa-plus me-1"></i>Add Workspace
+                            </button>
+                        }
                     </div>
                 </div>
                 
@@ -63,15 +69,24 @@
                                                 <td>@ws.CreatedDate.ToString("yyyy-MM-dd")</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewDetails(ws)">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-warning" @onclick="() => EditWorkspace(ws)">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteWorkspace(ws)">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
+                                                        @if (CanViewAll)
+                                                        {
+                                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewDetails(ws)">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        }
+                                                        @if (CanEdit)
+                                                        {
+                                                            <button class="btn btn-sm btn-outline-warning" @onclick="() => EditWorkspace(ws)">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                        }
+                                                        @if (CanDelete)
+                                                        {
+                                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteWorkspace(ws)">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        }
                                                     </div>
                                                 </td>
                                             </tr>

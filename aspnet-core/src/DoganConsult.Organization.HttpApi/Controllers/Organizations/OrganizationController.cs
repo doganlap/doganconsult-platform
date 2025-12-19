@@ -2,6 +2,7 @@ using DoganConsult.Organization.Organizations;
 using DoganConsult.Organization.Localization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Mvc;
@@ -47,4 +48,11 @@ public class OrganizationApiController : AbpControllerBase
     {
         return _organizationAppService.DeleteAsync(id);
     }
+
+    [HttpGet("count")]
+    public Task<long> GetCountAsync()
+    {
+        return _organizationAppService.GetCountAsync();
+    }
 }
+

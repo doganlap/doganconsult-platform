@@ -10,6 +10,7 @@ using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.OpenIddict;
+using Volo.Abp.PermissionManagement;
 using Volo.Abp.PermissionManagement.Identity;
 using Volo.Abp.PermissionManagement.OpenIddict;
 using Volo.Abp.SettingManagement;
@@ -34,6 +35,9 @@ public class OrganizationDomainModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
+        // Permission definitions are automatically discovered and registered by ABP Framework.
+        // No explicit registration needed for OrganizationPermissionDefinitionProvider.
+
         Configure<AbpLocalizationOptions>(options =>
         {
             options.Languages.Add(new LanguageInfo("ar", "ar", "العربية"));

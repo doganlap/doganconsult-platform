@@ -109,3 +109,9 @@ Write-Host ""
 Write-Host "After setup, test with:" -ForegroundColor Green
 Write-Host "  ssh hetzner1" -ForegroundColor Cyan
 Write-Host "  ssh hetzner2" -ForegroundColor Cyan
+
+
+
+
+
+

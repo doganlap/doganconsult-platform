@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DoganConsult.AI.AIRequests;
+using DoganConsult.AI.Permissions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.Application.Services;
@@ -23,6 +24,7 @@ public class AIAppService : ApplicationService, IAIAppService
         _aiRequestRepository = aiRequestRepository;
     }
 
+    [Authorize(AIPermissions.AIRequests.Create)]
     public async Task<AuditSummaryResponseDto> GenerateAuditSummaryAsync(AuditSummaryRequestDto input)
     {
         var stopwatch = Stopwatch.StartNew();
