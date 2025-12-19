@@ -1,0 +1,240 @@
+@page "/admin/features"
+@using DoganConsult.Web.Blazor
+@using DoganConsult.Workspace.Features
+@using Volo.Abp.Features
+@using Volo.Abp.MultiTenancy
+@inherits WebComponentBase
+
+<PageTitle>Feature Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-toggle-on me-2"></i>Module Features
+                    </h4>
+                    <p class="text-muted mb-0">Enable or disable modules and features for your tenant.</p>
+                </div>
+                <div class="card-body">
+                    @if (_isLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            @foreach (var module in _modules)
+                            {
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">@module.DisplayName</h5>
+                                            <small class="text-muted">@module.Description</small>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       id="module-@module.Name" 
+                                                       checked="@module.IsEnabled"
+                                                       @onchange="@((e) => HandleModuleToggle(module, e.Value is bool enabled && enabled))" />
+                                                <label class="form-check-label fw-bold" for="module-@module.Name">
+                                                    Enable @module.DisplayName
+                                                </label>
+                                            </div>
+
+                                            @if (module.SubFeatures.Any())
+                                            {
+                                                <div class="ms-4 mt-3">
+                                                    <small class="text-muted d-block mb-2">Sub-features:</small>
+                                                    @foreach (var subFeature in module.SubFeatures)
+                                                    {
+                                                        <div class="form-check form-switch mb-2">
+                                                            <input class="form-check-input" type="checkbox" 
+                                                                   id="sub-@subFeature.Name" 
+                                                                   checked="@subFeature.IsEnabled"
+                                                                   disabled="@(!module.IsEnabled)"
+                                                                   @onchange="@((e) => HandleSubFeatureToggle(subFeature, e.Value is bool enabled && enabled))" />
+                                                            <label class="form-check-label" for="sub-@subFeature.Name">
+                                                                @subFeature.DisplayName
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (_message != null)
+                        {
+                            <div class="alert alert-@(_isError ? "danger" : "success") alert-dismissible fade show mt-3" role="alert">
+                                @_message
+                                <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private IFeatureChecker FeatureChecker { get; set; } = null!;
+    [Inject] private IFeatureValueStore FeatureValueStore { get; set; } = null!;
+    [Inject] private ICurrentTenant CurrentTenant { get; set; } = null!;
+
+    private List<ModuleFeatureInfo> _modules = new();
+    private bool _isLoading = true;
+    private string? _message;
+    private bool _isError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeaturesAsync();
+    }
+
+    private async Task LoadFeaturesAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            _modules = new List<ModuleFeatureInfo>
+            {
+                new ModuleFeatureInfo
+                {
+                    Name = DgFeatures.Modules.Sbg,
+                    DisplayName = "Saudi Business Gate (SBG)",
+                    Description = "Procurement and contract management module",
+                    IsEnabled = await FeatureChecker.IsEnabledAsync(DgFeatures.Modules.Sbg),
+                    SubFeatures = new List<SubFeatureInfo>
+                    {
+                        new SubFeatureInfo
+                        {
+                            Name = DgFeatures.SubFeatures.Sbg.Procurement,
+                            DisplayName = "Procurement",
+                            IsEnabled = await FeatureChecker.IsEnabledAsync(DgFeatures.SubFeatures.Sbg.Procurement)
+                        },
+                        new SubFeatureInfo
+                        {
+                            Name = DgFeatures.SubFeatures.Sbg.Contracts,
+                            DisplayName = "Contracts",
+                            IsEnabled = await FeatureChecker.IsEnabledAsync(DgFeatures.SubFeatures.Sbg.Contracts)
+                        }
+                    }
+                },
+                new ModuleFeatureInfo
+                {
+                    Name = DgFeatures.Modules.ShahinGrc,
+                    DisplayName = "Shahin GRC",
+                    Description = "Governance, Risk, and Compliance module",
+                    IsEnabled = await FeatureChecker.IsEnabledAsync(DgFeatures.Modules.ShahinGrc),
+                    SubFeatures = new List<SubFeatureInfo>
+                    {
+                        new SubFeatureInfo
+                        {
+                            Name = DgFeatures.SubFeatures.ShahinGrc.Risk,
+                            DisplayName = "Risk Management",
+                            IsEnabled = await FeatureChecker.IsEnabledAsync(DgFeatures.SubFeatures.ShahinGrc.Risk)
+                        },
+                        new SubFeatureInfo
+                        {
+                            Name = DgFeatures.SubFeatures.ShahinGrc.Controls,
+                            DisplayName = "Controls",
+                            IsEnabled = await FeatureChecker.IsEnabledAsync(DgFeatures.SubFeatures.ShahinGrc.Controls)
+                        }
+                    }
+                },
+                new ModuleFeatureInfo
+                {
+                    Name = DgFeatures.Modules.NextErp,
+                    DisplayName = "NextERP",
+                    Description = "Enterprise Resource Planning module",
+                    IsEnabled = await FeatureChecker.IsEnabledAsync(DgFeatures.Modules.NextErp),
+                    SubFeatures = new List<SubFeatureInfo>()
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            _message = $"Failed to load features: {ex.Message}";
+            _isError = true;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleModuleToggle(ModuleFeatureInfo module, bool enabled)
+    {
+        try
+        {
+            await FeatureValueStore.SetAsync(CurrentTenant.Id, module.Name, enabled.ToString().ToLowerInvariant());
+            module.IsEnabled = enabled;
+            
+            // Disable sub-features if parent is disabled
+            if (!enabled)
+            {
+                foreach (var subFeature in module.SubFeatures)
+                {
+                    subFeature.IsEnabled = false;
+                    await FeatureValueStore.SetAsync(CurrentTenant.Id, subFeature.Name, "false");
+                }
+            }
+
+            _message = $"{module.DisplayName} {(enabled ? "enabled" : "disabled")} successfully.";
+            _isError = false;
+            
+            // Refresh the page after a short delay to update UI
+            await Task.Delay(500);
+            await LoadFeaturesAsync();
+        }
+        catch (Exception ex)
+        {
+            _message = $"Failed to update feature: {ex.Message}";
+            _isError = true;
+        }
+    }
+
+    private async Task HandleSubFeatureToggle(SubFeatureInfo subFeature, bool enabled)
+    {
+        try
+        {
+            await FeatureValueStore.SetAsync(CurrentTenant.Id, subFeature.Name, enabled.ToString().ToLowerInvariant());
+            subFeature.IsEnabled = enabled;
+            _message = $"{subFeature.DisplayName} {(enabled ? "enabled" : "disabled")} successfully.";
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = $"Failed to update feature: {ex.Message}";
+            _isError = true;
+        }
+    }
+
+    private class ModuleFeatureInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool IsEnabled { get; set; }
+        public List<SubFeatureInfo> SubFeatures { get; set; } = new();
+    }
+
+    private class SubFeatureInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public bool IsEnabled { get; set; }
+    }
+}
+

@@ -1,16 +1,33 @@
-﻿using System.Threading.Tasks;
+using System.Linq;
+using System.Threading.Tasks;
 using DoganConsult.Organization.Localization;
 using DoganConsult.Organization.Domain.Shared.Permissions;
+using DoganConsult.Web.Localization;
+using DoganConsult.Web.MultiTenancy;
+using DoganConsult.Web.Blazor.Services;
+using DoganConsult.Workspace.UI;
+using Volo.Abp.Features;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.Localization;
 using Volo.Abp.Identity.Blazor;
+using Volo.Abp.SettingManagement.Blazor.Menus;
 using Volo.Abp.TenantManagement.Blazor;
+using Volo.Abp.TenantManagement.Blazor.Navigation;
 
 namespace DoganConsult.Web.Blazor.Menus;
 
 public class WebMenuContributor : IMenuContributor
 {
+    private readonly DgModuleUiService? _moduleUiService;
+    private readonly IFeatureChecker? _featureChecker;
+
+    public WebMenuContributor(DgModuleUiService? moduleUiService = null, IFeatureChecker? featureChecker = null)
+    {
+        _moduleUiService = moduleUiService;
+        _featureChecker = featureChecker;
+    }
+
     public async Task ConfigureMenuAsync(MenuConfigurationContext context)
     {
         if (context.Menu.Name == StandardMenus.Main)
@@ -103,5 +120,52 @@ public class WebMenuContributor : IMenuContributor
 
         // ADMINISTRATION - Uses ABP's built-in administration menu
         // ABP modules will auto-register their own menu items under Administration
+        
+        // Load and add menu contributions from modules (if available)
+        if (_moduleUiService != null)
+        {
+            try
+            {
+                var moduleContributions = await _moduleUiService.GetMenuContributionsAsync();
+                foreach (var contribution in moduleContributions)
+                {
+                    var menuItem = new ApplicationMenuItem(
+                        contribution.Name,
+                        contribution.DisplayName,
+                        contribution.Url,
+                        icon: contribution.Icon,
+                        order: contribution.Order
+                    );
+
+                    if (!string.IsNullOrEmpty(contribution.RequiredPermission))
+                    {
+                        menuItem.RequiredPermissionName = contribution.RequiredPermission;
+                    }
+
+                    if (!string.IsNullOrEmpty(contribution.RequiredFeature))
+                    {
+                        menuItem.Metadata.Add("RequiredFeature", contribution.RequiredFeature);
+                    }
+
+                    // Add sub-items recursively
+                    foreach (var subItem in contribution.Items)
+                    {
+                        menuItem.AddItem(new ApplicationMenuItem(
+                            subItem.Name,
+                            subItem.DisplayName,
+                            subItem.Url,
+                            icon: subItem.Icon,
+                            order: subItem.Order
+                        ));
+                    }
+
+                    context.Menu.AddItem(menuItem);
+                }
+            }
+            catch
+            {
+                // Module UI service not available, continue without it
+            }
+        }
     }
 }

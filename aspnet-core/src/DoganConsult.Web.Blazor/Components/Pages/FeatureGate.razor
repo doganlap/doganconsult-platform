@@ -1,0 +1,33 @@
+@using DoganConsult.Workspace.Features
+@using Volo.Abp.Features
+@using Microsoft.AspNetCore.Components
+@inject IFeatureChecker FeatureChecker
+@inject NavigationManager NavigationManager
+
+@if (_isEnabled)
+{
+    @ChildContent
+}
+else
+{
+    <RedirectToModuleNotEnabled FeatureName="@FeatureName" />
+}
+
+@code {
+    [Parameter] public string FeatureName { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _isEnabled = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(FeatureName))
+        {
+            _isEnabled = true;
+            return;
+        }
+
+        _isEnabled = await FeatureChecker.IsEnabledAsync(FeatureName);
+    }
+}
+

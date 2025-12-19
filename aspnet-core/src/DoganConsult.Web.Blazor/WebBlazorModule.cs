@@ -140,6 +140,7 @@ public class WebBlazorModule : AbpModule
         
         // Register DG.OS Foundation services
         context.Services.AddScoped<DoganConsult.Web.Blazor.Services.DgThemeService>();
+        context.Services.AddTransient<DoganConsult.Web.Blazor.Services.DgModuleUiService>();
 
         // Configure SignalR for real-time demo updates
         context.Services.AddSignalR();
@@ -209,7 +210,8 @@ public class WebBlazorModule : AbpModule
     {
         Configure<AbpNavigationOptions>(options =>
         {
-            options.MenuContributors.Add(new WebMenuContributor());
+            // WebMenuContributor will be resolved via DI
+            options.MenuContributors.Add<WebMenuContributor>();
         });
     }
 
